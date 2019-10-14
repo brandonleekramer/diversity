@@ -1,25 +1,28 @@
 ---
 title: "Examining the Growth of Diversity-Related Terminology in Scientific Abstracts"
-author: "Brandon L. Kramer (UVA) & Catherine Lee (Rutgers)"
-output:
-  html: default 
+author: "Brandon L. Kramer (University of Virginia, Biocomplexity Institute) & Catherine Lee (Rutgers, Sociology)"
+output: html_document 
 ---
 
-In this project, we are examining the growth of in the use of the term "diversity". To do this, we drew from the MEDLINE database in Web of Science, using the search terms "TS=(diversity)" from 1990-2017 for human research only. This search provided 71,528 total results, which we extracted using the bibliometrix package in R. Next, we converted the abstracts of these articles to a text corpus and then used tidytext - a package designed for computational text analysis in R - to analyze patterns with the abstracts of these data. Below is the replication code for these analyses... 
+
+In this project, we are examining the growth of in the use of the term "diversity". To do this, we drew from the MEDLINE database in Web of Science, using the search terms "TS=(diversity)" from 1990-2017 for human research only. This search provided 71,528 total results, which we extracted using the bibliometrix package in R. Next, we converted the abstracts of these articles to a text corpus and then used tidytext - a package designed for computational text analysis in R - to analyze patterns with the abstracts of these data. Below is the R Markdown file and replication code for these analyses.
 
 ```{r setup, include = FALSE}
 rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Desktop/Brandon Kramer/Diversity/2019_0813")
 knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity Project/Data")
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", "widyr", "plotly", "stringi")) {library(pkg, character.only = TRUE)}
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 ```
+
+## Examining Growth of Published Studies 
 
 In this first chunk, we load our data and examine the overall growth of articles from our search query. As we can see, there is a pretty sizable growth in scientific literature that uses the term diversity - from about 500 times in 1990 to over 5000 in 2017.  
 
 ```{r, message = FALSE, results = FALSE}
 # loading the .csv file 
 text_data <- read_csv("historical_text_data.csv")
-
+```
+```{r wos study growth}
 # checking to see how the overall data looks 
 by_year <- text_data %>% 
   filter(year != "2018") %>% # filtering 2018 articles because they seem to be incomplete
@@ -31,9 +34,11 @@ by_year <- ggplot() + geom_line(aes(y = n, x = year), data = by_year, stat="iden
 by_year <- ggplotly(by_year); by_year
 ```
 
-Next, we want to look at word frequencies by year in the literature. This chunk of code breaks down how common words occur in the abstracts of our dataset. Note that we also remove some frequently occurring words that are not really relevant to our dataset, but these do not systematically alter our results. You should be able to click through these tables to gain more insight. 
+## Word Frequencies Over Time
 
-```{r wos abstract text analysis, messages = FALSE}
+Next, we want to look at word frequencies by year in the literature. This chunk of code breaks down how common words occur in the abstracts of our dataset. Note that we also remove some frequently occurring words that are not really relevant to our dataset, but these do not systematically alter our results. 
+
+```{r wos abstract text analysis, messages = FALSE, warning=FALSE}
 # tokenizing the abstract data into words 
 abstract_data <- text_data %>% 
   unnest_tokens(word, abstract) %>% 
@@ -42,18 +47,23 @@ abstract_data <- text_data %>%
 # most frequent word count in abstracts 
 abstract_data %>%
   count(word, sort = TRUE)
-
+```
+```{r wos abstract text analysis part 3, messages = FALSE, warning=FALSE, results = FALSE}
 # adding custom set of stopwords 
 my_stopwords <- tibble(word = c(as.character(1:9), 
-                                "1", "2", "3", "4", "rights", "reserved", "copyright", "elsevier", "5", "10"))
+                                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+                                "rights", "reserved", "copyright", "elsevier"))
 abstract_data <- abstract_data %>% anti_join(my_stopwords)
-
+```
+```{r wos abstract text analysis part 4, messages = FALSE, warning=FALSE}
 # looking at word frequencies by year 
 abstract_words <- abstract_data %>%
   filter(year != "2018") %>%
   group_by(year) %>% 
   count(word, sort = TRUE) %>% ungroup(); abstract_words
 ```
+
+## Growth in Population-Specific Terms Over Time
 
 Now, we want to look at how the most relevant words vary over time. Brandon chose to include words like diversity, genetic, and population as well as racially-specific and ethnically-specific terms. As we see, the rise of diversity does not necessarily mean that the focus on race or ethnicity is growing in congruence with that term. This could mean that diversity is being used as a catch-all in the scientific literature (i.e. that the multiplicity of the term makes it mean anything and everything) or that diversity is most used in fields like immunology or oncology. We will explore that hypothesis a bit more below. 
 
@@ -73,429 +83,30 @@ word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = word),
 interactive_graph <- ggplotly(word_graph); interactive_graph
 ```
 
-While that was quite useful, we do not see much variation in how race/ethinicity vary over time. One possibility is that variation in those terms is "diluted" by the various terms that researchers use. Thus, the next logical step is to collapse (or mutate) all of the population-specific terms into one category and compare that to other terminology over time. Both Lee (2009), Kramer (2019) and others (Panofsky and Bliss 2017) have found that biomedical researchers continue to use population-specific terminology to reinforce the notion of population differences in various biological markers. Below, we have collapsed several population-specific terms into one category based. This list of terms developed out of Kramer's (2019) past work and, while certainly not exhaustive, is is fairly comprehensive. 
+While that was quite useful, we do not see much variation in how race/ethinicity vary over time. One possibility is that variation in those terms is "diluted" by the various terms that researchers use. Thus, the next logical step is to collapse all of the population-specific terms into one category and compare that to other terminology over time. Both Lee (2009) and Kramer (2019) as well as others (e.g. Panofsky and Bliss 2017) have found that biomedical researchers continue to use population-specific terminology to reinforce the notion of population differences in various biological markers. Below, we have collapsed several population-specific terms into one category based. [This list of terms](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=0) which were developed out of Kramer's (2019) dissertation work. While we won't claim that this is an exhaustive list of all the population terms that exist in the world, it is a fairly comprehensive list of over 2,100 terms (also see below in text networks section). Let's take a look how much the use of all these population-specific terms grew over time... 
 
-```{r collapsing population specific terms, fig.width=9.5}
+```{r collapsing population specific terms part 1, message = FALSE, results = FALSE}
+population_specific <- read_csv("population_terms.csv") 
+```
+
+```{r collapsing population specific terms part 2, fig.width=9.5}
+
+population_specific <- paste(c("\\b(?i)(zcx", population_specific$term, "zxc)\\b"), collapse = "|")
 
 recoded_abstract_data <- abstract_data %>% 
-  mutate(recoded_word = word) 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = population_specific), 
+                               yes = "population-specific", no = word))
 
-population_specific <- c(## general race/ethnicity 
-                         "race"="population-specific", "racial"="population-specific", "racially"="population-specific",
-                         "ethnic"="population-specific","ethnicity"="population-specific", "ethnically"="population-specific",
-                         
-                         ## u.s. centric terminology 
-                         "white"="population-specific", "black"="population-specific", # did a sensitivity analysis on this (little change) 
-                         "caucasia"="population-specific", "caucasian"="population-specific", 
-                         "african"="population-specific", "afro"="population-specific",
-                         "hispanic"="population-specific", "mexican"="population-specific",  
-                         "latino"="population-specific", "latina"="population-specific", "latinx"="population-specific",
-                         "indian"="population-specific", "native"="population-specific", 
-                         "alaska"="population-specific", "alaskan"="population-specific",
-                         "hawaiian"="population-specific", "pacific"="population-specific",  
-                         
-                         ## continent-specific terminology
-                         "africa"="population-specific", "africana"="population-specific", "afro"="population-specific", 
-                         "america"="population-specific", "american"="population-specific",
-                         "asia"="population-specific", "asian"="population-specific", "asiatic"="population-specific",
-                         "antartica"="population-specific", "antartican"="population-specific",
-                         "australia"="population-specific", "australian"="population-specific",
-                         "europe"="population-specific", "european"="population-specific", "eurasia"="population-specific",
-                         
-                         ## subcontinent-specific terminology
-                         "western"="population-specific", "west"="population-specific", 
-                         "eastern"="population-specific", "east"="population-specific", 
-                         "northern"="population-specific", "north"="population-specific",
-                         "southern"="population-specific", "south"="population-specific",
-                         "india"="population-specific", "indian"="population-specific", "indio"="population-specific",
-                         "caribbean"="population-specific", "latin"="population-specific","amazon"="population-specific",
-                         "oceania"="population-specific", "oceanic"="population-specific",  
-                         "melanesia"="population-specific", "micronesia"="population-specific", "polynesia"="population-specific",
-                         "britian"="population-specific", "british"="population-specific",
-                         "siberia"="population-specific", "siberian"="population-specific",
-                         "balkan"="population-specific", "caucasus"="population-specific", 
-                         "scandanavia"="population-specific", "scandanavian"="population-specific", "nordic"="population-specific",
-                         "saharan"="population-specific", "subsaharan"="population-specific", 
-                         
-                         ## religious and linguistic-specific terminology
-                         "buddhist"="population-specific", "hindu"="population-specific", "hindi"="population-specific",
-                         "arab"="population-specific", "arabic"="population-specific", 
-                         "muslim"="population-specific", "moslem"="population-specific", 
-                         "islam"="population-specific", "islamic"="population-specific", 
-                         "ahmadiyya"="population-specific", "jewish"="population-specific", 
-                         "christian"="population-specific", "catholic"="population-specific", "sikh"="population-specific",
-                         "taoist"="population-specific", "judaic"="population-specific", 
-                         "jain"="population-specific", "shinto"="population-specific", 
-                         "bantu"="population-specific", "bantoid"="population-specific", "sasotho"="population-specific",
-                         
-                         ## nation-specific terminology (cite: https://en.wikipedia.org/wiki/List_of_sovereign_states)
-                         "afghanistan"="population-specific", "afghan"="population-specific", "afghans"="population-specific",
-                         "albania"="population-specific", "albanian"="population-specific", "albanians"="population-specific",
-                         "kosovo"="population-specific", "kosovar"="population-specific", "kosovan"="population-specific",
-                         "algeria"="population-specific", "algerian"="population-specific", "algerians"="population-specific",
-                         "andorra"="population-specific", "andorran"="population-specific", "andorrans"="population-specific",
-                         "angola"="population-specific", "angolan"="population-specific", "angolans"="population-specific",
-                         "argentina"="population-specific", "argentinian"="population-specific", "argentinians"="population-specific",
-                         "armenia"="population-specific", "armenian"="population-specific", "armenians"="population-specific", 
-                         "austria"="population-specific", "austrian"="population-specific", "austrians"="population-specific",
-                         "azerbaijan"="population-specific", "azerbaijani"="population-specific", "azerbaijanis"="population-specific",
-                         "bahamas"="population-specific", "bamamian"="population-specific", 
-                         "bamamians"="population-specific", "taino"="population-specific",
-                         "bahrain"="population-specific", "bahrainian"="population-specific", "bahrainians"="population-specific",
-                         "barbados"="population-specific", "barbadian"="population-specific", "bajan"="population-specific",
-                         "belarus"="population-specific", "belarusian"="population-specific", "belarusians"="population-specific",
-                         "belguim"="population-specific", "belgian"="population-specific", "belgians"="population-specific",
-                         "belize"="population-specific", "belizian"="population-specific", "belizians"="population-specific",
-                         "benin"="population-specific", "beninese"="population-specific", 
-                         "bhutan"="population-specific", "bhutanese"="population-specific",
-                         "bolivia"="population-specific", "bolivian"="population-specific", "bolivians"="population-specific",
-                         "bosnia"="population-specific", "bosnian"="population-specific", "bosnians"="population-specific",
-                         "herzegovina"="population-specific", "herzegovinan"="population-specific", "herzegovinans"="population-specific",
-                         "botswana"="population-specific", "botswanian"="population-specific", "botswanians"="population-specific",
-                         "brazil"="population-specific", "brazilian"="population-specific", "brazilians"="population-specific",
-                         "brunei"="population-specific", "bruneian"="population-specific", "bruneians"="population-specific",
-                         "bulgaria"="population-specific", "bulgarian"="population-specific", "bulgarians"="population-specific",
-                         "burkina"="population-specific", "faso"="population-specific", "burkinabe"="population-specific",
-                         "burma"="population-specific", "myanmar"="population-specific", "burmese"="population-specific",
-                         "burundi"="population-specific", "burundian"="population-specific", "burundians"="population-specific",
-                         "cambodia"="population-specific", "cambodian"="population-specific", "cambodians"="population-specific",
-                         "cameroon"="population-specific", "cameroonian"="population-specific", "cameroonians"="population-specific",
-                         "canada"="population-specific", "canadian"="population-specific", "canadians"="population-specific",
-                         "verde"="population-specific", "verdean"="population-specific", "verdeans"="population-specific",
-                         "chad"="population-specific", "chadian"="population-specific", "chadians"="population-specific",
-                         "chile"="population-specific", "chilean"="population-specific", "chileans"="population-specific",
-                         "china"="population-specific", "chinese"="population-specific",
-                         "taiwan"="population-specific", "taiwanese"="population-specific",
-                         "colombia"="population-specific", "colombian"="population-specific", "colombians"="population-specific",
-                         "comoros"="population-specific", "comoran"="population-specific", "comorans"="population-specific",
-                         "congo"="population-specific", "congonese"="population-specific",
-                         "costa"="population-specific", "rica"="population-specific", 
-                         "rican"="population-specific", "ricans"="population-specific",
-                         "cote"="population-specific", "divoire"="population-specific", "ivorian"="population-specific",
-                         "croatia"="population-specific", "croatian"="population-specific", "croatians"="population-specific",
-                         "cuba"="population-specific", "cuban"="population-specific", "cubans"="population-specific",
-                         "cyprus"="population-specific", "cypriot"="population-specific", "cypriots"="population-specific",
-                         "czech"="population-specific", "czechs"="population-specific",
-                         "denmark"="population-specific", "danish"="population-specific", 
-                         "dane"="population-specific", "danes"="population-specific",
-                         "djibouti"="population-specific", "djiboutian"="population-specific", "djiboutians"="population-specific",
-                         "dominica"="population-specific", "dominican"="population-specific", "dominicans"="population-specific",
-                         "timor"="population-specific", "timorese"="population-specific", 
-                         "ecuador"="population-specific", "ecuadorian"="population-specific", "ecuadorians"="population-specific",
-                         "egypt"="population-specific", "egyptian"="population-specific", "egyptians"="population-specific",
-                         "salvador"="population-specific", "salvadorian"="population-specific", "salvadorians"="population-specific",
-                         "guinea"="population-specific", "guinean"="population-specific", "guineans"="population-specific",
-                         "eritrea"="population-specific", "eritrean"="population-specific", "eritreans"="population-specific",
-                         "estonia"="population-specific", "estonian"="population-specific", "estonians"="population-specific",
-                         "eswatini"="population-specific", "eswatinian"="population-specific", "eswatinians"="population-specific",
-                         "ethiopia"="population-specific", "ethiopian"="population-specific", "ethiopians"="population-specific",
-                         "fiji"="population-specific", "fijian"="population-specific", "fijians"="population-specific",
-                         "finland"="population-specific", "finn"="population-specific", "finns"="population-specific",
-                         "france"="population-specific", "french"="population-specific", 
-                         "gabon"="population-specific", "gabonese"="population-specific", 
-                         "georgia"="population-specific", "georgian"="population-specific", "georgians"="population-specific",
-                         "germany"="population-specific", "german"="population-specific", "germans"="population-specific",
-                         "ghana"="population-specific", "ghanian"="population-specific", "ghanians"="population-specific",
-                         "greece"="population-specific", "greek"="population-specific", "greeks"="population-specific",
-                         "grenada"="population-specific", "grenadian"="population-specific", "grenadians"="population-specific",
-                         "guatamala"="population-specific", "guatamalan"="population-specific", "guatamalans"="population-specific",
-                         "guinea"="population-specific", "guinean"="population-specific", "guineans"="population-specific",
-                         "guyana"="population-specific", "guyanese"="population-specific", 
-                         "haiti"="population-specific", "haitian"="population-specific", "haitians"="population-specific",
-                         "vatican"="population-specific", "vaticans"="population-specific", 
-                         "honduras"="population-specific", "honduran"="population-specific", "hondurans"="population-specific",
-                         "hungary"="population-specific", "hungarian"="population-specific", "hungarians"="population-specific",
-                         "iceland"="population-specific", "icelander"="population-specific", "icelanders"="population-specific",
-                         "india"="population-specific", "indian"="population-specific", "indians"="population-specific",
-                         "indonesia"="population-specific", "indonesian"="population-specific", "indonesians"="population-specific",
-                         "iran"="population-specific", "iranian"="population-specific", "iranians"="population-specific",
-                         "isreal"="population-specific", "isrealite"="population-specific", "isrealites"="population-specific",
-                         "italy"="population-specific", "italian"="population-specific", "italians"="population-specific",
-                         "jamaica"="population-specific", "jamaican"="population-specific", "jamaicans"="population-specific",
-                         "japan"="population-specific", "japanese"="population-specific", 
-                         "jordan"="population-specific", "jordanian"="population-specific", "jordanians"="population-specific",
-                         "kazakhstan"="population-specific", "kazahk"="population-specific", "kazahks"="population-specific",
-                         "kenya"="population-specific", "kenyian"="population-specific", "kenyians"="population-specific",
-                         "kiribati"="population-specific", "kiribatis"="population-specific", 
-                         "korea"="population-specific", "korean"="population-specific", "koreans"="population-specific",
-                         "kuwait"="population-specific", "kuwaitis"="population-specific", 
-                         "kyrgyzstan"="population-specific", "kyrgyz"="population-specific", 
-                         "laos"="population-specific", "laotian"="population-specific", "laotians"="population-specific",
-                         "latvia"="population-specific", "latvian"="population-specific", "latvians"="population-specific",
-                         "lebanon"="population-specific", "lebanese"="population-specific", 
-                         "lesotho"="population-specific", "mosotho"="population-specific", "basotho"="population-specific",
-                         "liberia"="population-specific", "liberian"="population-specific", "liberians"="population-specific",
-                         "libya"="population-specific", "libyan"="population-specific", "libyans"="population-specific",
-                         "liechtenstein"="population-specific", "liechtensteiner"="population-specific", "liechtensteiners"="population-specific",
-                         "lithuania"="population-specific", "lithuanian"="population-specific", "lithuanians"="population-specific",
-                         "luxembourg"="population-specific", "luxembourger"="population-specific", "luxembourgers"="population-specific",
-                         "madagascar"="population-specific", "malagasy"="population-specific",
-                         "malawi"="population-specific", "malawian"="population-specific", "malawians"="population-specific",
-                         "malaysia"="population-specific", "malaysian"="population-specific", "malaysians"="population-specific",
-                         "maldives"="population-specific", "dhivehin"="population-specific", "dhives"="population-specific",
-                         "mali"="population-specific", "malian"="population-specific", "malians"="population-specific",
-                         "malta"="population-specific", "maltese"="population-specific", 
-                         "marshall"="population-specific", "marshallese"="population-specific", 
-                         "mauritania"="population-specific", "mauritanian"="population-specific", "mauritanians"="population-specific",
-                         "mauritius"="population-specific", "mauritian"="population-specific", "mauritians"="population-specific",
-                         "mexico"="population-specific", "mexican"="population-specific", "mexicans"="population-specific",
-                         "micronesia"="population-specific", "micronesian"="population-specific", "micronesians"="population-specific",
-                         "moldova"="population-specific", "moldovian"="population-specific", "moldovians"="population-specific",
-                         "monaco"="population-specific", "monegasque"="population-specific", "monacoian"="population-specific",
-                         "mongolia"="population-specific", "mongolian"="population-specific", "mongolians"="population-specific",
-                         "montenegro"="population-specific", "montenegrin"="population-specific", "montenegrins"="population-specific",
-                         "morocco"="population-specific", "moroccan"="population-specific", "moroccans"="population-specific",
-                         "mozambique"="population-specific", "mozambican"="population-specific", "mozambicans"="population-specific",
-                         "namibia"="population-specific", "namibian"="population-specific", "namibians"="population-specific",
-                         "nauru"="population-specific", "nauruan"="population-specific", "nauruans"="population-specific",
-                         "nepal"="population-specific", "nepalese"="population-specific", 
-                         "netherlands"="population-specific", "dutch"="population-specific", 
-                         "holland"="population-specific", "netherlandish"="population-specific",
-                         "zealand"="population-specific", "zealander"="population-specific", 
-                         "zealanders"="population-specific", "kiwis"="population-specific", "niue"="population-specific",
-                         "nicaragua"="population-specific", "nicaraguan"="population-specific", "nicaraguans"="population-specific",
-                         "niger"="population-specific", "nigerien"="population-specific", "nigeriens"="population-specific",
-                         "nigeria"="population-specific", "nigerian"="population-specific", "nigerians"="population-specific",
-                         "macedonia"="population-specific", "macedonian"="population-specific", "macedonians"="population-specific",
-                         "norway"="population-specific", "norwegian"="population-specific", "norwegians"="population-specific",
-                         "oman"="population-specific", "omani"="population-specific", 
-                         "pakistan"="population-specific", "pakistani"="population-specific", "pakistanis"="population-specific",
-                         "palau"="population-specific", "palauan"="population-specific", "palauans"="population-specific",
-                         "palestine"="population-specific", "palestinian"="population-specific", "palestinians"="population-specific",
-                         "panama"="population-specific", "panamanian"="population-specific", "panamanians"="population-specific",
-                         "paraguay"="population-specific", "paraguayan"="population-specific", "paraguayans"="population-specific",
-                         "peru"="population-specific", "peruvian"="population-specific", "peruvians"="population-specific",
-                         "philippines"="population-specific", "filipino"="population-specific", "filipinos"="population-specific",
-                         "poland"="population-specific", "pole"="population-specific", "poles"="population-specific",
-                         "portugal"="population-specific", "portuguese"="population-specific", 
-                         "qatar"="population-specific", "qatari"="population-specific", 
-                         "romania"="population-specific", "romanian"="population-specific", "romanians"="population-specific",
-                         "russia"="population-specific", "russian"="population-specific", "russians"="population-specific",
-                         "rwanda"="population-specific", "rwandan"="population-specific", "rwandans"="population-specific",
-                         "sahrawi"="population-specific", "kitts"="population-specific", "nevis"="population-specific", 
-                         "kittitian"="population-specific", "kittitians"="population-specific",
-                         "nevisian"="population-specific", "nevisians"="population-specific", "patwah"="population-specific",
-                         "lucia"="population-specific", "lucian"="population-specific", "lucians"="population-specific",
-                         "vincent"="population-specific", "vincentians"="population-specific", "grenadines"="population-specific",
-                         "samoa"="population-specific", "samoan"="population-specific", "samoans"="population-specific",
-                         "marino"="population-specific", "sammarinese"="population-specific", 
-                         "principe"="population-specific", "minuie"="population-specific",
-                         "saudi"="population-specific", "arabia"="population-specific", "saudis"="population-specific",
-                         "senegal"="population-specific", "senegalese"="population-specific", 
-                         "serbia"="population-specific", "serbian"="population-specific", "serbians"="population-specific",
-                         "seychelles"="population-specific", "seychellois"="population-specific", 
-                         "sierra"="population-specific", "leone"="population-specific", 
-                         "leonean"="population-specific", "leoneans"="population-specific",
-                         "singapore"="population-specific", "singaporean"="population-specific", "singaporeans"="population-specific",
-                         "slovakia"="population-specific", "slovakian"="population-specific", "slovakians"="population-specific",
-                         "slovenia"="population-specific", "slovenian"="population-specific", "slovenians"="population-specific",
-                         "solomon"="population-specific", "islander"="population-specific", 
-                         "somalia"="population-specific", "somalian"="population-specific", "somalians"="population-specific",
-                         "sudan"="population-specific", "sudanese"="population-specific", 
-                         "spain"="population-specific", "spaniard"="population-specific", "spaniards"="population-specific",
-                         "sri"="population-specific", "lanka"="population-specific", 
-                         "lankan"="population-specific", "lankans"="population-specific",
-                         "suriname"="population-specific", "surinamese"="population-specific", 
-                         "swaziland"="population-specific", "swazi"="population-specific", "swazis"="population-specific",
-                         "swedish"="population-specific", "swede"="population-specific", "swedes"="population-specific",
-                         "switzerland"="population-specific", "swiss"="population-specific", 
-                         "syria"="population-specific", "syrian"="population-specific", "syrians"="population-specific",
-                         "taiwan"="population-specific", "taiwanese"="population-specific", 
-                         "tajikistan"="population-specific", "tajiki"="population-specific", "tajik"="population-specific",
-                         "sart"="population-specific", "sarts"="population-specific", 
-                         "persian"="population-specific", "persians"="population-specific",
-                         "tanzania"="population-specific", "tanzanian"="population-specific", "tanzanians"="population-specific",
-                         "thailand"="population-specific", "thai"="population-specific", 
-                         "togo"="population-specific", "togolese"="population-specific", 
-                         "tonga"="population-specific", "tongan"="population-specific", "tongans"="population-specific",
-                         "trinidad"="population-specific", "trinidadian"="population-specific", "trini"="population-specific",
-                         "tobago"="population-specific", "tobagonian"="population-specific", "tobagonians"="population-specific",
-                         "trinbagonian"="population-specific", "trinbagonians"="population-specific", 
-                         "tunisia"="population-specific", "tunisian"="population-specific", "tunisians"="population-specific",
-                         "turkey"="population-specific", "turk"="population-specific", "turks"="population-specific",
-                         "turkmenistan"="population-specific", "turkmen"="population-specific", "turkmens"="population-specific",
-                         "tuvalu"="population-specific", "tuvaluan"="population-specific", "tuvaluans"="population-specific",
-                         "uganda"="population-specific", "ugandan"="population-specific", "ugandans"="population-specific",
-                         "ukraine"="population-specific", "ukrainian"="population-specific", "ukrainians"="population-specific",
-                         "emirates"="population-specific", "dubaian"="population-specific", "dubaians"="population-specific",
-                         "britian"="population-specific", "brits"="population-specific", 
-                         "ireland"="population-specific", "irish"="population-specific",
-                         "scotland"="population-specific", "scot"="population-specific", "scots"="population-specific",
-                         "wales"="population-specific", "welsch"="population-specific",
-                         "america"="population-specific", "american"="population-specific", "americans"="population-specific",
-                         "uruguay"="population-specific", "uruguayan"="population-specific", "uruguayans"="population-specific",
-                         "uzbekistan"="population-specific", "uzbek"="population-specific", "uzbeks"="population-specific",
-                         "vanuatu"="population-specific", "nivanuatu"="population-specific", "melanesian"="population-specific",
-                         "venezuela"="population-specific", "venezuelan"="population-specific", "venezuelans"="population-specific",
-                         "vietnam"="population-specific", "vietnamese"="population-specific", 
-                         "yemen"="population-specific", "yemeni"="population-specific", "yemenite"="population-specific",
-                         "zambia"="population-specific", "zambian"="population-specific", "zambians"="population-specific",
-                         "zimbabwe"="population-specific", "zimbabwean"="population-specific", "zimbabweans"="population-specific",
-                         "abkhazia"="population-specific", "abkhaz"="population-specific", "artsakh"="population-specific", 
-                         
-                         ##ethnic-specific terminology (cite: https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa)
-                         
-                         # north africa
-                         "baggara"="population-specific", "berpers"="population-specific", "copts"="population-specific",  
-                         "coptic"="population-specific", "fur"="population-specific", "haratin"="population-specific",
-                         "hassaniya"="population-specific", "maghrebis"="population-specific", "maghrebi"="population-specific",
-                         "moors"="population-specific", "moor"="population-specific", "nubian"="population-specific",
-                         "nubians"="population-specific", "sudanese"="population-specific", "toubou"="population-specific",
-                         "tebu"="population-specific", "tuareg"="population-specific", "zaghawa"="population-specific",
-                         "adele"="population-specific", "akan"="population-specific", "aku"="population-specific",  
-                         
-                         # west africa
-                         "baka"="population-specific", "bambara"="population-specific", "basaa"="population-specific",
-                         "bassa"="population-specific", "beti"="population-specific", "pahuin"="population-specific", 
-                         "ewondo"="population-specific", "fang"="population-specific", "bulu"="population-specific",
-                         "biafada"="population-specific", "bubi"="population-specific", "bube"="population-specific", 
-                         "mole"="population-specific","dagbani"="population-specific", "dendi"="population-specific",
-                         "edo"="population-specific", "bini"="population-specific", "efik"="population-specific",
-                         "ibibio"="population-specific", "eket"="population-specific", "esan"="population-specific", 
-                         "ewe"="population-specific", "fon"="population-specific", "fulbe"="population-specific",
-                         "pular"="population-specific", "adangme"="population-specific", "fulfulde"="population-specific",
-                         "fa"="population-specific", "gwari"="population-specific", "nupe"="population-specific",
-                         "hausa"="population-specific", "igbo"="population-specific", "ijaw"="population-specific", 
-                         "jola"="population-specific", "kriol"="population-specific", "kanuri"="population-specific",
-                         "mandinka"="population-specific", "mandingo"="population-specific", "mande"="population-specific", 
-                         "mano"="population-specific", "kpelle"="population-specific", "marka"="population-specific",
-                         "mende"="population-specific", "papel"="population-specific", "serer"="population-specific", 
-                         "cangin"="population-specific", "songhai"="population-specific", "tiv"="population-specific",
-                         "urhobo"="population-specific", "isoko"="population-specific", "uvwie"="population-specific",
-                         "erhowa"="population-specific", "okpe"="population-specific", "wolof"="population-specific",
-                         "itsekiri"="population-specific", "zarma"="population-specific",
-                         
-                         # central africa 
-                         "banda"="population-specific", "chewa"="population-specific", "chokwe"="population-specific", 
-                         "efe"="population-specific", "gbaya"="population-specific", "lingala"="population-specific",
-                         "kotoko"="population-specific", "mbundu"="population-specific", "kimbundu"="population-specific",
-                         "lagwan"="population-specific", "mbuunda"="population-specific", "chimbuunda"="population-specific",
-                         "moghamo"="population-specific", "ovimbundu"="population-specific", "ngamambo"="population-specific",
-                         "sua"="population-specific", "zande"="population-specific", "zaghawa"="population-specific",
-                         
-                         # east africa
-                         "agaw"="population-specific", "amhara"="population-specific", "beja"="population-specific",
-                         "bilen"="population-specific", "gurage"="population-specific", "oromo"="population-specific",
-                         "rashaida"="population-specific", "saho"="population-specific", "sidama"="population-specific",
-                         "tigrinya"="population-specific", "tigre"="population-specific", "tigrinya"="population-specific", 
-                         "wolaytta"="population-specific", 
-                         
-                         # southeast africa
-                         "alur"="population-specific", "anuak"="population-specific", "acholi"="population-specific",
-                         "banyoro"="population-specific", "basoga"="population-specific", "chagga"="population-specific",
-                         "dinka"="population-specific", "ganda"="population-specific", "langi"="population-specific",
-                         "hutu"="population-specific", "kamba"="population-specific", "kalenjin"="population-specific",
-                         "kikuyu"="population-specific", "kwama"="population-specific", "lugbara"="population-specific",
-                         "luo"="population-specific", "luhya"="population-specific", "maasai"="population-specific",
-                         "makonde"="population-specific", "ameru"="population-specific", "meru"="population-specific",
-                         "nuer"="population-specific", "samburu"="population-specific", "shilluk"="population-specific",
-                         "swahili"="population-specific", "tutsi"="population-specific", "rundi"="population-specific",
-                         "twa"="population-specific", "kiga"="population-specific", "ariaal"="population-specific",
-                         
-                         # southern africa
-                         "afrikaner"="population-specific", "bemba"="population-specific", "afrikaans"="population-specific", 
-                         "herero"="population-specific", "himba"="population-specific", "otjihimbo"="population-specific",
-                         "goffal"="population-specific", "kalanga"="population-specific", "khoikhoi"="population-specific",
-                         "lemba"="population-specific", "shona"="population-specific", 
-                         "makua"="population-specific", "nambya"="population-specific", "khoekhoegowab"="population-specific",
-                         "ndebele"="population-specific", "sindebele"="population-specific", "ovambo"="population-specific",
-                         "san"="population-specific", "khoisan"="population-specific", "ndebele"="population-specific",
-                         "shona"="population-specific", "sotho"="population-specific", "swazi"="population-specific",
-                         "tonga"="population-specific", "tsonga"="population-specific", "tswana"="population-specific",
-                         "venda"="population-specific", "xhosa"="population-specific", "yeyi"="population-specific",
-                         "shiyeyi"="population-specific", "zulu"="population-specific", "kwangali"="population-specific",
-                         "rukwangali"="population-specific", "banareng"="population-specific", "sepedi"="population-specific",
-                         
-                         # native americans per us census (cite: https://en.wikipedia.org/wiki/Native_Americans_in_the_United_States)
-                         "apache"="population-specific", "blackfeet"="population-specific", "blackfoot"="population-specific",
-                         "cherokee"="population-specific", "cheyenne"="population-specific", "chickasaw"="population-specific",
-                         "chippewa"="population-specific", "choctaw"="population-specific", "colville"="population-specific",
-                         "comanche"="population-specific", "cree"="population-specific", "creek"="population-specific",
-                         "crow"="population-specific", "delaware"="population-specific", "lenape"="population-specific",
-                         "mouma"="population-specific", "iroquois"="population-specific", "kiowa"="population-specific",
-                         "iowa"="population-specific", "lumbee"="population-specific", "menominee"="population-specific",
-                         "navajo"="population-specific", "osage"="population-specific", "ottawa"="population-specific",
-                         "paiute"="population-specific", "pima"="population-specific", "potawatomi"="population-specific",
-                         "pueblo"="population-specific", "puget"="population-specific", "salish"="population-specific",
-                         "seminole"="population-specific", "shoshone"="population-specific", "sioux"="population-specific",
-                         "tohono"="population-specific", "oodham"="population-specific", "ute"="population-specific",
-                         "yakama"="population-specific", "yaqui"="population-specific", "yuman"="population-specific",
-                         "alaskan"="population-specific", "aluet"="population-specific", "eskimo"="population-specific",
-                         "tlinget"="population-specific", 
-                         
-                         # first nations people (cite: https://en.wikipedia.org/wiki/Category:First_Nations_people)
-                         "abenaki"="population-specific", "aleut"="population-specific", "anishinaabe"="population-specific",
-                         "arikara"="population-specific", "assiniboine"="population-specific", "beothuk"="population-specific",
-                         "blackfoot"="population-specific", "salish"="population-specific", "cree"="population-specific",
-                         "dakelh"="population-specific", "dakota"="population-specific", "dene"="population-specific",
-                         "gitxsan"="population-specific", "gwichin"="population-specific", "haida"="population-specific",
-                         "haisla"="population-specific", "heiltsuk"="population-specific", "innu"="population-specific",
-                         "iroquois"="population-specific", "ktukaxa"="population-specific", "kwakwakawakw"="population-specific",
-                         "maliseet"="population-specific", "mikmaq"="population-specific", "mohawk"="population-specific",
-                         "makoda"="population-specific", "nanticoke"="population-specific", "nisgaa"="population-specific",
-                         "nuuchahnulth"="population-specific", "odawa"="population-specific", "ojicree"="population-specific",
-                         "ojibwe"="population-specific", "passamaquoddy"="population-specific", "saulteaux"="population-specific",
-                         "secwepemc"="population-specific", "sekani"="population-specific", "sioux"="population-specific",
-                         "squamish"="population-specific", "stolo"="population-specific", "tagish"="population-specific",
-                         "tahltan"="population-specific", "tlingit"="population-specific", "tsimshian"="population-specific",
-                         "tsuutina"="population-specific", "tutchone"="population-specific",
-                         
-                         # indigious peoples of carribean (cite: https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_the_Caribbean)
-                         "arawak"="population-specific", "caquetio"="population-specific", "caribs"="population-specific",
-                         "ciguayos"="population-specific", "garifuna"="population-specific", "guanahatabey"="population-specific",
-                         "igneri"="population-specific", "lucayan"="population-specific", "ortoiroid"="population-specific",
-                         "saladoid"="population-specific", "taino"="population-specific", "yamaye"="population-specific",
-                         
-                         # indigious peoples of central america (cite: https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_Central_America)
-                         "abya"="population-specific", "yala"="population-specific", "bokota"="population-specific",
-                         "boruca"="population-specific", "bribri"="population-specific", "chorti"="population-specific",
-                         "kuna"="population-specific", "dorasque"="population-specific", "embera"="population-specific",
-                         "wounaan"="population-specific", "garifuna"="population-specific", "guatuso"="population-specific",
-                         "jakaltek"="population-specific", "maleku"="population-specific", "miskito"="population-specific",
-                         "naso"="population-specific", "nonoalca"="population-specific", "pech"="population-specific",
-                         "pusilha"="population-specific", "rama"="population-specific", "sumo"="population-specific",
-                         "tolupan"="population-specific", "xinca"="population-specific", "yasika"="population-specific",
-                         
-                         # indigious peoples of south america (cite: https://en.wikipedia.org/wiki/List_of_Indigenous_peoples_of_South_America)
-                         
-                         # central asia (cite: https://en.wikipedia.org/wiki/Demographics_of_Central_Asia#Ethnic_groups_in_Central_Asia)
-                         # east asia (cite: https://en.wikipedia.org/wiki/East_Asian_people)
-                         # siberia (cite: https://en.wikipedia.org/wiki/Indigenous_peoples_of_Siberia)
-                         # southeast asia (cite: https://en.wikipedia.org/wiki/Ethnic_groups_of_Southeast_Asia)
-                         # west asia (cite: https://en.wikipedia.org/wiki/Ethnic_groups_in_the_Middle_East)
-                         # middle east (cite: https://en.wikipedia.org/wiki/Ethnic_groups_in_the_Middle_East)
-                         
-                         # ""="population-specific", ""="population-specific", ""="population-specific",
-                         
-                         # europe (cite: https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_Europe)
-                         "abkhazian"="population-specific", "abkhazians"="population-specific", "adyghe"="population-specific",
-                         "ayramoiset"="population-specific", "basque"="population-specific", "cherkess"="population-specific",
-                         "circassian"="population-specific", "circassians"="population-specific", "erzya"="population-specific",
-                         "goral"="population-specific", "izhma"="population-specific", "karelian"="population-specific",
-                         "karelians"="population-specific", "komi"="population-specific", "lezgin"="population-specific",
-                         "lezgins"="population-specific", "mari"="population-specific", "mokshas"="population-specific",
-                         "mordvins"="population-specific", "nenets"="population-specific", "prussian"="population-specific",
-                         "prussians"="population-specific", "sami"="population-specific", "savakot"="population-specific",
-                         "skolt"="population-specific", "skolts"="population-specific", "tver"="population-specific",
-                         "karelian"="population-specific", "karelians"="population-specific", "vaqueiros"="population-specific",
-                         "alzada"="population-specific", "vespian"="population-specific", "vespians"="population-specific"
-                         )
-
-
-recoded_abstract_data$recoded_word <- recode(recoded_abstract_data$recoded_word, !!!population_specific)
-
-recoded_abstract_data %>% filter(recoded_word =="population-specific")
+recoded_abstract_data %>% filter(recoded_word == "population-specific")
 
 recoded_abstract_words <- recoded_abstract_data %>%
   filter(year != "2018") %>%
   group_by(year) %>% 
   count(recoded_word, sort = TRUE) %>% ungroup(); recoded_abstract_words
 
-recoded_abstract_words %>% 
-  group_by(year)
-
 diversity_terms <- recoded_abstract_words %>% 
-  filter(recoded_word == "diversity" | recoded_word == "genetic" | recoded_word == "population" | recoded_word == "population-specific") 
+  filter(recoded_word == "diversity" | recoded_word == "genetic" | 
+         recoded_word == "population" | recoded_word == "population-specific") 
 diversity_terms
 
 word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = recoded_word),
@@ -506,42 +117,153 @@ word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = recoded_word),
 interactive_graph <- ggplotly(word_graph); interactive_graph
 ```
 
-We were also interested in the terms that most commonly occured alongside diversity. We can do this by running pairwise counts across the abstracts and then using network analysis to map what those relationships look like. In the graph presented below, the nodes correspond to commonly occuring words in our abstract dataset with the strength of the lines between the nodes aligning with the frequency those words arise in the same abstract. Looks like this graph may need some editing to remove non-theoretically relevant terms. 
+Interesting! After we collapsed all of the terms together in the population-specific category, we see a dramatic growth that goes well beyond the growth in diversity. Now, let's see what the growth of these terms look like when we break it down by general, national, continential, and ethnic groups across various geographies. 
 
-```{r co-occurence networks of diversity abstracts, fig.width=9.5}
-# co-occurence count of abstracts 
-abstract_pairs <- abstract_data %>% 
-  pairwise_count(word, id, sort = TRUE, upper = FALSE)
-abstract_pairs
+```{r breaking apart those population specific terms part 1, message = FALSE, warning = FALSE, fig.width=9.5}
+
+general_pop_terms <- read_csv("population_terms.csv") %>% filter(sub_category == "population_general")
+us_specific_terms <- read_csv("population_terms.csv") %>% filter(sub_category == "us_specific")
+continental_terms <- read_csv("population_terms.csv") %>% 
+  filter(category == "continental" | category == "subcontinental")
+ling_religious_terms <- read_csv("population_terms.csv") %>% filter(category == "linguistic_religious")
+national_terms <- read_csv("population_terms.csv") %>% filter(category == "national")
+south_american_ethnic_groups <- read_csv("population_terms.csv") %>% filter(category == "south_america")
+african_ethnic_groups <- read_csv("population_terms.csv") %>% filter(category == "africa")
+north_american_ethnic_groups <- read_csv("population_terms.csv") %>% filter(category == "north_america")
+european_ethnic_groups <- read_csv("population_terms.csv") %>% filter(category == "europe")
+asian_ethnic_groups <- read_csv("population_terms.csv") %>% filter(category == "asia")
+all_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "south_america" | category == "africa" | 
+           category == "asia" | category == "north_america" | category == "europe")
+```
+
+```{r breaking apart those population specific terms part 2, fig.width=9.5}
+general_pop_terms <- paste(c("\\b(?i)(zxz", general_pop_terms$term, "zxz)\\b"), collapse = "|")
+us_specific_terms <- paste(c("\\b(?i)(zxz", us_specific_terms$term, "zxz)\\b"), collapse = "|")
+continental_terms <- paste(c("\\b(?i)(zxz", continental_terms$term, "zxz)\\b"), collapse = "|")
+ling_religious_terms <- paste(c("\\b(?i)(zxz", ling_religious_terms$term, "zxz)\\b"), collapse = "|")
+national_terms <- paste(c("\\b(?i)(zxz", national_terms$term, "zxz)\\b"), collapse = "|")
+south_american_ethnic_groups <- paste(c("\\b(?i)(zxz", south_american_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+african_ethnic_groups <- paste(c("\\b(?i)(zxz", african_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+north_american_ethnic_groups <- paste(c("\\b(?i)(zxz", north_american_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+european_ethnic_groups <- paste(c("\\b(?i)(zxz", european_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+asian_ethnic_groups <- paste(c("\\b(?i)(zxz", asian_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+all_ethnic_groups <- paste(c("\\b(?i)(zxz", all_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+
+recoded_abstract_data <- abstract_data %>% 
+  
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = general_pop_terms), 
+                               yes = "general population terms", no = word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = us_specific_terms), 
+                               yes = "us-specific terms", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = continental_terms), 
+                               yes = "continental terms", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = ling_religious_terms), 
+                               yes = "linguistic & religious terms", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = national_terms), 
+                               yes = "national terms", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = south_american_ethnic_groups), 
+                               yes = "south american ethnic groups", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = african_ethnic_groups), 
+                               yes = "african ethnic groups", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = north_american_ethnic_groups), 
+                               yes = "north american ethnic groups", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = european_ethnic_groups), 
+                               yes = "european ethnic groups", no = recoded_word)) %>%
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = asian_ethnic_groups), 
+                               yes = "asian ethnic groups", no = recoded_word))  
+
+recoded_abstract_words <- recoded_abstract_data %>%
+  filter(year != "2018") %>%
+  group_by(year) %>% 
+  count(recoded_word, sort = TRUE) %>% ungroup(); recoded_abstract_words
+
+diversity_terms <- recoded_abstract_words %>% 
+  filter(recoded_word == "diversity" | recoded_word == "population" | recoded_word == "population-specific" |
+         recoded_word == "general population terms" | recoded_word == "continental terms" | recoded_word == "linguistic & religious terms" | 
+         recoded_word == "national terms" | recoded_word == "south american ethnic groups" | recoded_word == "african ethnic groups" |
+         recoded_word == "north american ethnic groups" | recoded_word == "european ethnic groups" | recoded_word == "asian ethnic groups" |
+         recoded_word == "us-specific terms") 
+diversity_terms
+
+word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = recoded_word),
+                     data = diversity_terms, stat="identity") + 
+  labs(title = "Growth in Diversity-Related Terminology (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.title = element_blank())
+
+interactive_graph <- ggplotly(word_graph); interactive_graph
+```
+
+As we can see here, the majority of growth in population-specific terms is because of an increased proclivity to mention nationalities (e.g. Italian or Japanese), continental terms (e.g. africa, asia, north america), and general population terms (e.g. race, ethnicity, caucasian, african, asian, etc). We do not really see much growth in ethnic groups in any given continent even when we lump all of the different ethnic groups into one category (not shown here). 
+
+## Text Networks of Diversity-Related Studies
+
+We were also interested in the terms that most commonly occured alongside diversity. We can do this by running pairwise counts across the abstracts and then using network analysis to map what those relationships look like. In the graph presented below, the nodes correspond to commonly occuring words in our abstract dataset with the strength of the lines between the nodes aligning with the frequency those words arise in the same abstract. 
+
+```{r co-occurence networks of diversity abstracts part 1, message = FALSE, warning = FALSE, fig.width=9.5}
+
+all_population_terms <- read_csv("population_terms.csv")
+```
+
+Here is that massive list of population terms we mentioned above. Keep in mind that when we searched through our corpus, we ignored cases so don't mind the variation in capitalization here. 
+
+```{r co-occurence networks of diversity abstracts part 2, fig.width=9.5, fig.height=7}
+all_population_terms <- paste(c("\\b(?i)(zxz", all_population_terms$term, "zxz)\\b"), collapse = "|")
+all_population_terms
+
+filtered_pairs <- abstract_data %>%
+  filter(str_detect(word, all_population_terms)) %>% 
+  pairwise_count(word, id, sort = TRUE, upper = FALSE) %>% 
+  filter(n >= 80)
 
 # network visualization of most frequent pairs 
 set.seed(1234)
-abstract_pairs %>%
-  filter(n >= 5000) %>%   # may need to alter this number for a cutoff point 
-  graph_from_data_frame() %>%
-  ggraph(layout = "fr") +
-  geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "cyan4") +
-  geom_node_point(size = 3) +
-  geom_node_text(aes(label = name), repel = TRUE, 
-                 point.padding = unit(0.2, "lines")) + theme_void()
+filtered_pairs %>%
+    filter(n >= 80) %>%   # may need to alter this number for a cutoff point 
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "cyan4") +
+    geom_node_point(size = 3) +
+    geom_node_text(aes(label = name), repel = TRUE, 
+                   point.padding = unit(0.2, "lines")) + theme_void()
+
 ```
+
+This network is composed of nodes (corresponding to poppulation-specific words in our corpus) and ties (representing how many times they co-occur in the same abstracts of our dataset). As you can see in the graph, there is a core that forms with the most commonly occuring words in the corpus. Below, I have made the same network interactive using the networkD3 package. This allows you to hover over each node (or word) and see which other words it is connected to in the network. 
+
+```{r interactive co-occurence networks of diversity abstracts, fig.width=9.5, fig.height=7}
+links <- filtered_pairs %>% 
+  rename(from = item1, to = item2, weight = n)
+
+simpleNetwork(links,  fontSize = 20,  linkDistance = 200, 
+              opacity = 0.8, width = 12, fontFamily = "sans-serif", charge = -20, zoom = TRUE)
+```
+
+We can also use an algorithm that breaks networks into neighborhoods of words that share the most frequeny co-occurrences. Here, the same network is visualized, but this time the colors correspond to different clusters (measured using the modularity function in igraph). This helps see the clustering of words in the network after the less frequent words are filtered out (i.e. those occurring less than 80 times).
+
+```{r interactive co-occurence networks of diversity abstracts with modularity, fig.width=9.5, fig.height=7}
+word_graph <- graph.data.frame(links, directed = FALSE)
+wc <- cluster_walktrap(word_graph)
+members <- membership(wc)
+words_d3 <- igraph_to_networkD3(word_graph, group = members, what = "both")
+
+forceNetwork(Links = words_d3$links, Nodes = words_d3$nodes, 
+             Source = 'source', Target = 'target', NodeID = 'name', Group = 'group',
+             fontSize = 25,  linkDistance = 100, opacity = 0.8, 
+             fontFamily = "sans-serif", charge = -15, zoom = TRUE)
+```
+
+## Examining Diversity Across Different Geographies
 
 The next step is to look at how the concept of "diversity" is used across the world. As the graph below demonstrates, the rise of "diversity" seems mostly to grow in the context of predominantly White, Westernized countries like US, England, the Netherlands, Germany and Switzerland. 
 
 ```{r breaking down annual growth of diversity by country, fig.width=9.5}
-text_data$country <- tolower(text_data$country)
-
-# tokenizing the abstract data into words 
-abstract_data <- text_data %>% 
-  unnest_tokens(word, abstract) %>% 
-  anti_join(stop_words)
-
-# most frequent word count in abstracts 
-abstract_data %>%
-  count(word, sort = TRUE)
+# here we are just converting everything to lower case 
+abstract_data$country <- tolower(abstract_data$country)
 
 # looking at word frequencies by year 
 diversity_by_country <- abstract_data %>%
+  filter(year != "2018") %>%
   group_by(year) %>% 
   count(word, country, sort = TRUE) %>% ungroup(); diversity_by_country
 
@@ -557,28 +279,35 @@ diversity_over_time <- ggplot() + geom_line(aes(y = n, x = year, colour = countr
 diversity_over_time <- ggplotly(diversity_over_time); diversity_over_time
 ```
 
+## Examining Diversity Across Different Academic Disciplines 
+
 Lastly, we wanted to look more into the growth of diversity related terms by scientific subject matter. This snippet of code breaks down the number of words occuring in abstracts over time, which is then broken down by MEDLINE's and Web of Science's subject categories. I have opted to only include 12 of the 150 different categories that could have been graphed here. Overall, we see that the rise of diversity in genetics & heredity, biochemistry & molecular biology, microbiology, immunology, and infectious disease research. We do not see this same rise in the social sciences, though there admittedly is some overall growth in that domain. 
 
 ```{r breaking down annual growth of diversity by subject, message = FALSE, warning = FALSE, fig.width=9.5}
+
+# first we need to break apart all the subject categories for each paper 
 text_data <- text_data %>% 
   separate(subject, into = paste("subject", 1:15, sep = "_"), sep = ";") %>%
   gather(value, subject, subject_1:subject_15, na.rm = TRUE) %>% select(-value)
 
+# and remove the annoying parentheticals from some categories
 text_data <- text_data %>% 
-  separate(subject, into = c("subject", "void"), sep = "[(]") %>% select(-void) 
+  separate(subject, into = c("subject", "void"), sep = "[(]") %>% select(-void)
 
+# then we git rid of the extra white space and make everything lower case to standardize 
 text_data$subject <- stri_trim_both(text_data$subject)
 text_data$subject <- tolower(text_data$subject)
-# unique(text_data$subject) 
 
+# this shows us we have 134 different subjects and we appear to have removed all the duplicates 
+unique(text_data$subject)
+ 
+# now we can see how often these words arise by subject 
 subject_data <- text_data %>% 
   unnest_tokens(word, abstract) %>% 
   anti_join(stop_words)
 
-subject_data %>% 
-  count(word, sort = TRUE)
-
 growth_by_subject <- subject_data %>%
+  filter(year != "2018") %>%
   group_by(year) %>% 
   count(word, subject, sort = TRUE) %>% ungroup()  
 
@@ -597,36 +326,70 @@ graph_by_subject <- growth_by_subject %>%
 
 graph_by_subject <- ggplot() + geom_line(aes(y = n, x = year, colour = subject),
                      data = graph_by_subject, stat="identity") +
-  labs(title = "Growth in Diversity-Related Terminology (From 1990-2017, By Subject)") + 
+  labs(title = "Growth in Diversity-Related Terminology (From 1990-2017), By Subject)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.title = element_blank())
 
 graph_by_subject <- ggplotly(graph_by_subject); graph_by_subject
 
 ```
 
+Instead of selecting particular subjects, we also wanted to know what would happen if we just collapsed the categories into three buckets: (1) genetics & heredity (i.e. evolution, plant and animal sciences), (2) biomedical studies, and (3) the social and behavioral sciences. As a general side note, when one of the original categories did not fit into these three recoded categories (e.g. mathematics or computer science), they were just recoded as "other" and ignored in our final analysis. For a full list of how the original 134 categories were recoded, [you can visit this link](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=849010328). 
+
+```{r breaking down annual growth of diversity by recoded subject part 1, message = FALSE, warning = FALSE, fig.width=9.5}
+genetics_heredity <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "genetics_heredity")
+biomedical_studies <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "biomedical_studies")
+social_behavioral <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "social_behavioral")
+other_studies <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "other")
+```
+
+
+```{r breaking down annual growth of diversity by recoded subject part 2, fig.width=9.5}
+genetics_heredity <- paste(c("\\b(?i)(zxz", genetics_heredity$original_subject, "zxz)\\b"), collapse = "|")
+biomedical_studies <- paste(c("\\b(?i)(zxz", biomedical_studies$original_subject, "zxz)\\b"), collapse = "|")
+social_behavioral <- paste(c("\\b(?i)(zxz", social_behavioral$original_subject, "zxz)\\b"), collapse = "|")
+other_studies <- paste(c("\\b(?i)(zxz", other_studies$original_subject, "zxz)\\b"), collapse = "|")
+
+recoded_subject_data <- subject_data %>% 
+  select(subject, word, year) %>%
+  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, pattern = genetics_heredity), 
+                               yes = "genetics & heredity", no = subject)) %>%
+  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, pattern = biomedical_studies), 
+                               yes = "biomedical studies", no = recoded_subject)) %>%
+  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, pattern = social_behavioral), 
+                               yes = "social & behavioral sciences", no = recoded_subject)) %>% 
+  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, pattern = other_studies), 
+                               yes = "other subjects", no = recoded_subject))
+
+growth_by_subject <- recoded_subject_data %>%
+  filter(year != "2018") %>%
+  group_by(year) %>% 
+  count(word, recoded_subject, sort = TRUE) %>% ungroup()
+
+graph_by_subject <- growth_by_subject %>% 
+  filter(word == "diversity") 
+
+graph_by_subject <- ggplot() + geom_line(aes(y = n, x = year, colour = recoded_subject),
+                     data = graph_by_subject, stat="identity") +
+  labs(title = "Growth in Diversity-Related Terminology (From 1990-2017), By Subject") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.title = element_blank())
+
+interactive_by_subject <- ggplotly(graph_by_subject); interactive_by_subject
+
+```
+
+Perhaps this is just a by-product of more categories being biomedically-related, but this analysis clearly shows that diversity seems to be growing faster in biomedical studies than in the social & behavioral sciences and genetics & heredity-related studies. 
+
+## Conclusion 
+
 Overall, this document shows a rise in the use of "diversity" across scientific research. We see a 10-fold increase across the 1990s and 2000's, which mostly occurs in research deriving from Westernized biomedical scientific contexts. Our future analyses will examine more what implications this has for the use of diversity in and outside of that domain. 
 
+## References 
 
+Kramer, B. L. (2019). *Molecularization at the intersections: testosterone, prostate cancer and the construction of racial difference.* Doctoral dissertation, Rutgers University-School of Graduate Studies.
 
+Lee, C. (2009). “Race” and “ethnicity” in biomedical research: how do scientists construct and explain differences in health?. *Social Science & Medicine*, 68(6), 1183-1190.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Panofsky, A., & Bliss, C. (2017). Ambiguity and scientific authority: population classification in genomic science. *American Sociological Review*, 82(1), 59-87.
 
 
 
