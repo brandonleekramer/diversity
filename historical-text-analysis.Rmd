@@ -22,7 +22,7 @@ In this first chunk, we load our data and examine the overall growth of articles
 # loading the .csv file 
 text_data <- read_csv("historical_text_data.csv")
 ```
-```{r wos study growth}
+```{r wos study growth, fig.width=9.5}
 # checking to see how the overall data looks 
 by_year <- text_data %>% 
   filter(year != "2018") %>% # filtering 2018 articles because they seem to be incomplete
