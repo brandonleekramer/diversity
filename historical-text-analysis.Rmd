@@ -1,16 +1,18 @@
 ---
-title: "Examining the Growth of Diversity-Related Terminology in Scientific Abstracts"
-author: "Brandon L. Kramer (University of Virginia, Biocomplexity Institute) & Catherine Lee (Rutgers, Sociology)"
+title: "The Growth of Diversity in Scientific Abstracts"
+subtitle: "Historical Text Analyses" 
+author: "Brandon L. Kramer (UVA, Biocomplexity Institute) & Catherine Lee (Rutgers, Sociology)"
 output: html_document 
 ---
 
+## Data Overview
 
 In this project, we are examining the growth of in the use of the term "diversity". To do this, we drew from the MEDLINE database in Web of Science, using the search terms "TS=(diversity)" from 1990-2017 for human research only. This search provided 71,528 total results, which we extracted using the bibliometrix package in R. Next, we converted the abstracts of these articles to a text corpus and then used tidytext - a package designed for computational text analysis in R - to analyze patterns with the abstracts of these data. Below is the R Markdown file and replication code for these analyses.
 
 ```{r setup, include = FALSE}
 rm(list = ls())
-#knitr::opts_knit$set(root.dir = "~/Desktop/Brandon Kramer/Diversity/2019_0813")
-knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity Project/Data")
+knitr::opts_knit$set(root.dir = "~/Desktop/Diversity/the-growth-of-diversity")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity Project/Data")
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 ```
 
@@ -20,6 +22,7 @@ In this first chunk, we load our data and examine the overall growth of articles
 
 ```{r, message = FALSE, results = FALSE}
 # loading the .csv file 
+setwd("~/Documents/Diversity/Data")
 text_data <- read_csv("historical_text_data.csv")
 ```
 ```{r wos study growth, fig.width=9.5}
@@ -44,38 +47,129 @@ abstract_data <- text_data %>%
   unnest_tokens(word, abstract) %>% 
   anti_join(stop_words)
 
-# most frequent word count in abstracts 
-abstract_data %>%
-  count(word, sort = TRUE)
-```
-```{r wos abstract text analysis part 3, messages = FALSE, warning=FALSE, results = FALSE}
 # adding custom set of stopwords 
 my_stopwords <- tibble(word = c(as.character(1:9), 
                                 "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
                                 "rights", "reserved", "copyright", "elsevier"))
 abstract_data <- abstract_data %>% anti_join(my_stopwords)
+
+# most frequent word count in abstracts 
+abstract_data %>%
+  count(word, sort = TRUE)
 ```
+
 ```{r wos abstract text analysis part 4, messages = FALSE, warning=FALSE}
 # looking at word frequencies by year 
 abstract_words <- abstract_data %>%
   filter(year != "2018") %>%
+  filter(word == "race" | word == "racial") %>%
   group_by(year) %>% 
   count(word, sort = TRUE) %>% ungroup(); abstract_words
 ```
 
 ## Growth in Population-Specific Terms Over Time
 
-Now, we want to look at how the most relevant words vary over time. Brandon chose to include words like diversity, genetic, and population as well as racially-specific and ethnically-specific terms. As we see, the rise of diversity does not necessarily mean that the focus on race or ethnicity is growing in congruence with that term. This could mean that diversity is being used as a catch-all in the scientific literature (i.e. that the multiplicity of the term makes it mean anything and everything) or that diversity is most used in fields like immunology or oncology. We will explore that hypothesis a bit more below. 
+Now, we want to look at how the most relevant words vary over time. We chose to include words like diversity and its various sub-types (i.e. genetic, cultural, and population) as well as racially-specific and ethnically-specific terms. As the graph shows, the rise of diversity does not necessarily mean that researchers focus on race or ethnicity. This could mean that diversity is being used as a catch-all in the scientific literature (i.e. that the multiplicity of the term makes it mean anything and everything) or that diversity is most used in fields like immunology or oncology. We will explore that hypothesis a bit more below. 
 
-```{r examining top diversity related words over time, fig.width=9.5}
-diversity_terms <- abstract_words %>% 
+```{r graphing the growth of diversity part 1, fig.width=9.5}
+# collapsing race*, ethnicity* and cultural* terminology 
+racial_variations <- "\\b(?i)(race|racial|racially)\\b"
+ethnic_variations <- "\\b(?i)(ethnic|ethnicity|ethnically)\\b"
+cultural_variations <- "\\b(?i)(culture|cultural|culturally)\\b"
+
+# recoding race*, ethnicity* and cultural* terminology
+recoded_abstract_data <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = racial_variations), 
+                       yes = "racial*", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = ethnic_variations), 
+                       yes = "ethnic*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = cultural_variations), 
+                       yes = "cultural*", no = term))
+
+recoded_abstract_words <- recoded_abstract_data %>%
   filter(year != "2018") %>%
-  filter(word == "diversity" |  word == 'genetic' | word == "population" |
-         word == "ethnic" | word == "racial" | word == 'race' | 
-         word == 'caucasian' | word == 'african' | word == 'black') 
+  group_by(year) %>% 
+  count(term, sort = TRUE) %>% ungroup()
+
+diversity_terms <- recoded_abstract_words %>% 
+  filter(year != "2018") %>%
+  filter(term == "diversity" | term == "cultural*" | term == "genetic" | 
+           term == "population" | term == "racial*" | term == "ethnic*" ) 
 diversity_terms
 
-word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = word),
+word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = term),
+                     data = diversity_terms, stat="identity") + 
+  labs(title = "Growth in Diversity-Related Terms (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank())
+
+interactive_graph <- ggplotly(word_graph); interactive_graph
+```
+
+```{r examining top diversity related words over time, fig.width=9.5}
+# need to get this right 
+us_specific_bigrams <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word,
+                       pattern = "\\b(?i)(caucasian|caucasians|whites)\\b"), yes = "white", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(americans)\\b"), yes = "american", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(hispanics)\\b"), yes = "hispanic", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(indians)\\b"), yes = "indian", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(islanders)\\b"), yes = "islander", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(alaska|alaskans)\\b"), yes = "alaskan", no = term)) %>%
+  select(-word) %>% rename(word = term) %>% 
+  unnest_tokens(bigram, word, token = "ngrams", n = 2) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>%          
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word)
+
+us_specific_bigrams %>% 
+  unite(bigram, word1, word2, sep = "-") %>% 
+  filter(bigram == "african-american" | bigram == "american-indian" | bigram == "native-american" |
+           
+         bigram == "pacific-islander" | 
+         bigram == "mexican-american" ) %>% 
+  count(bigram, year, sort = TRUE)
+
+#black <- paste(c("\\b(?i)(caucasian|caucasians|whites)\\b"), collapse = "|")
+#american_indian <-  paste(c("\\b(?i)(ethnic|ethnicity|ethnically)\\b"), collapse = "|")
+
+
+
+```
+
+
+
+```{r examining us population terms over time, fig.width=9.5}
+# collapsing race* and ethnicity* terminology 
+white <- paste(c("\\b(?i)(caucasian|caucasians|white)\\b"), collapse = "|")
+black <- paste(c("\\b(?i)(black|african)\\b"), collapse = "|")
+asian <- paste(c("\\b(?i)(asian|asians)\\b"), collapse = "|")
+pacific_islander <- paste(c("\\b(?i)(pacific|asians)\\b"), collapse = "|")
+
+
+recoded_abstract_data <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = white), 
+                               yes = "white/caucasian", no = word)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = black), 
+                               yes = "black/african-american", no = word))
+
+recoded_abstract_words <- recoded_abstract_data %>%
+  filter(year != "2018") %>%
+  group_by(year) %>% 
+  count(term, sort = TRUE) %>% ungroup()
+
+diversity_terms <- recoded_abstract_words %>% 
+  filter(year != "2018") %>%
+  filter(term == "diversity" |  term == "white" | term == "caucasian" | 
+         term == "black" | term = "african-american" ) 
+diversity_terms
+
+word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = term),
                      data = diversity_terms, stat="identity") + 
   labs(title = "Growth in Diversity-Related Terms (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.title = element_blank())
@@ -94,7 +188,8 @@ population_specific <- read_csv("population_terms.csv")
 population_specific <- paste(c("\\b(?i)(zcx", population_specific$term, "zxc)\\b"), collapse = "|")
 
 recoded_abstract_data <- abstract_data %>% 
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = population_specific), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = population_specific), 
                                yes = "population-specific", no = word))
 
 recoded_abstract_data %>% filter(recoded_word == "population-specific")
@@ -120,7 +215,7 @@ interactive_graph <- ggplotly(word_graph); interactive_graph
 Interesting! After we collapsed all of the terms together in the population-specific category, we see a dramatic growth that goes well beyond the growth in diversity. Now, let's see what the growth of these terms look like when we break it down by general, national, continential, and ethnic groups across various geographies. 
 
 ```{r breaking apart those population specific terms part 1, message = FALSE, warning = FALSE, fig.width=9.5}
-
+# breaking apart population-specific words 
 general_pop_terms <- read_csv("population_terms.csv") %>% filter(sub_category == "population_general")
 us_specific_terms <- read_csv("population_terms.csv") %>% filter(sub_category == "us_specific")
 continental_terms <- read_csv("population_terms.csv") %>% 
@@ -151,26 +246,35 @@ asian_ethnic_groups <- paste(c("\\b(?i)(zxz", asian_ethnic_groups$term, "zxz)\\b
 all_ethnic_groups <- paste(c("\\b(?i)(zxz", all_ethnic_groups$term, "zxz)\\b"), collapse = "|")
 
 recoded_abstract_data <- abstract_data %>% 
-  
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = general_pop_terms), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = general_pop_terms), 
                                yes = "general population terms", no = word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = us_specific_terms), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = us_specific_terms), 
                                yes = "us-specific terms", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = continental_terms), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = continental_terms), 
                                yes = "continental terms", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = ling_religious_terms), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = ling_religious_terms), 
                                yes = "linguistic & religious terms", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = national_terms), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = national_terms), 
                                yes = "national terms", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = south_american_ethnic_groups), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = south_american_ethnic_groups), 
                                yes = "south american ethnic groups", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = african_ethnic_groups), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = african_ethnic_groups), 
                                yes = "african ethnic groups", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = north_american_ethnic_groups), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = north_american_ethnic_groups), 
                                yes = "north american ethnic groups", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = european_ethnic_groups), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = european_ethnic_groups), 
                                yes = "european ethnic groups", no = recoded_word)) %>%
-  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, pattern = asian_ethnic_groups), 
+  mutate(recoded_word = ifelse(test = str_detect(string = abstract_data$word, 
+                                                 pattern = asian_ethnic_groups), 
                                yes = "asian ethnic groups", no = recoded_word))  
 
 recoded_abstract_words <- recoded_abstract_data %>%
@@ -179,11 +283,13 @@ recoded_abstract_words <- recoded_abstract_data %>%
   count(recoded_word, sort = TRUE) %>% ungroup(); recoded_abstract_words
 
 diversity_terms <- recoded_abstract_words %>% 
-  filter(recoded_word == "diversity" | recoded_word == "population" | recoded_word == "population-specific" |
-         recoded_word == "general population terms" | recoded_word == "continental terms" | recoded_word == "linguistic & religious terms" | 
-         recoded_word == "national terms" | recoded_word == "south american ethnic groups" | recoded_word == "african ethnic groups" |
-         recoded_word == "north american ethnic groups" | recoded_word == "european ethnic groups" | recoded_word == "asian ethnic groups" |
-         recoded_word == "us-specific terms") 
+  filter(recoded_word == "diversity" | recoded_word == "population" | 
+           recoded_word == "population-specific" | recoded_word == "general population terms" | 
+           recoded_word == "continental terms" | recoded_word == "linguistic & religious terms" | 
+           recoded_word == "national terms" | recoded_word == "south american ethnic groups" | 
+           recoded_word == "african ethnic groups" | recoded_word == "north american ethnic groups" | 
+           recoded_word == "european ethnic groups" | recoded_word == "asian ethnic groups" |
+           recoded_word == "us-specific terms") 
 diversity_terms
 
 word_graph <- ggplot() + geom_line(aes(y = n, x = year, colour = recoded_word),
@@ -195,63 +301,6 @@ interactive_graph <- ggplotly(word_graph); interactive_graph
 ```
 
 As we can see here, the majority of growth in population-specific terms is because of an increased proclivity to mention nationalities (e.g. Italian or Japanese), continental terms (e.g. africa, asia, north america), and general population terms (e.g. race, ethnicity, caucasian, african, asian, etc). We do not really see much growth in ethnic groups in any given continent even when we lump all of the different ethnic groups into one category (not shown here). 
-
-## Text Networks of Diversity-Related Studies
-
-We were also interested in the terms that most commonly occured alongside diversity. We can do this by running pairwise counts across the abstracts and then using network analysis to map what those relationships look like. In the graph presented below, the nodes correspond to commonly occuring words in our abstract dataset with the strength of the lines between the nodes aligning with the frequency those words arise in the same abstract. 
-
-```{r co-occurence networks of diversity abstracts part 1, message = FALSE, warning = FALSE, fig.width=9.5}
-
-all_population_terms <- read_csv("population_terms.csv")
-```
-
-Here is that massive list of population terms we mentioned above. Keep in mind that when we searched through our corpus, we ignored cases so don't mind the variation in capitalization here. 
-
-```{r co-occurence networks of diversity abstracts part 2, fig.width=9.5, fig.height=7}
-all_population_terms <- paste(c("\\b(?i)(zxz", all_population_terms$term, "zxz)\\b"), collapse = "|")
-all_population_terms
-
-filtered_pairs <- abstract_data %>%
-  filter(str_detect(word, all_population_terms)) %>% 
-  pairwise_count(word, id, sort = TRUE, upper = FALSE) %>% 
-  filter(n >= 80)
-
-# network visualization of most frequent pairs 
-set.seed(1234)
-filtered_pairs %>%
-    filter(n >= 80) %>%   # may need to alter this number for a cutoff point 
-    graph_from_data_frame() %>%
-    ggraph(layout = "fr") +
-    geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "cyan4") +
-    geom_node_point(size = 3) +
-    geom_node_text(aes(label = name), repel = TRUE, 
-                   point.padding = unit(0.2, "lines")) + theme_void()
-
-```
-
-This network is composed of nodes (corresponding to poppulation-specific words in our corpus) and ties (representing how many times they co-occur in the same abstracts of our dataset). As you can see in the graph, there is a core that forms with the most commonly occuring words in the corpus. Below, I have made the same network interactive using the networkD3 package. This allows you to hover over each node (or word) and see which other words it is connected to in the network. 
-
-```{r interactive co-occurence networks of diversity abstracts, fig.width=9.5, fig.height=7}
-links <- filtered_pairs %>% 
-  rename(from = item1, to = item2, weight = n)
-
-simpleNetwork(links,  fontSize = 20,  linkDistance = 200, 
-              opacity = 0.8, width = 12, fontFamily = "sans-serif", charge = -20, zoom = TRUE)
-```
-
-We can also use an algorithm that breaks networks into neighborhoods of words that share the most frequeny co-occurrences. Here, the same network is visualized, but this time the colors correspond to different clusters (measured using the modularity function in igraph). This helps see the clustering of words in the network after the less frequent words are filtered out (i.e. those occurring less than 80 times).
-
-```{r interactive co-occurence networks of diversity abstracts with modularity, fig.width=9.5, fig.height=7}
-word_graph <- graph.data.frame(links, directed = FALSE)
-wc <- cluster_walktrap(word_graph)
-members <- membership(wc)
-words_d3 <- igraph_to_networkD3(word_graph, group = members, what = "both")
-
-forceNetwork(Links = words_d3$links, Nodes = words_d3$nodes, 
-             Source = 'source', Target = 'target', NodeID = 'name', Group = 'group',
-             fontSize = 25,  linkDistance = 100, opacity = 0.8, 
-             fontFamily = "sans-serif", charge = -15, zoom = TRUE)
-```
 
 ## Examining Diversity Across Different Geographies
 
@@ -284,7 +333,6 @@ diversity_over_time <- ggplotly(diversity_over_time); diversity_over_time
 Lastly, we wanted to look more into the growth of diversity related terms by scientific subject matter. This snippet of code breaks down the number of words occuring in abstracts over time, which is then broken down by MEDLINE's and Web of Science's subject categories. I have opted to only include 12 of the 150 different categories that could have been graphed here. Overall, we see that the rise of diversity in genetics & heredity, biochemistry & molecular biology, microbiology, immunology, and infectious disease research. We do not see this same rise in the social sciences, though there admittedly is some overall growth in that domain. 
 
 ```{r breaking down annual growth of diversity by subject, message = FALSE, warning = FALSE, fig.width=9.5}
-
 # first we need to break apart all the subject categories for each paper 
 text_data <- text_data %>% 
   separate(subject, into = paste("subject", 1:15, sep = "_"), sep = ";") %>%
@@ -330,7 +378,6 @@ graph_by_subject <- ggplot() + geom_line(aes(y = n, x = year, colour = subject),
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.title = element_blank())
 
 graph_by_subject <- ggplotly(graph_by_subject); graph_by_subject
-
 ```
 
 Instead of selecting particular subjects, we also wanted to know what would happen if we just collapsed the categories into three buckets: (1) genetics & heredity (i.e. evolution, plant and animal sciences), (2) biomedical studies, and (3) the social and behavioral sciences. As a general side note, when one of the original categories did not fit into these three recoded categories (e.g. mathematics or computer science), they were just recoded as "other" and ignored in our final analysis. For a full list of how the original 134 categories were recoded, [you can visit this link](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=849010328). 
@@ -341,7 +388,6 @@ biomedical_studies <- read_csv("subject_categories.csv") %>% filter(collapsed_su
 social_behavioral <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "social_behavioral")
 other_studies <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "other")
 ```
-
 
 ```{r breaking down annual growth of diversity by recoded subject part 2, fig.width=9.5}
 genetics_heredity <- paste(c("\\b(?i)(zxz", genetics_heredity$original_subject, "zxz)\\b"), collapse = "|")
@@ -374,7 +420,6 @@ graph_by_subject <- ggplot() + geom_line(aes(y = n, x = year, colour = recoded_s
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), legend.title = element_blank())
 
 interactive_by_subject <- ggplotly(graph_by_subject); interactive_by_subject
-
 ```
 
 Perhaps this is just a by-product of more categories being biomedically-related, but this analysis clearly shows that diversity seems to be growing faster in biomedical studies than in the social & behavioral sciences and genetics & heredity-related studies. 

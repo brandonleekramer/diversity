@@ -1,0 +1,92 @@
+---
+title: "The Growth of Diversity in Scientific Abstracts"
+subtitle: "Text Network Analyses"
+author: "Brandon L. Kramer (UVA, Biocomplexity Institute) & Catherine Lee (Rutgers, Sociology)"
+output: html_document
+---
+
+## Data Overview
+
+In this project, we are examining the growth of in the use of the term "diversity". To do this, we drew from the MEDLINE database in Web of Science, using the search terms "TS=(diversity)" from 1990-2017 for human research only. This search provided 71,528 total results, which we extracted using the bibliometrix package in R. Next, we converted the abstracts of these articles to a text corpus and then used tidytext - a package designed for computational text analysis in R - to analyze patterns with the abstracts of these data. Below is the R Markdown file and replication code for these analyses.
+
+```{r setup, include = FALSE}
+rm(list = ls())
+knitr::opts_knit$set(root.dir = "~/Desktop/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity Project/Data")
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+```
+
+```{r wos abstract text analysis, messages = FALSE, warning=FALSE}
+# pulling the data 
+text_data <- read_csv("historical_text_data.csv")
+
+# tokenizing the abstract data into words 
+abstract_data <- text_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words)
+
+# most frequent word count in abstracts 
+abstract_data %>%
+  count(word, sort = TRUE)
+```
+```{r wos abstract text analysis part 3, messages = FALSE, warning=FALSE, results = FALSE}
+# adding custom set of stopwords 
+my_stopwords <- tibble(word = c(as.character(1:9), 
+                                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+                                "rights", "reserved", "copyright", "elsevier"))
+abstract_data <- abstract_data %>% anti_join(my_stopwords); rm(my_stopwords)
+```
+
+## Text Networks of Diversity-Related Studies
+
+We were also interested in the terms that most commonly occured alongside diversity. We can do this by running pairwise counts across the abstracts and then using network analysis to map what those relationships look like. In the graph presented below, the nodes correspond to commonly occuring words in our abstract dataset with the strength of the lines between the nodes aligning with the frequency those words arise in the same abstract. 
+
+```{r co-occurence networks of diversity abstracts part 1, message = FALSE, warning = FALSE, fig.width=9.5}
+all_population_terms <- read_csv("population_terms.csv")
+all_population_terms <- paste(c("\\b(?i)(zxz", all_population_terms$term, "zxz)\\b"), collapse = "|")
+all_population_terms
+
+filtered_pairs <- abstract_data %>%
+  filter(str_detect(word, all_population_terms)) %>% 
+  pairwise_count(word, id, sort = TRUE, upper = FALSE) %>% 
+  filter(n >= 80)
+```
+
+Here is that massive list of population terms we mentioned above. Keep in mind that when we searched through our corpus, we ignored cases so don't mind the variation in capitalization here. 
+
+```{r co-occurence networks of diversity abstracts part 2, fig.width=9.5, fig.height=7}
+# network visualization of most frequent pairs 
+set.seed(1234)
+filtered_pairs %>%
+    filter(n >= 80) %>%   # may need to alter this number for a cutoff point 
+    graph_from_data_frame() %>%
+    ggraph(layout = "fr") +
+    geom_edge_link(aes(edge_alpha = n, edge_width = n), edge_colour = "cyan4") +
+    geom_node_point(size = 3) +
+    geom_node_text(aes(label = name), repel = TRUE, 
+                   point.padding = unit(0.2, "lines")) + theme_void()
+```
+
+This network is composed of nodes (corresponding to poppulation-specific words in our corpus) and ties (representing how many times they co-occur in the same abstracts of our dataset). As you can see in the graph, there is a core that forms with the most commonly occuring words in the corpus. Below, I have made the same network interactive using the networkD3 package. This allows you to hover over each node (or word) and see which other words it is connected to in the network. 
+
+```{r interactive co-occurence networks of diversity abstracts, fig.width=9.5, fig.height=7}
+links <- filtered_pairs %>% 
+  rename(from = item1, to = item2, weight = n)
+
+simpleNetwork(links,  fontSize = 20,  linkDistance = 200, 
+              opacity = 0.8, width = 12, fontFamily = "sans-serif", charge = -20, zoom = TRUE)
+```
+
+We can also use an algorithm that breaks networks into neighborhoods of words that share the most frequeny co-occurrences. Here, the same network is visualized, but this time the colors correspond to different clusters (measured using the modularity function in igraph). This helps see the clustering of words in the network after the less frequent words are filtered out (i.e. those occurring less than 80 times).
+
+```{r interactive co-occurence networks of diversity abstracts with modularity, fig.width=9.5, fig.height=7}
+word_graph <- graph.data.frame(links, directed = FALSE)
+wc <- cluster_walktrap(word_graph)
+members <- membership(wc)
+words_d3 <- igraph_to_networkD3(word_graph, group = members, what = "both")
+
+forceNetwork(Links = words_d3$links, Nodes = words_d3$nodes, 
+             Source = 'source', Target = 'target', NodeID = 'name', Group = 'group',
+             fontSize = 25,  linkDistance = 100, opacity = 0.8, 
+             fontFamily = "sans-serif", charge = -15, zoom = TRUE)
+```
