@@ -1,0 +1,431 @@
+---
+title: "The Growth of Diversity in Scientific Abstracts"
+author: "Brandon L. Kramer (UVA, Biocomplexity Institute) & Catherine Lee (Rutgers, Sociology)"
+output: html_document 
+---
+
+## Project Overview
+
+Over the course of the 25 years, there have been persistent calls from both governmental and scientific circles to include more diverse populations in biomedical research (Epstein 2008). Among the many initatives that have been put in place since, the National Institute of Health (NIH) spearheaded this process mandating that all federally funded clinical research work to include women and racial/ethinic minorities in their research, citing concerns over population-specific diseases and potential side-effects that may only impact certain groups (Oh et al. 2015). In this project, we are interested in researching how this policy and other inclusion-based initiatives have contributed to the growth of diversity-related terminiology in biomedical research. To do this, we will be using techniques from computational text analysis to outline the emergence of diversity and how it varies by some common bibliometric co-variates. 
+
+## Data Overview
+
+In our analyses below, we are examining the growth of in the use of the term "diversity". To do this, we drew from the MEDLINE database in Web of Science, using the search terms ["TS=(diversity)" from 1990-2017 for human research only](https://docs.google.com/spreadsheets/d/1RNpPAyowuDfA5p8Sx7nEIw1a7Z8VWFoMFc3WPQ0QELw/edit#gid=933487936). This search provided 71,528 total results, which we extracted using the bibliometrix package in R (Aria and Cuccurillo 2017). Next, we converted the abstracts of these articles to a text corpus and then used tidytext - a package designed for computational text analysis in R - to analyze patterns with the abstracts of these data (Silge and Robinson 2016). Below is the R Markdown file and replication code for these analyses.
+
+```{r setup, include = FALSE}
+rm(list = ls())
+knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+```
+
+## Examining Growth of Published Studies 
+
+In this first chunk, we load our data and examine the overall growth of articles from our search query. As we can see, there is a pretty sizable growth in scientific literature that uses the term diversity - from about 500 times in 1990 to over 5000 in 2017.  
+
+```{r load packages, message = FALSE, results = FALSE}
+# loading packages 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+# loading the .csv file 
+text_data <- read_csv("historical_text_data.csv") %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+```
+```{r wos study growth, fig.width=9.5}
+# checking to see how the overall data looks 
+pubs_by_year <- text_data %>% 
+  group_by(year) %>% count(year, sort = TRUE) %>% ungroup() %>% 
+  ggplot() + geom_line(aes(y = n, x = year), stat="identity") + 
+  labs(title = "Figure 1. Growth in Diversity-Related Publications from 1990-2017",
+       caption = "Data Source: Web of Science") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank()); ggplotly()
+```
+
+## Word Frequencies Over Time
+
+Next, we want to look at word frequencies by year in the literature. This chunk of code breaks down how common words occur in the abstracts of our dataset. Note that we also remove some frequently occurring words that are not really relevant to our dataset, but these do not systematically alter our results. 
+
+```{r wos abstract text analysis, messages = FALSE, warning=FALSE}
+# tokenizing the abstract data into words 
+abstract_data <- text_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words)
+# adding custom set of stopwords 
+my_stopwords <- tibble(word = c(as.character(1:14), 
+                                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+                                "rights", "reserved", "copyright", "elsevier"))
+abstract_data <- abstract_data %>% anti_join(my_stopwords); rm(my_stopwords)
+# most frequent word count in abstracts 
+abstract_data %>%
+  count(word, sort = TRUE)
+```
+
+```{r wos abstract text analysis part 4, messages = FALSE, warning=FALSE}
+# looking at word frequencies by year 
+abstract_data %>%
+  group_by(year) %>% 
+  count(word, sort = TRUE) %>% ungroup()
+```
+
+## Growth in General Population Terms Over Time
+
+Now, we want to look at how the most relevant words vary over time. We chose to include words like diversity and its various sub-types (i.e. genetic, cultural, and population) as well as racially-specific and ethnically-specific terms. As the graph shows, the rise of diversity does not necessarily mean that researchers focus on race or ethnicity. This could mean that diversity is being used as a catch-all in the scientific literature (i.e. that the multiplicity of the term makes it mean anything and everything) or that diversity is most used in fields like immunology or oncology. We will explore that hypothesis a bit more below. 
+
+```{r graphing the growth of diversity part 1, fig.width=9.5}
+# recoding race*, ethnicity* and cultural* terminology
+general_pop_terms <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
+                       yes = "racial*", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "ethnic*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
+                       yes = "cultural*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern =
+  "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
+                       yes = "ancestry*", no = term)) %>% 
+# grouping by year and filter relevant population terms 
+  group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
+  filter(term == "diversity" | term == "cultural*" | term == "genetic" | term == "population*" | 
+           term == "racial*" | term == "ethnic*" | term == "ancestry*") %>% 
+# graphing terms over time 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
+  labs(title = "Figure 2. Growth in General Diversity-Related Terms (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+## Growth in US-Specific Population Terms Over Time
+
+Now we want to look at all [US-specific population terminology](https://www.census.gov/topics/population/race/about.html). This is not much different than what we have already done except for the small technical problem of tidytext separating hyphenated words in our original analysis (e.g. African-Americans). While the package quanteda has an option to unnest tokens while ignoring hyphenated words, quanteda takes a lot of RAM and ushers in other potential methodological inconsistencies. Instead, we are going to create bigrams of key US-specific terms in [tidytext](https://www.tidytextmining.com/ngrams.html) and then add them back into our larger dataset for trend anaylsis. 
+
+```{r examining top diversity related words over time, fig.width=9.5}
+# first we need to recode variations of us-specific words (an alternative to stemming) 
+us_pop_counts <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word,
+                       pattern = "\\b(?i)(caucasian|caucasians)\\b"), yes = "caucasian", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(americans)\\b"), yes = "american", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(hispanics)\\b"), yes = "hispanic", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(indians)\\b"), yes = "indian", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(islanders)\\b"), yes = "islander", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(alaska|alaskans)\\b"), yes = "alaskan", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(hawaii|hawaiians)\\b"), yes = "hawaiian", no = term)) %>%
+  select(-word) %>% rename(word = term) %>% 
+# create a bigram of us-specific words 
+  unnest_tokens(bigram, word, token = "ngrams", n = 2) %>% 
+  separate(bigram, c("word1", "word2"), sep = " ") %>%          
+  filter(!word1 %in% stop_words$word) %>%
+  filter(!word2 %in% stop_words$word) %>% 
+# unite the birgrams together with a hyphen
+  unite(word, word1, word2, sep = "-") %>% 
+  filter(word == "african-american" | word == "mexican-american" |
+         word == "american-indian" | word == "native-american" | 
+         word == "alaskan-native" | word == "native-hawaiian" | 
+         word == "pacific-islander" | word == "racial*" | word == "ethnic*" ) %>% 
+  count(word, year, sort = TRUE) 
+# combining the hyphenated words to our full dataset 
+us_pop_counts <- abstract_data %>% 
+  group_by(year) %>% count(word, sort = TRUE) %>% ungroup() %>% 
+  select(word, year, n) %>% bind_rows(us_pop_counts) 
+# graphing us-specific terms over time 
+us_pop_terms <- us_pop_counts %>% 
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word,
+                       pattern = "\\b(?i)(black|blacks|african-american)\\b"), 
+                       yes = "black*", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(white|caucasian-american)\\b"), 
+                       yes = "white*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(hispanic|mexican-american)\\b"), 
+                       yes = "hispanic*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(native-american|american-indian|alaskan-native)\\b"), 
+                       yes = "native-american*", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(pacific-islander|native-hawaiian)\\b"), 
+                       yes = "pacific-islander*", no = term)) %>%   
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
+                       yes = "racial*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "ethnic*", no = term)) %>% 
+  filter(term == "black*" | term == "white*" | term == "hispanic*" | 
+         term == "native-american*" | term == "pacific-islander*" | 
+         term == "diversity" | term == "racial*" | term == "ethnic*") %>%  
+  group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
+  labs(title = "Figure 3. Growth in US-Specific Diversity-Related Terms (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+To make this graph, we recoded all hyphenated words that we consider US-specific population terms, including African-American, Mexican-American, American-Indian, Native American, Alaskan Indian, and Pacific Islander. We recoded these variations into the five main racial/ethnic categories used on the US Census (White, Black, Hispanic, Native American, and Pacific Islander) and included them alongside all the variations of race and ethnicity. We also included our baseline term diversity to help compare the growth of US-specific terms to our other analyses. As we can see here, there is not a ton of growth in US-specific diversity-related terminology over time. For those of you who thought that the growth of diversity is largely related to an increased proclivity for scientists to study race/ethnicity in accordance with a US-specific research program, this graph essentially shows that this does hypothesis can be rejected. 
+
+## Examining the Multiplicity of Population Terminology
+
+While that graph was quite informative, we do not see much variation in how race/ethinicity vary over time in comparison with terms like diversity. One possibility is that variation in population terms is "diluted" by both the multiplicity of population terminology and the ambiguity of how those terms are used (M'Charek 2013; Panofsky and Bliss 2017). Thus, the next logical step is to collapse all possible population terms into one category and graph that over time. Both Lee (2009) and Kramer (2019) as well as others (e.g. Panofsky and Bliss 2017) have found that biomedical researchers continue to use population-specific terminology to reinforce the notion of population differences in various biological markers. Below, we have collapsed several population-specific terms into one category based. [This list of terms](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=0) which were developed out of Kramer's (2019) dissertation work. 
+
+```{r collapsing population specific terms part 1, message = FALSE, results = FALSE, warning = FALSE}
+# pulling our list of population
+all_pop_terms <- read_csv("population_terms.csv") 
+all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
+```
+
+While we won't claim that this is an exhaustive list of all the population terms that exist in the world, it is a fairly comprehensive list of over 2,100 terms (also see below in text networks section). Let's take a look how much the use of all these population-specific terms grew over time.
+
+```{r collapsing population specific terms part 2, fig.width=9.5}
+all_pop_terms_graph <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population*", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = all_pop_terms), 
+                       yes = "all population terms", no = term)) %>% 
+  group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
+  filter(term == "diversity" | term == "genetic" | 
+         term == "population*" | term == "all population terms") %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
+  labs(title = "Figure 4. Growth in Collapsed Diversity-Related Terminology (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+Interesting! After we collapsed all of the population terms together into one category, we see a dramatic growth that goes well beyond even the term "diversity" that was so high to start. This give some support to the notion that multiplicty and ambiguity could be mechanisms that drive the growth of diversity-related terms. More specifically, following M'Charek (2013), we are arguing that race is a multiplicity; it is a discourse that can link to *various* material referrents depending on the context it is embedded within. The definition of race can be dependent on the technologies or researchers that are enacting the concept to carry out specific ends. Because of its multiplicitous nature, race also becomes ambiguous and uncertain. Race can be many things, which obscures the precision of any specific claims that can be made about it. Panofsky and Bliss (2017) find that population terms grow in use over time in the context of biomedical studies, but there use is often quite imprecise. The authors argue that this ambiguity seems to reinforce authority in some scientific communities. Building on that work, we do see evidence that variability in population terms at multiple levels does increase over time. 
+
+Now, let's see what the growth of all these population terms when we break them into general, national, continential, and ethnic-specific variations over time. Here, general refers to terms like race, ethnicity, and other terms related broadly to racial terms. National and continental terms are self-explanatory. Ethnic-specific terms refers to all possible ethnic terms we could find in the course of generating these terms. That said, we still have some work to do on refining these various terms before publication.
+
+```{r breaking apart those population specific terms part 1, message = FALSE, warning = FALSE}
+# pulling in concatenated population terms from our dataset 
+general_pop_terms <- read_csv("population_terms.csv") %>% 
+  filter(sub_category == "population_general")
+us_specific_terms <- read_csv("population_terms.csv") %>% 
+  filter(sub_category == "us_specific")
+continental_terms <- read_csv("population_terms.csv") %>% 
+  filter(category == "continental" | category == "subcontinental")
+ling_religious_terms <- read_csv("population_terms.csv") %>% 
+  filter(category == "linguistic_religious")
+national_terms <- read_csv("population_terms.csv") %>% 
+  filter(category == "national")
+south_american_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "south_america")
+african_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "africa")
+north_american_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "north_america")
+european_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "europe")
+asian_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "asia")
+all_ethnic_groups <- read_csv("population_terms.csv") %>% 
+  filter(category == "south_america" | category == "africa" | category == "asia" | 
+         category == "north_america" | category == "europe")
+# creating detection string patterns for all the categories
+general_pop_terms <- paste(c("\\b(?i)(zxz", 
+                     general_pop_terms$term, "zxz)\\b"), collapse = "|")
+us_specific_terms <- paste(c("\\b(?i)(zxz", 
+                     us_specific_terms$term, "zxz)\\b"), collapse = "|")
+continental_terms <- paste(c("\\b(?i)(zxz", 
+                     continental_terms$term, "zxz)\\b"), collapse = "|")
+ling_religious_terms <- paste(c("\\b(?i)(zxz", 
+                     ling_religious_terms$term, "zxz)\\b"), collapse = "|")
+national_terms <- paste(c("\\b(?i)(zxz", 
+                     national_terms$term, "zxz)\\b"), collapse = "|")
+south_american_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     south_american_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+african_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     african_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+north_american_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     north_american_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+european_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     european_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+asian_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     asian_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+all_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     all_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+```
+
+```{r breaking apart those population specific terms part 2, fig.width=9.5}
+# graphing the population terms into various categories 
+pop_terms_bycats <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = general_pop_terms), 
+                       yes = "general population terms", no = word)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = us_specific_terms), 
+                       yes = "us-specific terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = continental_terms), 
+                       yes = "continental terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = ling_religious_terms), 
+                       yes = "linguistic & religious terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = national_terms), 
+                       yes = "national terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = south_american_ethnic_groups), 
+                       yes = "south american ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = african_ethnic_groups), 
+                       yes = "african ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = north_american_ethnic_groups), 
+                       yes = "north american ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = european_ethnic_groups), 
+                       yes = "european ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = asian_ethnic_groups), 
+                       yes = "asian ethnic groups", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population*", no = term)) %>% 
+  group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
+  filter(term == "diversity" | term == "population*" | 
+         term == "general population terms" | term == "us-specific terms" |
+         term == "continental terms" | term == "linguistic & religious terms" | 
+         term == "national terms" | term == "south american ethnic groups" | 
+         term == "african ethnic groups" | term == "north american ethnic groups" | 
+         term == "european ethnic groups" | term == "asian ethnic groups" ) %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
+  labs(title = "Figure 5. Growth in Diversity-Related Terminology by Category (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+As we can see here, the majority of growth in population-specific terms is because of an increased proclivity to mention nationalities (e.g. Italian, Japanese, Canadian, etc.), continental terms (e.g. Africa, Asia, Europe, or North and South America), and general population terms (e.g. race, ethnicity, Caucasian, African, Asian, etc.). Relative to these other general terms, we do not really see much growth in ethnic groups in any given continent or when we lump all of the different ethnic groups into one category. 
+
+## Examining Diversity Across Different Geographies
+
+The next step is to look at how the concept of "diversity" is used across the world. As the graph below demonstrates, the rise of "diversity" seems mostly to grow in the context of predominantly White, Westernized countries like US, England, the Netherlands, Germany and Switzerland. 
+
+```{r breaking down annual growth of diversity by country, fig.width=9.5}
+# standardizing all countries  
+pop_terms_bycountry <- abstract_data %>% 
+  separate(country, into = c("country", "void"), 
+           sep = "[(]", extra = "drop", fill = "right") %>%     
+  mutate(country = stri_trim_both(country)) %>%   
+  mutate(country = tolower(country)) %>%
+  group_by(year) %>% 
+  count(word, country, sort = TRUE) %>% ungroup() %>% 
+  filter(word == "diversity") %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = country), stat="identity") +
+  labs(title = "Figure 6. Growth in Diversity-Related Terminology by Country (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+## Examining Diversity Across Different Academic Disciplines 
+
+Lastly, we wanted to look more into the growth of diversity related terms by scientific subject matter. This snippet of code breaks down the number of words occuring in abstracts over time, which is then broken down by MEDLINE's and Web of Science's subject categories. I have opted to only include 12 of the 150 different categories that could have been graphed here. Overall, we see that the rise of diversity in genetics & heredity, biochemistry & molecular biology, microbiology, immunology, and infectious disease research. We do not see this same rise in the social sciences, though there admittedly is some overall growth in that domain. 
+
+```{r breaking down annual growth of diversity by subject, message = FALSE, warning = FALSE, fig.width=9.5}
+# standardizing all subjects  
+pop_terms_bysubject <- abstract_data %>% 
+  separate(subject, into = paste("subject", 1:15, sep = "_"), sep = ";") %>%
+  gather(value, subject, subject_1:subject_15, na.rm = TRUE) %>% select(-value) %>% 
+  separate(subject, into = c("subject", "void"), sep = "[(]") %>% select(-void) %>% 
+  mutate(subject = stri_trim_both(subject)) %>% 
+  mutate(subject = tolower(subject)) %>% 
+  select(subject, word, year) %>%
+  group_by(year) %>% 
+  count(word, subject, sort = TRUE) %>% ungroup() %>%     
+  filter(word == "diversity") %>% 
+  filter(subject == "genetics & heredity" | subject == "biochemistry & molecular biology" | 
+         subject == "microbiology" | subject == "infectious diseases" | subject == "immunology" | 
+         subject == "pharmacology & pharmacy" | subject == "behavioral sciences" |
+         subject == "health care sciences & services" | subject == "neurosciences & neurology" |
+         subject == "psychology" | subject == "sociology" | 
+         subject == "oncology" | subject == "business & economics" ) %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = subject), stat="identity") +
+  labs(title = "Growth in Diversity-Related Terminology by Select Subject (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+Instead of selecting particular subjects, we also wanted to know what would happen if we just collapsed the categories into three buckets: (1) genetics & heredity (i.e. evolution, plant and animal sciences), (2) biomedical studies, and (3) the social and behavioral sciences. As a general side note, when one of the original categories did not fit into these three recoded categories (e.g. mathematics or computer science), they were just recoded as "other" and ignored in our final analysis. For a full list of how the original 134 categories were recoded, [you can visit this link](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=849010328). 
+
+```{r breaking down annual growth of diversity by recoded subject part 1, message = FALSE, warning = FALSE, fig.width=9.5}
+# loading the recoded subject data 
+genetics_heredity <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "genetics_heredity")
+biomedical_studies <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "biomedical_studies")
+social_behavioral <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "social_behavioral")
+other_studies <- read_csv("subject_categories.csv") %>% filter(collapsed_subject == "other")
+# recoding the data 
+genetics_heredity <- paste(c("\\b(?i)(zxz", genetics_heredity$original_subject, "zxz)\\b"), collapse = "|")
+biomedical_studies <- paste(c("\\b(?i)(zxz", biomedical_studies$original_subject, "zxz)\\b"), collapse = "|")
+social_behavioral <- paste(c("\\b(?i)(zxz", social_behavioral$original_subject, "zxz)\\b"), collapse = "|")
+other_studies <- paste(c("\\b(?i)(zxz", other_studies$original_subject, "zxz)\\b"), collapse = "|")
+```
+
+```{r breaking down annual growth of diversity by recoded subject part 2, fig.width=9.5, warning=FALSE}
+# breaking apart existing categories 
+pop_terms_sbjrc <- text_data %>% 
+  separate(subject, into = paste("subject", 1:15, sep = "_"), 
+           sep = ";", extra = "drop", fill = "right") %>% 
+  gather(value, subject, subject_1:subject_15, na.rm = TRUE) %>% select(-value) %>% 
+  separate(subject, into = c("subject", "void"), 
+           sep = "[(]", extra = "drop", fill = "right") %>% select(-void) %>% 
+  mutate(subject = stri_trim_both(subject)) %>% 
+  mutate(subject = tolower(subject)) 
+# recoding the subject categories and graphing changes over time 
+pop_terms_sbjrc <- pop_terms_sbjrc %>% 
+  mutate(category = ifelse(test = str_detect(string = pop_terms_sbjrc$subject, 
+                           pattern = genetics_heredity), 
+                           yes = "genetics & heredity", no = "")) %>% 
+  mutate(category = ifelse(test = str_detect(string = pop_terms_sbjrc$subject, 
+                           pattern = biomedical_studies), 
+                           yes = "biomedical studies", no = category)) %>% 
+  mutate(category = ifelse(test = str_detect(string = pop_terms_sbjrc$subject, 
+                           pattern = social_behavioral), 
+                           yes = "social & behavioral sciences", no = category)) %>%
+  mutate(category = ifelse(test = str_detect(string = pop_terms_sbjrc$subject, 
+                           pattern = other_studies), 
+                           yes = "other subjects", no = category)) %>%  
+  unnest_tokens(word, abstract) %>% anti_join(stop_words) %>% 
+  group_by(year) %>% 
+  count(word, category, sort = TRUE) %>% ungroup() %>% 
+  filter(word == "diversity") %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = category), mstat="identity") +
+  labs(title = "Growth in Diversity-Related Terminology by Collapsed Category (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+Perhaps this is just a by-product of more categories being biomedically-related, but this analysis clearly shows that diversity seems to be growing faster in biomedical studies than in the social & behavioral sciences and genetics & heredity-related studies. Now that we have a good handle on the trends in raw counts, we can reconfigure all of our graphs to detect how often these terms [arise across articles in terms of percentages](https://brandonleekramer.github.io/diversity/text-analysis-percentages.html).
+
+## Conclusion 
+
+Overall, this document shows a rise in the use of "diversity" across scientific research. We see a 10-fold increase across the 1990s and 2000's, which mostly occurs in research deriving from Westernized biomedical scientific contexts. Our future analyses will examine more what implications this has for the use of diversity in and outside of that domain. 
+
+## References 
+
+Aria, M., & Cuccurullo, C. (2017). bibliometrix: An R-tool for comprehensive science mapping analysis. *Journal of Informetrics*, 11(4), 959-975.
+
+Epstein, S. (2008). *Inclusion: The Politics of Difference in Medical Research.* University of Chicago Press.
+
+Kramer, B. L. (2019). *Molecularization at the Intersections: Testosterone, Prostate Cancer and the Construction of Racial Difference.* Doctoral dissertation, Rutgers University-School of Graduate Studies.
+
+Lee, C. (2009). “Race” and “ethnicity” in biomedical research: how do scientists construct and explain differences in health?. *Social Science & Medicine*, 68(6), 1183-1190.
+
+M'charek, A. (2013). Beyond fact or fiction: On the materiality of race in practice. *Cultural Anthropology*, 28(3), 420-442.
+
+Oh, S. S., Galanter, J., Thakur, N., Pino-Yanes, M., Barcelo, N. E., White, M. J., et al. (2015). Diversity in clinical and biomedical research: A promise yet to be fulfilled. *PLoS Medicine*, 12(12), e1001918.
+
+Panofsky, A., & Bliss, C. (2017). Ambiguity and scientific authority: population classification in genomic science. *American Sociological Review*, 82(1), 59-87.
+
+Silge, J., & Robinson, D. (2016). tidytext: Text Mining and Analysis Using Tidy Data Principles in R. *Journal of Open Source Software*, 1(3), 37.
+
+

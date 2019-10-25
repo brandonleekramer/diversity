@@ -1,0 +1,43 @@
+---
+title: "Untitled"
+author: "Brandon L. Kramer"
+date: "10/25/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r graphing the growth of diversity part ___, fig.width=9.5}
+# recoding race*, ethnicity* and cultural* terminology
+general_pop_terms <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
+                       yes = "racial*", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "ethnic*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
+                       yes = "cultural*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern =
+  "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
+                       yes = "ancestry*", no = term)) %>% 
+  
+# grouping by year and filter relevant population terms 
+  group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
+  filter(term == "diversity" | term == "cultural*" | term == "genetic" | term == "population*" | 
+           term == "racial*" | term == "ethnic*" | term == "ancestry*") %>% 
+# graphing terms over time 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
+  labs(title = "Figure 2. Growth in General Diversity-Related Terms (1990-2017)") + 
+  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
+        legend.title = element_blank()); ggplotly()
+```
+
+
