@@ -315,7 +315,8 @@ The next step is to look at how the concept of "diversity" is used across the wo
 ```{r breaking down annual growth of diversity by country, fig.width=9.5}
 # standardizing all countries  
 pop_terms_bycountry <- abstract_data %>% 
-  separate(country, into = c("country", "void"), sep = "[(]") %>% select(-void) %>% 
+  separate(country, into = c("country", "void"), 
+           sep = "[(]", extra = "drop", fill = "right") %>%     
   mutate(country = stri_trim_both(country)) %>%   
   mutate(country = tolower(country)) %>%
   group_by(year) %>% 
@@ -339,6 +340,7 @@ pop_terms_bysubject <- abstract_data %>%
   separate(subject, into = c("subject", "void"), sep = "[(]") %>% select(-void) %>% 
   mutate(subject = stri_trim_both(subject)) %>% 
   mutate(subject = tolower(subject)) %>% 
+  select(subject, word, year) %>%
   group_by(year) %>% 
   count(word, subject, sort = TRUE) %>% ungroup() %>%     
   filter(word == "diversity") %>% 
@@ -370,31 +372,72 @@ other_studies <- paste(c("\\b(?i)(zxz", other_studies$original_subject, "zxz)\\b
 ```
 
 ```{r breaking down annual growth of diversity by recoded subject part 2, fig.width=9.5}
-reduced_pop_terms_bysubject <- abstract_data %>% 
-  select(subject, word, year) %>%
+pop_terms_byrcsubj <- abstract_data %>% 
   separate(subject, into = paste("subject", 1:15, sep = "_"), sep = ";") %>%
   gather(value, subject, subject_1:subject_15, na.rm = TRUE) %>% select(-value) %>% 
-  separate(subject, into = c("subject", "void"), sep = "[(]") %>% select(-void) %>% 
+  separate(subject, into = c("subject", "void"), 
+           sep = "[(]", extra = "drop", fill = "right") %>% 
   mutate(subject = stri_trim_both(subject)) %>% 
   mutate(subject = tolower(subject)) %>% 
-  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, 
+  select(subject, word, year) 
+
+pop_terms_byrcsubj %> %
+  mutate(recoded_subject = ifelse(test = str_detect(string = abstract_data$subject, 
                                   pattern = genetics_heredity), 
                                   yes = "genetics & heredity", no = subject)) %>%
-  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, 
+  mutate(recoded_subject = ifelse(test = str_detect(string = abstract_data$subject, 
                                   pattern = biomedical_studies), 
                                   yes = "biomedical studies", no = recoded_subject)) %>%
-  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject,
+  mutate(recoded_subject = ifelse(test = str_detect(string = abstract_data$subject,
                                   pattern = social_behavioral), 
                                   yes = "social & behavioral sciences", no = recoded_subject)) %>% 
-  mutate(recoded_subject = ifelse(test = str_detect(string = subject_data$subject, 
+  mutate(recoded_subject = ifelse(test = str_detect(string = abstract_data$subject, 
                                   pattern = other_studies), 
-                                  yes = "other subjects", no = recoded_subject)) %>% 
+                                  yes = "other subjects", no = recoded_subject)) %>%   
   group_by(year) %>% count(word, recoded_subject, sort = TRUE) %>% ungroup() %>% 
   filter(word == "diversity") %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = recoded_subject), mstat="identity") +
   labs(title = "Growth in Diversity-Related Terminology (From 1990-2017), By Subject") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
+```
+
+```{r}
+mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = general_pop_terms), 
+                               yes = "general population terms", no = word)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = us_specific_terms), 
+                               yes = "us-specific terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = continental_terms), 
+                               yes = "continental terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = ling_religious_terms), 
+                               yes = "linguistic & religious terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = national_terms), 
+                               yes = "national terms", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = south_american_ethnic_groups), 
+                               yes = "south american ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = african_ethnic_groups), 
+                               yes = "african ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = north_american_ethnic_groups), 
+                               yes = "north american ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = european_ethnic_groups), 
+                               yes = "european ethnic groups", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                               pattern = asian_ethnic_groups), 
+                               yes = "asian ethnic groups", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population*", no = term)) %>%
+
+
 ```
 
 Perhaps this is just a by-product of more categories being biomedically-related, but this analysis clearly shows that diversity seems to be growing faster in biomedical studies than in the social & behavioral sciences and genetics & heredity-related studies. 
