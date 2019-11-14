@@ -1615,6 +1615,9 @@ summary {
 <div id="appendices" class="section level3">
 <h3>Appendices</h3>
 <p><strong>Appendix 1.</strong> Here is a full list of all the blue nodes from the community detection algorithm.</p>
+<pre class="r"><code>nodeList %&gt;% 
+  filter(cluster == &quot;1&quot;) %&gt;%
+  rename(term = nName) %&gt;% select(-ID)</code></pre>
 <pre><code>##          term nodeDegree nodeBetweenness cluster
 ## 1     african       8700       108.41121       1
 ## 2      ethnic       8700       183.17757       1
@@ -1633,6 +1636,9 @@ summary {
 ## 15  caucasian       1200         0.00000       1
 ## 16     latino        900         0.00000       1</code></pre>
 <p><strong>Appendix 2.</strong> Here is a full list of all the green nodes from the community detection algorithm.</p>
+<pre class="r"><code>nodeList %&gt;% 
+  filter(cluster == &quot;3&quot;) %&gt;%
+  rename(term = nName) %&gt;% select(-ID)</code></pre>
 <pre><code>##        term nodeDegree nodeBetweenness cluster
 ## 1    africa       5700       11.214953       3
 ## 2    europe       4800       97.196262       3
@@ -1651,6 +1657,9 @@ summary {
 ## 15   indian       3300       54.205607       3
 ## 16  eastern       3900        3.738318       3</code></pre>
 <p><strong>Appendix 3.</strong> Here is a full list of all the deep red nodes from the community detection algorithm.</p>
+<pre class="r"><code>nodeList %&gt;% 
+  filter(cluster != &quot;1&quot; &amp; cluster != &quot;3&quot;) %&gt;%
+  rename(term = nName) %&gt;% select(-ID)</code></pre>
 <pre><code>##          term nodeDegree nodeBetweenness cluster
 ## 1     chinese       1800       82.242991       2
 ## 2   brazilian        300        0.000000       6
@@ -1671,6 +1680,7 @@ summary {
 ## 17      spain        300        0.000000      15
 ## 18   islander        300        0.000000      16</code></pre>
 <p><strong>Appendix 4.</strong> Correlation Calculation for Degree and Betweenness Centrality</p>
+<pre class="r"><code>cor(nodeList$nodeDegree, nodeList$nodeBetweenness)</code></pre>
 <pre><code>## [1] 0.618682</code></pre>
 </div>
 

@@ -25,7 +25,7 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph",
 text_data <- read_csv("historical_text_data.csv") %>% filter(year != "2018")
 ```
 
-```{r abstract text analysis, messages = FALSE, warning=FALSE, echo=FALSE}
+```{r abstract text analysis, messages = FALSE, results=FALSE, warning=FALSE, echo=FALSE}
 # tokenizing the abstract data into words 
 abstract_data <- text_data %>% 
   unnest_tokens(word, abstract) %>% 
@@ -218,7 +218,7 @@ Silge, J., & Robinson, D. (2016). tidytext: Text Mining and Analysis Using Tidy 
 
 **Appendix 1.** Here is a full list of all the blue nodes from the community detection algorithm.
 
-```{r appendix 1, rows.print=25, fig.width=9.5, echo=FALSE}
+```{r appendix 1, rows.print=25, fig.width=9.5}
 nodeList %>% 
   filter(cluster == "1") %>%
   rename(term = nName) %>% select(-ID)
@@ -226,7 +226,7 @@ nodeList %>%
 
 **Appendix 2.** Here is a full list of all the green nodes from the community detection algorithm.
 
-```{r appendix 2, rows.print=25, fig.width=9.5, echo=FALSE}
+```{r appendix 2, rows.print=25, fig.width=9.5}
 nodeList %>% 
   filter(cluster == "3") %>%
   rename(term = nName) %>% select(-ID)
@@ -234,7 +234,7 @@ nodeList %>%
 
 **Appendix 3.** Here is a full list of all the deep red nodes from the community detection algorithm.
 
-```{r appendix 3, rows.print=50, fig.width=9.5, echo=FALSE}
+```{r appendix 3, rows.print=50, fig.width=9.5}
 nodeList %>% 
   filter(cluster != "1" & cluster != "3") %>%
   rename(term = nName) %>% select(-ID)
@@ -242,7 +242,7 @@ nodeList %>%
 
 **Appendix 4.** Correlation Calculation for Degree and Betweenness Centrality 
 
-```{r appendix 4, fig.width=9.5, echo=FALSE}
+```{r appendix 4, fig.width=9.5}
 cor(nodeList$nodeDegree, nodeList$nodeBetweenness)
 ```
 
