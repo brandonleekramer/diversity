@@ -14,10 +14,10 @@ In our analyses below, we are examining the growth of in the use of the term "di
 
 ```{r setup, include = FALSE}
 rm(list = ls())
-#knitr::opts_knit$set(root.dir = "~/Desktop/Diversity/Data")
-knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
-```{r load packages, results = FALSE, message = FALSE, results = FALSE}
+```{r load packages, results = FALSE, message = FALSE, results = FALSE, echo = FALSE}
 #loading packages
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", 
               "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
@@ -25,7 +25,7 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph",
 text_data <- read_csv("historical_text_data.csv") %>% filter(year != "2018")
 ```
 
-```{r abstract text analysis, messages = FALSE, warning=FALSE}
+```{r abstract text analysis, messages = FALSE, warning=FALSE, echo=FALSE}
 # tokenizing the abstract data into words 
 abstract_data <- text_data %>% 
   unnest_tokens(word, abstract) %>% 
@@ -41,7 +41,7 @@ abstract_data <- abstract_data %>% anti_join(my_stopwords); rm(my_stopwords)
 
 We were also interested in the terms that most commonly occured alongside diversity. We can do this by running pairwise counts across the abstracts and then using interactive network analysis to plot what those relationships look like. In the graph presented below, the nodes correspond to commonly occuring words in our abstract dataset with the strength of the lines between the nodes aligning with the frequency those words arise in the same abstract. 
 
-```{r co-occurence networks of diversity abstracts part 1, message = FALSE, warning = FALSE, results = FALSE, fig.width=9.5}
+```{r co-occurence networks of diversity abstracts part 1, message = FALSE, warning = FALSE, results = FALSE, fig.width=9.5, echo=FALSE}
 # pulling the population terms data
 all_population_terms <- read_csv("population_terms.csv")
 all_population_terms <- paste(c("\\b(?i)(zxz", all_population_terms$term, "zxz)\\b"), collapse = "|")
@@ -55,7 +55,7 @@ filtered_pairs <- abstract_data %>%
 
 Here is that massive list of population terms we mentioned above. Keep in mind that when we searched through our corpus, we ignored cases so don't mind the variation in capitalization here. 
 
-```{r co-occurence networks of diversity abstracts part 2, fig.width=9.5, fig.height=7}
+```{r co-occurence networks of diversity abstracts part 2, fig.width=9.5, fig.height=7, echo=FALSE}
 # network visualization of most frequent pairs 
 set.seed(1234)
 filtered_pairs %>%
@@ -70,7 +70,7 @@ filtered_pairs %>%
 
 This network is composed of nodes (corresponding to poppulation terms in our corpus) and ties (representing how many times they co-occur in the same abstracts of our dataset). As you can see in the graph, there is a core that forms with the most commonly occuring words in the corpus. Below, I have made the same network interactive using the networkD3 package. This allows you to hover over each node (or word) and see which other words it is connected to in the network. 
 
-```{r interactive co-occurence networks of diversity abstracts, fig.width=9.5, fig.height=7}
+```{r interactive co-occurence networks of diversity abstracts, fig.width=9.5, fig.height=7, echo=FALSE}
 edgeList <- filtered_pairs %>% 
   rename(word1 = item1, word2 = item2, weight = n)
 
@@ -97,7 +97,7 @@ In contrast to these continental and biogeographical terms, we also have specifi
 
 We can also use an algorithm that breaks networks into neighborhoods of words that share the most frequent co-occurrences. To do this, we need to use the forceNetwork function in networkD3, which takes a little work, but also helps us see the degree centrality, betweenness centrality and dice similarity of each term in the network. 
 
-```{r make network}
+```{r make network, echo=FALSE}
 # make a graph and remove duplicate edges/self-loops 
 g <- igraph::simplify(igraph::graph.data.frame(edgeList, directed=FALSE))
 # extract the nodelist 
@@ -133,7 +133,7 @@ nodeList <- cbind(nodeList, cluster=clusters$nodes$group)
 rm(betAll, betAll.norm, dsAll, F1, getNodeID, clusters)
 ```
 
-```{r visualizing degree centrality}
+```{r visualizing degree centrality, echo=FALSE}
 # creating a color palette for data types 
 my_colors <- 'd3.scaleOrdinal() .domain(["1", "2", "3", "4", "5", 
                                          "6", "7", "8", "9", "10",
@@ -166,7 +166,7 @@ The other big grouping (i.e. the nodes in **deep red**) correspond to specific n
 
 The next step is changing the size of the nodes to correspond to the betweenness centrality rather than the degree centrality (without changing any of the colors from our previous network). Degree centrality is essentially just the number of times that one term was mentioned with another term. Betweenness centrality, on the other hand, generally helps us detect nodes that serve as "bridges" connecting disparite nodes (or groups of nodes) in a network. More formally, betweenness centrality describes the frequencies of nodes in the shortest paths between indirectly connected nodes (Freeman 1977, 1978). While these measures are distinct, they do correlate pretty highly in our network (r = 0.62), so we should not expect to see major differences between most of the high ranking nodes. Let's take a look at this graph. 
 
-```{r visualizing betweenness centrality}
+```{r visualizing betweenness centrality, echo=FALSE}
 # creating a color palette for data types 
 my_colors <- 'd3.scaleOrdinal() .domain(["1", "2", "3", "4", "5", 
                                          "6", "7", "8", "9", "10",
@@ -187,7 +187,7 @@ networkD3::forceNetwork(Links = edgeList, Nodes = nodeList, Source = "word1ID", 
 
 When we look at this graph, we see some similar terms with large node sizes. For example, American and Asian are both still pretty large. Relatively speaking, however, African has diminished in size considerably (was at the center left and now at the right periphery). Some of these changes are easy to catch, but others are not. Thus, it might be wise to analyze the biggest differences in degree centrality to betweenness centrality (in terms of where they rank in our list of terms). Let's take a look at the terms with the biggest differences.
 
-```{r centrality differences, rows.print=50, fig.width=9.5}
+```{r centrality differences, rows.print=50, fig.width=9.5, echo=FALSE}
 nodeList %>% 
   mutate(nodeDegRank = round(rank(-nodeDegree))) %>% 
   mutate(nodeBetwRank = round(rank(-nodeBetweenness))) %>% 
@@ -218,7 +218,7 @@ Silge, J., & Robinson, D. (2016). tidytext: Text Mining and Analysis Using Tidy 
 
 **Appendix 1.** Here is a full list of all the blue nodes from the community detection algorithm.
 
-```{r appendix 1, rows.print=25, fig.width=9.5}
+```{r appendix 1, rows.print=25, fig.width=9.5, echo=FALSE}
 nodeList %>% 
   filter(cluster == "1") %>%
   rename(term = nName) %>% select(-ID)
@@ -226,7 +226,7 @@ nodeList %>%
 
 **Appendix 2.** Here is a full list of all the green nodes from the community detection algorithm.
 
-```{r appendix 2, rows.print=25, fig.width=9.5}
+```{r appendix 2, rows.print=25, fig.width=9.5, echo=FALSE}
 nodeList %>% 
   filter(cluster == "3") %>%
   rename(term = nName) %>% select(-ID)
@@ -234,7 +234,7 @@ nodeList %>%
 
 **Appendix 3.** Here is a full list of all the deep red nodes from the community detection algorithm.
 
-```{r appendix 3, rows.print=50, fig.width=9.5}
+```{r appendix 3, rows.print=50, fig.width=9.5, echo=FALSE}
 nodeList %>% 
   filter(cluster != "1" & cluster != "3") %>%
   rename(term = nName) %>% select(-ID)
@@ -242,7 +242,7 @@ nodeList %>%
 
 **Appendix 4.** Correlation Calculation for Degree and Betweenness Centrality 
 
-```{r appendix 4, fig.width=9.5}
+```{r appendix 4, fig.width=9.5, echo=FALSE}
 cor(nodeList$nodeDegree, nodeList$nodeBetweenness)
 ```
 
