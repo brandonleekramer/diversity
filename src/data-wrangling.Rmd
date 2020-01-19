@@ -1,0 +1,29 @@
+---
+title: "Data Wrangling"
+author: "Brandon L. Kramer"
+date: "1/18/2020"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+rm(list = ls())
+#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+```
+
+```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+# loading packages 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "bibliometrix",
+              "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+# loading the .csv file 
+
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/BiomedCorpus")
+#test <- readFiles("savedrecs (0).txt")
+files <- dir(pattern = "*.txt")
+files <- readFiles(files)
+raw_corpus <- convert2df(files, dbsource = "isi", format = "plaintext")
+setwd("C:/Users/bkram/CloudStation/Diversity/Data")
+write_csv(raw_corpus, "biomedical_corpus.csv")
+
+```
+

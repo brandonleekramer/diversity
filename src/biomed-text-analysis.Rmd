@@ -26,9 +26,15 @@ In this first chunk, we load our data and examine the overall growth of articles
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
-text_data <- read_csv("diversity_corpus.csv") %>% 
+
+text_data <- read_csv("biomedical_corpus.csv") %>% 
+  rowid_to_column(var = "id") %>% 
+  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
+         abstract = AB, references = CR, year = PY, times_cited = TC) %>% 
+  select(id, authors, title, year, publication, abstract, references, year, times_cited) %>% 
 # filtering 2018 articles because they seem to be incomplete 
   filter(year != "2018") 
+  
 ```
 ```{r wos study growth, fig.width=9.5, echo=FALSE}
 # checking to see how the overall data looks 
@@ -48,7 +54,8 @@ Next, we want to look at word frequencies by year in the literature. Note that w
 # tokenizing the abstract data into words 
 abstract_data <- text_data %>% 
   unnest_tokens(word, abstract) %>% 
-  anti_join(stop_words)
+  anti_join(stop_words) %>% 
+  drop_na(word)
 # adding custom set of stopwords 
 my_stopwords <- tibble(word = c(as.character(1:14), 
                                 "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
@@ -143,8 +150,9 @@ gen_pop_prc_counts <- text_data %>%
   ungroup() %>% 
   rename(total = n) 
 # articles with term mentioned each year 
-gen_pop_prc_counts <- general_pop_terms %>% filter(di_racial == 1) %>% 
-  group_by(year) %>% summarise(cnt_racial = n_distinct(id)) %>% 
+gen_pop_prc_counts <- general_pop_terms %>% 
+  filter(di_racial == 1) %>% group_by(year) %>% 
+  summarise(cnt_racial = n_distinct(id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>%  
   mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_ethnic == 1) %>% 
