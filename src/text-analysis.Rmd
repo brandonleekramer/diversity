@@ -73,29 +73,35 @@ Now that we have the basics out of the way, we want to look at how the most rele
 ```{r figure 2a, fig.width=9.5, echo=FALSE}
 # recoding race*, ethnicity* and cultural* terminology
 general_pop_terms <- abstract_data %>% 
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = "\\b(?i)(race|racial|racially)\\b"), 
+  #                     yes = "racial*", no = word)) %>% 
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+  #                     yes = "ethnic*", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
-                       yes = "racial*", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
-                       yes = "ethnic*", no = term)) %>% 
+                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "race/ethnicity", no = word)) %>% 
+  mutate(di_racial = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
-                       yes = "cultural*", no = term)) %>% 
+                       yes = "cultural", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population*", no = term)) %>% 
+                       yes = "population", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern =
   "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
-                       yes = "ancestry*", no = term)) %>% 
+                       yes = "ancestry", no = term)) %>% 
 # grouping by year and filter relevant population terms 
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
-  filter(term == "diversity" | term == "cultural*" | term == "genetic" | term == "population*" | 
-           term == "racial*" | term == "ethnic*" | term == "ancestry*") %>% 
+  filter(term == "diversity" | term == "cultural" | term == "genetic" |  
+           #term == "racial" | term == "ethnic" | 
+           term == "population" | term == "race/ethnicity" | term == "ancestry") %>% 
 # graphing terms over time 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
-  labs(title = "Figure 2A. Growth in General Diversity-Related Terms (1990-2017)") + 
+  labs(title = "Figure 2A. Total Growth in Diversity-Related Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
 ```
@@ -105,32 +111,37 @@ As the graph shows, the rise of diversity does not necessarily mean that researc
 ```{r figure 2b, fig.width=9.5, echo=FALSE}
 # recoding race*, ethnicity* and cultural* terminology
 general_pop_terms <- abstract_data %>% 
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = "\\b(?i)(race|racial|racially)\\b"), 
+  #                     yes = "racial*", no = word)) %>% 
+  #mutate(di_racial = ifelse(test = str_detect(string = term, 
+  #                     pattern = "\\b(racial*)\\b"), yes = 1, no = 0)) %>% 
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+  #                     yes = "ethnic*", no = term)) %>% 
+  #mutate(di_ethnic = ifelse(test = str_detect(string = term, 
+  #                     pattern = "\\b(ethnic*)\\b"), yes = 1, no = 0)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
-                       yes = "racial*", no = word)) %>% 
+                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "race/ethnicity", no = word)) %>% 
   mutate(di_racial = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(racial*)\\b"), yes = 1, no = 0)) %>% 
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
-                       yes = "ethnic*", no = term)) %>% 
-  mutate(di_ethnic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(ethnic*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
-                       yes = "cultural*", no = term)) %>% 
+                       yes = "cultural", no = term)) %>% 
   mutate(di_cultural = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(cultural*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(cultural)\\b"), yes = 1, no = 0)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population*", no = term)) %>% 
+                       yes = "population", no = term)) %>% 
   mutate(di_population = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(population*)\\b"), yes = 1, no = 0)) %>%
+                       pattern = "\\b(population)\\b"), yes = 1, no = 0)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern =
   "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
-                       yes = "ancestry*", no = term)) %>% 
+                       yes = "ancestry", no = term)) %>% 
   mutate(di_ancestry = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(ancestry*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(ancestry)\\b"), yes = 1, no = 0)) %>% 
   mutate(di_diversity = ifelse(test = str_detect(string = term, 
                        pattern = "diversity"), yes = 1, no = 0)) %>% 
   mutate(di_genetic = ifelse(test = str_detect(string = term, 
@@ -147,10 +158,10 @@ gen_pop_prc_counts <- general_pop_terms %>% filter(di_racial == 1) %>%
   group_by(year) %>% summarise(cnt_racial = n_distinct(id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>%  
   mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
-gen_pop_prc_counts <- general_pop_terms %>% filter(di_ethnic == 1) %>% 
-  group_by(year) %>% summarise(cnt_ethnic = n_distinct(id)) %>% 
-  right_join(gen_pop_prc_counts, by = "year") %>% 
-  mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
+#gen_pop_prc_counts <- general_pop_terms %>% filter(di_ethnic == 1) %>% 
+#  group_by(year) %>% summarise(cnt_ethnic = n_distinct(id)) %>% 
+#  right_join(gen_pop_prc_counts, by = "year") %>% 
+#  mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_cultural == 1) %>% 
   group_by(year) %>% summarise(cnt_cultural = n_distinct(id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
@@ -174,14 +185,13 @@ gen_pop_prc_counts <- general_pop_terms %>% filter(di_genetic == 1) %>%
 
 # graphing terms over time 
 gen_pop_prc_counts <- gen_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry*"), stat="identity") +
-  geom_line(aes(y = prc_cultural, x = year, colour = "cultural*"), stat="identity") +
+  geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), stat="identity") +
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), stat="identity") +
   geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), stat="identity") +
-  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnic*"), stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), stat="identity") +
   geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), stat="identity") +
-  geom_line(aes(y = prc_population, x = year, colour = "population*"), stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "racial*"), stat="identity") +
-  labs(title = "Figure 2B. Proportional Growth in General Diversity-Related Terms (1990-2017)") + 
+  geom_line(aes(y = prc_population, x = year, colour = "population"), stat="identity") +
+  labs(title = "Figure 2B. Proportional Growth in Diversity-Related Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly() 
 ```
@@ -222,41 +232,49 @@ us_pop_counts <- abstract_data %>%
   filter(word == "african-american" | word == "mexican-american" |
          word == "american-indian" | word == "native-american" | 
          word == "alaskan-native" | word == "native-hawaiian" | 
-         word == "pacific-islander" | word == "racial*" | word == "ethnic*" ) %>% 
+         word == "pacific-islander" ) %>% 
   count(word, year, sort = TRUE) 
 # combining the hyphenated words to our full dataset 
-us_pop_counts <- abstract_data %>% 
+us_pop_counts_pt1 <- abstract_data %>% 
   group_by(year) %>% count(word, sort = TRUE) %>% ungroup() %>% 
-  select(word, year, n) %>% bind_rows(us_pop_counts) 
+  select(word, year, n) %>% bind_rows(us_pop_counts) %>% 
+  arrange(-n)
+
 # graphing us-specific terms over time 
-us_pop_terms <- us_pop_counts %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word,
+us_pop_terms <- us_pop_counts_pt1 %>% 
+  mutate(term = ifelse(test = str_detect(string = word,
                        pattern = "\\b(?i)(black|blacks|african-american)\\b"), 
-                       yes = "black*", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       yes = "african-american/black", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(white|caucasian-american)\\b"), 
-                       yes = "white*", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(hispanic|mexican-american)\\b"), 
-                       yes = "hispanic*", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       yes = "caucasian/white", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(asian)\\b"), 
+                       yes = "asian", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(hispanic|mexican-american|latino|latina|latinx)\\b"), 
+                       yes = "hispanic/latinx", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(native-american|american-indian|alaskan-native)\\b"), 
-                       yes = "native-american*", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       yes = "native-american", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(pacific-islander|native-hawaiian)\\b"), 
-                       yes = "pacific-islander*", no = term)) %>%   
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       yes = "pacific-islander", no = term)) %>%   
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(race|racial|racially)\\b"), 
-                       yes = "racial*", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       yes = "race", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
-                       yes = "ethnic*", no = term)) %>% 
-  filter(term == "black*" | term == "white*" | term == "hispanic*" | 
-         term == "native-american*" | term == "pacific-islander*" | 
-         term == "diversity" | term == "racial*" | term == "ethnic*") %>%  
+                       yes = "ethnicity", no = term)) %>% 
+  #mutate(term = ifelse(test = str_detect(string = word, 
+  #                     pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+  #                     yes = "race/ethnicity", no = term)) %>%
+  filter(term == "african-american/black" | term == "caucasian/white" | term == "hispanic/latinx" | 
+         term == "native-american" | term == "pacific-islander" | term == "asian" |
+         term == "race" | term == "ethnicity" | term == "race/ethnicity") %>%  
   group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
-  labs(title = "Figure 3A. Growth in US-Specific Diversity-Related Terms (1990-2017)") + 
+  labs(title = "Figure 3A. Total Growth in US-Specific Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
 ```
@@ -264,6 +282,7 @@ us_pop_terms <- us_pop_counts %>%
 To make this graph of all US-specific terminology, we recoded all hyphenated words that we consider US-specific population terms, including African-American, Mexican-American, American-Indian, Native American, Alaskan Indian, and Pacific Islander. We recoded these variations into the five main racial/ethnic categories used on the US Census (White, Black, Hispanic, Native American, and Pacific Islander) and included them alongside all the variations of race and ethnicity. We also included our baseline term diversity to help compare the growth of US-specific terms to our other analyses. As we can see here, there is not a ton of growth in US-specific diversity-related terminology over time (at least in comparison with the term diversity). For those that the growth of diversity is largely related to an increased proclivity for scientists to study race/ethnicity in accordance with a US-specific research program, this graph essentially shows that this hypothesis is pretty weakly supported. 
 
 ```{r figure 3b, fig.width=9.5, echo=FALSE}
+
 # first we need to recode variations of us-specific words (an alternative to stemming) 
 us_pop_counts <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word,
@@ -301,39 +320,44 @@ us_pop_counts <- abstract_data %>%
 us_pop_counts <- us_pop_counts %>% 
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word,
                        pattern = "\\b(?i)(black|blacks|african-american)\\b"), 
-                       yes = "black*", no = word)) %>% 
+                       yes = "african-american/black", no = word)) %>% 
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
                        pattern = "\\b(?i)(white|caucasian-american)\\b"), 
-                       yes = "white*", no = term)) %>% 
+                       yes = "caucasian/white", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(hispanic|mexican-american)\\b"), 
-                       yes = "hispanic*", no = term)) %>% 
+                       pattern = "\\b(?i)(asian)\\b"), 
+                       yes = "asian", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+                       pattern = "\\b(?i)(hispanic|mexican-american|latino|latina|latinx)\\b"), 
+                       yes = "hispanic/latinx", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
                        pattern = "\\b(?i)(native-american|american-indian|alaskan-native)\\b"), 
-                       yes = "native-american*", no = term)) %>%
+                       yes = "native-american", no = term)) %>%
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
                        pattern = "\\b(?i)(pacific-islander|native-hawaiian)\\b"), 
-                       yes = "pacific-islander*", no = term)) %>%   
+                       yes = "pacific-islander", no = term)) %>%   
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
                        pattern = "\\b(?i)(race|racial|racially)\\b"), 
-                       yes = "racial*", no = term)) %>% 
+                       yes = "race", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
                        pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
-                       yes = "ethnic*", no = term)) %>% 
+                       yes = "ethnicity", no = term)) %>% 
   mutate(black = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(black*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(african-american/black)\\b"), yes = 1, no = 0)) %>% 
   mutate(white = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(white*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(caucasian/white)\\b"), yes = 1, no = 0)) %>%
+  mutate(asian = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
   mutate(hispanic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(hispanic*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(hispanic/latinx)\\b"), yes = 1, no = 0)) %>% 
   mutate(native_american = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(native-american*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(native-american)\\b"), yes = 1, no = 0)) %>% 
   mutate(pacific_islander = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(pacific-islander*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(pacific-islander)\\b"), yes = 1, no = 0)) %>% 
   mutate(racial = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(racial*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(race)\\b"), yes = 1, no = 0)) %>% 
   mutate(ethnic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(ethnic*)\\b"), yes = 1, no = 0))  
+                       pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) 
 
 # total articles each year 
 us_pop_prc_counts <- text_data %>% group_by(year) %>% 
@@ -347,6 +371,10 @@ us_pop_prc_counts <- us_pop_counts %>% filter(white == 1) %>%
   group_by(year) %>% summarise(cnt_white = n_distinct(id)) %>% 
   left_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_white = round(cnt_white / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% filter(asian == 1) %>% 
+  group_by(year) %>% summarise(cnt_asian = n_distinct(id)) %>% 
+  left_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_asian = round(cnt_asian / total * 100, digits = 2))
 us_pop_prc_counts <- us_pop_counts %>% filter(hispanic == 1) %>% 
   group_by(year) %>% summarise(cnt_hispanic = n_distinct(id)) %>% 
   right_join(us_pop_prc_counts, by = "year") %>% 
@@ -368,16 +396,18 @@ us_pop_prc_counts <- us_pop_counts %>% filter(ethnic == 1) %>%
   right_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
 
+
 # graphing terms over time 
-us_pop_prc_counts <- us_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_black, x = year, colour = "black*"), stat="identity") +
-  geom_line(aes(y = prc_white, x = year, colour = "white*"), stat="identity") +
-  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic*"), stat="identity") +
-  geom_line(aes(y = prc_native_american, x = year, colour = "native-american*"), stat="identity") +
-  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander*"), stat="identity") +
-  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnic*"), stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "racial*"), stat="identity") +
-  labs(title = "Figure 3B. Growth in US-Specific Diversity Terms, By Percentage (1990-2017)") + 
+us_pop_prc_counts_graph <- us_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_black, x = year, colour = "african-american/black"), stat="identity") +
+  geom_line(aes(y = prc_white, x = year, colour = "caucasian/white"), stat="identity") +
+  geom_line(aes(y = prc_asian, x = year, colour = "asian"), stat="identity") +
+  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"), stat="identity") +
+  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), stat="identity") +
+  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), stat="identity") +
+  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race"), stat="identity") +
+  labs(title = "Figure 3B. Proportional Growth in US-Specific Diversity Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly() 
 ```
@@ -396,17 +426,20 @@ all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse
 
 ```{r figure 4a, fig.width=9.5, echo=FALSE}
 all_pop_terms_graph <- abstract_data %>% 
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population*", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       yes = "population", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = all_pop_terms), 
                        yes = "all population terms", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "race/ethnicity", no = term)) %>% 
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
-  filter(term == "diversity" | term == "genetic" | 
-         term == "population*" | term == "all population terms") %>% 
+  filter(term == "diversity" | term == "race/ethnicity" | 
+         term == "population" | term == "all population terms") %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
-  labs(title = "Figure 4A. Growth in Collapsed Diversity-Related Terminology (1990-2017)") + 
+  labs(title = "Figure 4A. Total Growth in Diversity-Related Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
 ```
@@ -421,10 +454,17 @@ all_pop_terms_trends <- abstract_data %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = all_pop_terms), 
                        yes = "all population terms", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "race/ethnicity", no = term)) %>% 
   mutate(population = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b((?<!all )population*)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b((?<!all )population)\\b"), yes = 1, no = 0)) %>% 
   mutate(all_pop_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(all population terms)\\b"), yes = 1, no = 0)) 
+                       pattern = "\\b(all population terms)\\b"), yes = 1, no = 0)) %>% 
+  mutate(diversity = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(diversity)\\b"), yes = 1, no = 0)) %>% 
+  mutate(race_ethnicity = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) 
 # total articles each year 
 all_pop_prc_counts <- text_data %>% group_by(year) %>% 
   count(year) %>% ungroup() %>% rename(total = n) 
@@ -437,11 +477,22 @@ all_pop_prc_counts <- all_pop_terms_trends %>% filter(all_pop_terms == 1) %>%
   group_by(year) %>% summarise(cnt_all_pop = n_distinct(id)) %>% 
   right_join(all_pop_prc_counts, by = "year") %>% 
   mutate(prc_all_pop = round(cnt_all_pop / total * 100, digits = 2))
+all_pop_prc_counts <- all_pop_terms_trends %>% filter(diversity == 1) %>% 
+  group_by(year) %>% summarise(cnt_diversity = n_distinct(id)) %>% 
+  right_join(all_pop_prc_counts, by = "year") %>% 
+  mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
+all_pop_prc_counts <- all_pop_terms_trends %>% filter(race_ethnicity == 1) %>% 
+  group_by(year) %>% summarise(cnt_race_ethnicity = n_distinct(id)) %>% 
+  right_join(all_pop_prc_counts, by = "year") %>% 
+  mutate(prc_race_ethnicity = round(cnt_race_ethnicity / total * 100, digits = 2))
+
 # graphing the patterns over time
 all_pop_prc_counts <- all_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_population, x = year, colour = "population*"), stat="identity") +
+  geom_line(aes(y = prc_population, x = year, colour = "population"), stat="identity") +
   geom_line(aes(y = prc_all_pop, x = year, colour = "all population terms"), stat="identity") + 
-  labs(title = "Figure 4B. Growth in Collapsed Diversity Terminology, By Percentage (1990-2017)") + 
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), stat="identity") + 
+  geom_line(aes(y = prc_race_ethnicity, x = year, colour = "race/ethnicity"), stat="identity") + 
+  labs(title = "Figure 4B. Proportional Growth in Collapsed Diversity-Related Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
 ```
@@ -500,7 +551,7 @@ all_ethnic_groups <- paste(c("\\b(?i)(zxz",
 
 ```{r figure 5a, fig.width=9.5, echo=FALSE}
 # graphing the population terms into various categories 
-pop_terms_bycats <- abstract_data %>% 
+pop_terms_bycats_pt1 <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = general_pop_terms), 
                        yes = "general population terms", no = word)) %>%
@@ -509,38 +560,42 @@ pop_terms_bycats <- abstract_data %>%
                        yes = "us-specific terms", no = term)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = continental_terms), 
-                       yes = "continental terms", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = ling_religious_terms), 
-                       yes = "linguistic & religious terms", no = term)) %>%
+                       yes = "continental terms", no = term)) %>% 
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = ling_religious_terms), 
+  #                     yes = "linguistic & religious terms", no = term)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = national_terms), 
                        yes = "national terms", no = term)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = south_american_ethnic_groups), 
+  #                     yes = "south american ethnic groups", no = term)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = african_ethnic_groups), 
+  #                     yes = "african ethnic groups", no = term)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = north_american_ethnic_groups), 
+  #                     yes = "north american ethnic groups", no = term)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = european_ethnic_groups), 
+  #                     yes = "european ethnic groups", no = term)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = asian_ethnic_groups), 
+  #                     yes = "asian ethnic groups", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = south_american_ethnic_groups), 
-                       yes = "south american ethnic groups", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = african_ethnic_groups), 
-                       yes = "african ethnic groups", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = north_american_ethnic_groups), 
-                       yes = "north american ethnic groups", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = european_ethnic_groups), 
-                       yes = "european ethnic groups", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = asian_ethnic_groups), 
-                       yes = "asian ethnic groups", no = term)) %>% 
+                       pattern = all_ethnic_groups), 
+                       yes = "all ethnic groups", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population*", no = term)) %>% 
+                       yes = "population", no = term)) %>% 
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
-  filter(term == "diversity" | term == "population*" | 
+  filter(term == "diversity" | term == "population" | 
          term == "general population terms" | term == "us-specific terms" |
-         term == "continental terms" | term == "linguistic & religious terms" | 
-         term == "national terms" | term == "south american ethnic groups" | 
-         term == "african ethnic groups" | term == "north american ethnic groups" | 
-         term == "european ethnic groups" | term == "asian ethnic groups" ) %>% 
+         term == "continental terms" | term == "national terms" | term == "all ethnic terms"
+         #term == "south american ethnic groups" | term == "linguistic & religious terms" |
+         #term == "african ethnic groups" | term == "north american ethnic groups" | 
+         #term == "european ethnic groups" | term == "asian ethnic groups" 
+         ) %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
   labs(title = "Figure 5A. Growth in Diversity-Related Terminology by Category (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
@@ -567,46 +622,51 @@ pop_terms_bycats <- abstract_data %>%
                        yes = "continental terms", no = term)) %>%
   mutate(continental_terms = ifelse(test = str_detect(string = term, 
                        pattern = "continental terms"), yes = 1, no = 0)) %>% 
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = ling_religious_terms), 
-                       yes = "linguistic & religious terms", no = term)) %>%
-  mutate(ling_rel_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "linguistic & religious terms"), yes = 1, no = 0)) %>% 
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = ling_religious_terms), 
+  #                     yes = "linguistic & religious terms", no = term)) %>%
+  #mutate(ling_rel_terms = ifelse(test = str_detect(string = term, 
+  #                     pattern = "linguistic & religious terms"), yes = 1, no = 0)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = national_terms), 
                        yes = "national terms", no = term)) %>%
   mutate(national_terms = ifelse(test = str_detect(string = term, 
                        pattern = "national terms"), yes = 1, no = 0)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = south_american_ethnic_groups), 
+  #                     yes = "south american ethnic groups", no = term)) %>%
+  #mutate(south_american_terms = ifelse(test = str_detect(string = term, 
+  #                     pattern = "south american ethnic groups"), yes = 1, no = 0)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = african_ethnic_groups), 
+  #                     yes = "african ethnic groups", no = term)) %>%
+  #mutate(african_terms = ifelse(test = str_detect(string = term, 
+  #                     pattern = "african ethnic groups"), yes = 1, no = 0)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = north_american_ethnic_groups), 
+  #                     yes = "north american ethnic groups", no = term)) %>%
+  #mutate(north_american_terms = ifelse(test = str_detect(string = term, 
+  #                     pattern = "north american ethnic groups"), yes = 1, no = 0)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = european_ethnic_groups), 
+  #                     yes = "european ethnic groups", no = term)) %>%
+  #mutate(european_terms = ifelse(test = str_detect(string = term, 
+  #                     pattern = "european ethnic groups"), yes = 1, no = 0)) %>%
+  #mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+  #                     pattern = asian_ethnic_groups), 
+  #                     yes = "asian ethnic groups", no = term)) %>% 
+  #mutate(asian_terms = ifelse(test = str_detect(string = term, 
+  #                     pattern = "asian ethnic groups"), yes = 1, no = 0)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = south_american_ethnic_groups), 
-                       yes = "south american ethnic groups", no = term)) %>%
-  mutate(south_american_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "south american ethnic groups"), yes = 1, no = 0)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = african_ethnic_groups), 
-                       yes = "african ethnic groups", no = term)) %>%
-  mutate(african_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "african ethnic groups"), yes = 1, no = 0)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = north_american_ethnic_groups), 
-                       yes = "north american ethnic groups", no = term)) %>%
-  mutate(north_american_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "north american ethnic groups"), yes = 1, no = 0)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = european_ethnic_groups), 
-                       yes = "european ethnic groups", no = term)) %>%
-  mutate(european_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "european ethnic groups"), yes = 1, no = 0)) %>%
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = asian_ethnic_groups), 
-                       yes = "asian ethnic groups", no = term)) %>% 
-  mutate(asian_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "asian ethnic groups"), yes = 1, no = 0)) %>%
+                       pattern = all_ethnic_groups), 
+                       yes = "all ethnic groups", no = term)) %>% 
+  mutate(all_ethnic_terms = ifelse(test = str_detect(string = term, 
+                       pattern = "all ethnic groups"), yes = 1, no = 0)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population*", no = term)) %>% 
+                       yes = "population", no = term)) %>% 
   mutate(population = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b((?<!general )population*)\\b"), yes = 1, no = 0)) 
+                       pattern = "\\b((?<!general )population)\\b"), yes = 1, no = 0)) 
 
 # total articles each year 
 bycats_prc_counts <- text_data %>% group_by(year) %>% 
@@ -624,34 +684,38 @@ bycats_prc_counts <- pop_terms_bycats %>% filter(continental_terms == 1) %>%
   group_by(year) %>% summarise(cnt_continental_terms = n_distinct(id)) %>% 
   right_join(bycats_prc_counts, by = "year") %>% 
   mutate(prc_continental_terms = round(cnt_continental_terms / total * 100, digits = 2))
-bycats_prc_counts <- pop_terms_bycats %>% filter(ling_rel_terms == 1) %>% 
-  group_by(year) %>% summarise(cnt_ling_rel_terms = n_distinct(id)) %>% 
-  right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(prc_ling_rel_terms = round(cnt_ling_rel_terms / total * 100, digits = 2))
+#bycats_prc_counts <- pop_terms_bycats %>% filter(ling_rel_terms == 1) %>% 
+#  group_by(year) %>% summarise(cnt_ling_rel_terms = n_distinct(id)) %>% 
+#  right_join(bycats_prc_counts, by = "year") %>% 
+#  mutate(prc_ling_rel_terms = round(cnt_ling_rel_terms / total * 100, digits = 2))
 bycats_prc_counts <- pop_terms_bycats %>% filter(national_terms == 1) %>% 
   group_by(year) %>% summarise(cnt_national_terms = n_distinct(id)) %>% 
   right_join(bycats_prc_counts, by = "year") %>% 
   mutate(prc_national_terms = round(cnt_national_terms / total * 100, digits = 2))
-bycats_prc_counts <- pop_terms_bycats %>% filter(south_american_terms == 1) %>% 
-  group_by(year) %>% summarise(cnt_south_american_terms = n_distinct(id)) %>% 
+#bycats_prc_counts <- pop_terms_bycats %>% filter(south_american_terms == 1) %>% 
+#  group_by(year) %>% summarise(cnt_south_american_terms = n_distinct(id)) %>% 
+#  right_join(bycats_prc_counts, by = "year") %>% 
+#  mutate(prc_south_american_terms = round(cnt_south_american_terms / total * 100, digits = 2))
+#bycats_prc_counts <- pop_terms_bycats %>% filter(african_terms == 1) %>% 
+#  group_by(year) %>% summarise(cnt_african_terms = n_distinct(id)) %>% 
+#  right_join(bycats_prc_counts, by = "year") %>% 
+#  mutate(prc_african_terms = round(cnt_african_terms / total * 100, digits = 2))
+#bycats_prc_counts <- pop_terms_bycats %>% filter(north_american_terms == 1) %>% 
+#  group_by(year) %>% summarise(cnt_north_american_terms = n_distinct(id)) %>% 
+#  right_join(bycats_prc_counts, by = "year") %>% 
+#  mutate(prc_north_american_terms = round(cnt_north_american_terms / total * 100, digits = 2))
+#bycats_prc_counts <- pop_terms_bycats %>% filter(european_terms == 1) %>% 
+#  group_by(year) %>% summarise(cnt_european_terms = n_distinct(id)) %>% 
+#  right_join(bycats_prc_counts, by = "year") %>% 
+#  mutate(prc_european_terms = round(cnt_european_terms / total * 100, digits = 2))
+#bycats_prc_counts <- pop_terms_bycats %>% filter(asian_terms == 1) %>% 
+#  group_by(year) %>% summarise(cnt_asian_terms = n_distinct(id)) %>% 
+#  right_join(bycats_prc_counts, by = "year") %>% 
+#  mutate(prc_asian_terms = round(cnt_asian_terms / total * 100, digits = 2))
+bycats_prc_counts <- pop_terms_bycats %>% filter(all_ethnic_terms == 1) %>% 
+  group_by(year) %>% summarise(cnt_all_ethnic_terms = n_distinct(id)) %>% 
   right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(prc_south_american_terms = round(cnt_south_american_terms / total * 100, digits = 2))
-bycats_prc_counts <- pop_terms_bycats %>% filter(african_terms == 1) %>% 
-  group_by(year) %>% summarise(cnt_african_terms = n_distinct(id)) %>% 
-  right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(prc_african_terms = round(cnt_african_terms / total * 100, digits = 2))
-bycats_prc_counts <- pop_terms_bycats %>% filter(north_american_terms == 1) %>% 
-  group_by(year) %>% summarise(cnt_north_american_terms = n_distinct(id)) %>% 
-  right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(prc_north_american_terms = round(cnt_north_american_terms / total * 100, digits = 2))
-bycats_prc_counts <- pop_terms_bycats %>% filter(european_terms == 1) %>% 
-  group_by(year) %>% summarise(cnt_european_terms = n_distinct(id)) %>% 
-  right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(prc_european_terms = round(cnt_european_terms / total * 100, digits = 2))
-bycats_prc_counts <- pop_terms_bycats %>% filter(asian_terms == 1) %>% 
-  group_by(year) %>% summarise(cnt_asian_terms = n_distinct(id)) %>% 
-  right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(prc_asian_terms = round(cnt_asian_terms / total * 100, digits = 2))
+  mutate(prc_all_ethnic_terms = round(cnt_all_ethnic_terms / total * 100, digits = 2))
 bycats_prc_counts <- pop_terms_bycats %>% filter(population == 1) %>% 
   group_by(year) %>% summarise(cnt_population = n_distinct(id)) %>% 
   right_join(bycats_prc_counts, by = "year") %>% 
@@ -661,15 +725,16 @@ bycats_prc_counts <- bycats_prc_counts %>% ggplot() +
   geom_line(aes(y = prc_general_terms, x = year, colour = "general population terms"), stat="identity") +
   geom_line(aes(y = prc_us_terms, x = year, colour = "us-specific terms"), stat="identity") +
   geom_line(aes(y = prc_continental_terms, x = year, colour = "continental terms"), stat="identity") +
-  geom_line(aes(y = prc_ling_rel_terms, x = year, colour = "linguistic & religious terms"), stat="identity") +
+  #geom_line(aes(y = prc_ling_rel_terms, x = year, colour = "linguistic & religious terms"), stat="identity") +
   geom_line(aes(y = prc_national_terms, x = year, colour = "national terms"), stat="identity") +
-  geom_line(aes(y = prc_south_american_terms, x = year, colour = "south american terms"), stat="identity") +
-  geom_line(aes(y = prc_african_terms, x = year, colour = "african terms"), stat="identity") +
-  geom_line(aes(y = prc_north_american_terms, x = year, colour = "north american terms"), stat="identity") +
-  geom_line(aes(y = prc_european_terms, x = year, colour = "european terms"), stat="identity") +
-  geom_line(aes(y = prc_asian_terms, x = year, colour = "asian terms"), stat="identity") +
-  geom_line(aes(y = prc_population, x = year, colour = "population*"), stat="identity") +
-  labs(title = "Figure 5B. Growth in Diversity-Related Terminology, By Category/Percentage (1990-2017)") + 
+  #geom_line(aes(y = prc_south_american_terms, x = year, colour = "south american terms"), stat="identity") +
+  #geom_line(aes(y = prc_african_terms, x = year, colour = "african terms"), stat="identity") +
+  #geom_line(aes(y = prc_north_american_terms, x = year, colour = "north american terms"), stat="identity") +
+  #geom_line(aes(y = prc_european_terms, x = year, colour = "european terms"), stat="identity") +
+  #geom_line(aes(y = prc_asian_terms, x = year, colour = "asian terms"), stat="identity") +
+  geom_line(aes(y = prc_all_ethnic_terms, x = year, colour = "all ethnic terms"), stat="identity") +
+  geom_line(aes(y = prc_population, x = year, colour = "population"), stat="identity") +
+  labs(title = "Figure 5B. Proportional Growth in Diversity-Related Terminology (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
 ```
