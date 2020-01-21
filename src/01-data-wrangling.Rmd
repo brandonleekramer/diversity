@@ -7,18 +7,40 @@ output: html_document
 
 ```{r setup, include = FALSE}
 rm(list = ls())
+
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
 knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
-```
-
-```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
+
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "bibliometrix",
               "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
-# loading the .csv file 
+```
 
-setwd("C:/Users/bkram/CloudStation/Diversity/Data/BiomedCorpus")
-#test <- readFiles("savedrecs (0).txt")
+```{r diversity corpus, message = FALSE, results = FALSE, echo=FALSE}
+
+# diversity corpus 
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Diversity Corpus Raw Files")
+files <- dir(pattern = "*.txt")
+files <- readFiles(files)
+raw_corpus <- convert2df(files, dbsource = "isi", format = "plaintext")
+setwd("C:/Users/bkram/CloudStation/Diversity/Data")
+write_csv(raw_corpus, "raw_diversity_corpus.csv")
+diversity_corpus <- raw_corpus %>% 
+  rowid_to_column(var = "id") %>%
+  rename(author = AU, title = TI, publication = SO, 
+         abstract = AB, year = PY, subject = SC, 
+         department = C1, grant_information = GI, 
+         keyword = ID, pubmed_id = UT, doi = DI) %>% 
+  select(author, title, publication, abstract, year, subject, 
+         department, grant_information, keyword, pubmed_id, doi)
+write_csv(diversity_corpus, "diversity_corpus.csv")
+
+```
+
+```{r diversity corpus, message = FALSE, results = FALSE, echo=FALSE}
+
+# biomedical corpus 
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Biomedical Corpus Raw Files")
 files <- dir(pattern = "*.txt")
 files <- readFiles(files)
 raw_corpus <- convert2df(files, dbsource = "isi", format = "plaintext")
@@ -26,4 +48,3 @@ setwd("C:/Users/bkram/CloudStation/Diversity/Data")
 write_csv(raw_corpus, "biomedical_corpus.csv")
 
 ```
-

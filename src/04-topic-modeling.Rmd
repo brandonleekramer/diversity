@@ -13,21 +13,24 @@ knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", "ldatuning",
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", "ldatuning", "lubridate",
               "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
 # filtering 2018 articles because they seem to be incomplete 
   filter(year != "2018") 
 
-test_data <- text_data %>% 
-  slice(1:3000)
-
 ```
 
 ```{r}
 
-by_abstract <- test_data %>% 
+text_data <- text_data %>% 
+  mutate(publication = tolower(publication)) %>% 
+  separate(publication, into = c("publication", "void"), 
+           sep = "[(]") %>% 
+  select(-void) 
+
+by_abstract <- text_data %>% 
   unnest_tokens(word, abstract)
 
 my_stopwords <- tibble(word = c(as.character(1:14), 
@@ -48,6 +51,9 @@ pubs_dtm <- word_counts %>%
 
 ```{r}
 
+# in this snippet, we will be logging start/end times 
+mat_start <- data.frame(event="mat_start", time=now("EST"))
+
 finding_k <- FindTopicsNumber(
   pubs_dtm,
   topics = seq(from = 10, to = 150, by = 10),
@@ -57,9 +63,13 @@ finding_k <- FindTopicsNumber(
   #mc.cores = 2L, # defaults to NA and finds cores available 
   verbose = TRUE)
 
-FindTopicsNumber_plot(finding_k)
+# logging the times and saving the work in RDS files 
+mat_end <- data.frame(event="mat_end", time=now("EST"))
+time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
+#saveRDS(bp_matrix, "bp_matrix.rds")
+saveRDS(time_log, "time_log.rds")
 
-?FindTopicsNumber
+FindTopicsNumber_plot(finding_k)
 
 ```
 
