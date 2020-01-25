@@ -8,13 +8,14 @@ output: html_document
 ```{r setup, include = FALSE}
 rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+knitr::opts_knit$set(root.dir = "~/")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", "ldatuning", "lubridate",
-              "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", #"ldatuning", 
+              "lubridate", "plotly", "stringi")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
 # filtering 2018 articles because they seem to be incomplete 
@@ -28,7 +29,11 @@ text_data <- text_data %>%
   mutate(publication = tolower(publication)) %>% 
   separate(publication, into = c("publication", "void"), 
            sep = "[(]") %>% 
-  select(-void) 
+  separate(publication, into = c("publication", "void"), 
+           sep = "[:]") %>% select(-void) %>%
+  mutate(publication = ifelse(test = str_detect(string = publication, 
+  pattern = "\\b(?i)(proceedings of the national academy of sciences of the united states of america)\\b"), 
+  yes = "pnas", no = publication)) 
 
 by_abstract <- text_data %>% 
   unnest_tokens(word, abstract)
@@ -46,7 +51,6 @@ word_counts
 
 pubs_dtm <- word_counts %>%
   cast_dtm(publication, word, n)
-
 ```
 
 ```{r}
@@ -76,7 +80,7 @@ FindTopicsNumber_plot(finding_k)
 
 ```{r, fig.width=11.5}
 
-pubs_lda <- LDA(pubs_dtm, k = 10, control = list(seed = 1234))
+pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234))
 
 pubs_lda_td <- tidy(pubs_lda)
 pubs_lda_td
