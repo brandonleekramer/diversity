@@ -6,9 +6,9 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-rm(list = ls())
+#rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "~/")
+knitr::opts_knit$set(root.dir = "~/diversity-data")
 #knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
@@ -79,19 +79,48 @@ FindTopicsNumber_plot(finding_k)
 
 
 ```{r, fig.width=11.5}
+# in this snippet, we will be logging start/end times 
+mat_start <- data.frame(event="mat_start", time=now("EST"))
 
-pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234))
+pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234)) #2:30PM - 
+saveRDS(pubs_lda, "pubs_lda.rds")
+
+# logging the times and saving the work in RDS files 
+mat_end <- data.frame(event="mat_end", time=now("EST"))
+time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
+#saveRDS(bp_matrix, "bp_matrix.rds")
+saveRDS(time_log, "time_log.rds")
+
+```
+
+```{r}
 
 pubs_lda_td <- tidy(pubs_lda)
 pubs_lda_td
 
-top_terms <- pubs_lda_td %>%
+all_terms <- pubs_lda_td %>%
+  drop_na(term) %>% 
   group_by(topic) %>%
-  top_n(5, beta) %>%
+  #top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms <- pubs_lda_td %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(10, beta) %>%
   ungroup() %>%
   arrange(topic, -beta)
 
 top_terms %>%
+  #filter(topic < 10) %>% 
+  #filter(topic > 9 & topic < 19) %>% 
+  #filter(topic > 18 & topic < 28) %>% 
+  #filter(topic > 27 & topic < 37) %>% 
+  #filter(topic > 36 & topic < 46) %>% 
+  #filter(topic > 45 & topic < 55) %>% 
+  #filter(topic > 54 & topic < 64) %>%
+  #filter(topic > 63) %>% 
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(term, beta)) +
   geom_bar(stat = "identity") +
@@ -100,9 +129,89 @@ top_terms %>%
 
 ```
 
+```{r}
+
+top_terms <- top_terms %>% 
+  mutate(general_class = recode(topic, 
+  "1"="population_science","2"="population_science","3"="population_science","4"="population_science","5"="bio_science",
+  "6"="population_science","7"="population_science","8"="bio_science","9"="bio_science","10"="population_science",
+  "11"="bio_science","12"="population_science","13"="bio_science","14"="bio_science","15"="population_science",
+  "16"="population_science","17"="bio_science","18"="bio_science","19"="bio_science","20"="population_science",
+  "21"="bio_science","22"="general_science","23"="bio_science","24"="population_science","25"="general_science",
+  "26"="population_science","27"="population_science","28"="population_science","29"="bio_science","30"="population_science",
+  "31"="population_science","32"="bio_science","33"="bio_science","34"="population_science","35"="bio_science",
+  "36"="bio_science","37"="population_science","38"="population_science","39"="population_science","40"="population_science",
+  "41"="population_science","42"="bio_science","43"="population_science","44"="bio_science","45"="population_science",
+  "46"="population_science","47"="bio_science","48"="bio_science","49"="bio_science","50"="population_science",
+  "51"="population_science","52"="population_science","53"="bio_science","54"="bio_science","55"="bio_science",
+  "56"="population_science","57"="population_science","58"="bio_science","59"="bio_science","60"="population_science",
+  "61"="population_science","62"="bio_science","63"="bio_science","64"="population_science","65"="bio_science",
+  "66"="bio_science","67"="population_science","68"="population_science","69"="population_science","70"="bio_science")) 
+
+# checking coding scheme for human_diversity / recoding specificity
+top_terms %>%
+  filter(general_class == "population_science") %>% 
+  #filter(topic < 16) %>% 
+  #filter(topic > 15 & topic < 35) %>%
+  filter(topic > 34 & topic < 51) %>%
+  #filter(topic > 54) %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+
+# checking coding scheme for biodiversity / recoding specificity
+top_terms %>%
+  filter(general_class == "bio_science") %>% 
+  #filter(topic < 20) %>% 
+  #filter(topic > 19 & topic < 45) %>%
+  filter(topic > 44 & topic < 63) %>%
+  #filter(topic > 62) %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
 
 
+all_terms <- all_terms %>% 
+  mutate(general_class = recode(topic, 
+  "1"="population_science","2"="population_science","3"="population_science","4"="population_science","5"="bio_science",
+  "6"="population_science","7"="population_science","8"="bio_science","9"="bio_science","10"="population_science",
+  "11"="bio_science","12"="population_science","13"="bio_science","14"="bio_science","15"="population_science",
+  "16"="population_science","17"="bio_science","18"="bio_science","19"="bio_science","20"="population_science",
+  "21"="bio_science","22"="general_science","23"="bio_science","24"="population_science","25"="general_science",
+  "26"="population_science","27"="population_science","28"="population_science","29"="bio_science","30"="population_science",
+  "31"="population_science","32"="bio_science","33"="bio_science","34"="population_science","35"="bio_science",
+  "36"="bio_science","37"="population_science","38"="population_science","39"="population_science","40"="population_science",
+  "41"="population_science","42"="bio_science","43"="population_science","44"="bio_science","45"="population_science",
+  "46"="population_science","47"="bio_science","48"="bio_science","49"="bio_science","50"="population_science",
+  "51"="population_science","52"="population_science","53"="bio_science","54"="bio_science","55"="bio_science",
+  "56"="population_science","57"="population_science","58"="bio_science","59"="bio_science","60"="population_science",
+  "61"="population_science","62"="bio_science","63"="bio_science","64"="population_science","65"="bio_science",
+  "66"="bio_science","67"="population_science","68"="population_science","69"="population_science","70"="bio_science")) %>% 
+  mutate(defined_topic = recode(topic,
+  "1"="human_genetics", "2"="racial_diversity","3"="human_genetics", "4"="clinical","5"="hepatitis",
+  "6"="human_genetics", "7"="nutrition",       "8"="genetics",       "9"="genetics",         "10"="deafness_hearing",
+  "11"="cell_diversity","12"="human_genetics", "13"="cell_diversity","14"="cell_diversity",  "15"="human_genetics",
+  "16"="human_genetics","17"="hepatitis",      "18"="cell_diversity","19"="genetics",        "20"="mental_health",
+  "21"="genetics",      "22"="general_science","23"="tuberculosis",  "24"="racial_diversity","25"="general_science",
+  "26"="human_genetics","27"="human_genetics", "28"="clinical","29"="genetics",     "30"="research_ethics",
+  "31"="reproduction",  "32"="neuroscience",   "33"="cancer",        "34"="sex/gender",      "35"="microbiome",
+  "36"="malaria",       "37"="clinical","38"="healthcare",   "39"="surgerical","40"="mental_health",
+  "41"="environmental", "42"="pharmacology","43"="dental","44"="genetics","45"="human_genetics",
+  "46"="human_genetics","47"="immunology",     "48"="hiv",           "49"="bacteria",        "50"="education",
+  "51"="asthma","52"="healthcare",    "53"="clinical", "54"="cancer",      "55"="plants",
+  "56"="sexual_health", "57"="clinical","58"="neuroscience", "59"="cell_diversity", "60"="language",
+  "61"="human_genetics","62"="neuroscience","63"="vaccines","64"="healthcare","65"="pharmacology",
+  "66"="cancer",        "67"="human_genetics", "68"="clinical","69"="clinical","70"="cell_diversity"))
 
+all_terms %>% 
+  group_by(defined_topic) %>% 
+  count(defined_topic)
+
+```
 
 
 Citations 
