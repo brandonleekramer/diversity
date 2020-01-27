@@ -89,10 +89,13 @@ general_pop_terms <- abstract_data %>%
                        pattern =
   "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
                        yes = "ancestry*", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), yes = "sex/gender", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|polygyny|polygynous|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), yes = "sexuality", no = term)) %>%
 # grouping by year and filter relevant population terms 
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
   filter(term == "diversity" | term == "cultural*" | term == "genetic" | term == "population*" | 
-           term == "racial*" | term == "ethnic*" | term == "ancestry*") %>% 
+           term == "racial*" | term == "ethnic*" | term == "ancestry*" | 
+           term == "sex/gender" | term == "sexuality") %>% 
 # graphing terms over time 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
   labs(title = "Figure 2A. Growth in General Diversity-Related Terms (1990-2017)") + 
@@ -132,7 +135,13 @@ general_pop_terms <- abstract_data %>%
   mutate(di_diversity = ifelse(test = str_detect(string = term, 
                        pattern = "diversity"), yes = 1, no = 0)) %>% 
   mutate(di_genetic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(genetic)\\b"), yes = 1, no = 0))
+                       pattern = "\\b(genetic)\\b"), yes = 1, no = 0)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), yes = "sex/gender", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), yes = "sexuality", no = term)) %>%
+  mutate(di_sexgender = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(sex/gender)\\b"), yes = 1, no = 0)) %>%
+  mutate(di_sexuality = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(sexuality)\\b"), yes = 1, no = 0))
 
 # total articles each year 
 gen_pop_prc_counts <- text_data %>% 
@@ -170,6 +179,14 @@ gen_pop_prc_counts <- general_pop_terms %>% filter(di_genetic == 1) %>%
   group_by(year) %>% summarise(cnt_genetic = n_distinct(id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_genetic = round(cnt_genetic / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% filter(di_sexgender == 1) %>% 
+  group_by(year) %>% summarise(cnt_sexgender = n_distinct(id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_sexgender = round(cnt_sexgender / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% filter(di_sexuality == 1) %>% 
+  group_by(year) %>% summarise(cnt_sexuality = n_distinct(id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_sexuality = round(cnt_sexuality / total * 100, digits = 2))
 
 # graphing terms over time 
 gen_pop_prc_counts <- gen_pop_prc_counts %>% ggplot() + 
@@ -180,6 +197,8 @@ gen_pop_prc_counts <- gen_pop_prc_counts %>% ggplot() +
   geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), stat="identity") +
   geom_line(aes(y = prc_population, x = year, colour = "population*"), stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "racial*"), stat="identity") +
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), stat="identity") +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), stat="identity") +
   labs(title = "Figure 2B. Proportional Growth in General Diversity-Related Terms (1990-2017)") + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly() 

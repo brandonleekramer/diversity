@@ -7,15 +7,15 @@ output: html_document
 
 ```{r setup, include = FALSE}
 #rm(list = ls())
-#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "~/diversity-data")
+knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "~/diversity-data")
 #knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", #"ldatuning", 
-              "lubridate", "plotly", "stringi")) {library(pkg, character.only = TRUE)}
+              "lubridate", "plotly", "stringi", "ggraph")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
 # filtering 2018 articles because they seem to be incomplete 
@@ -53,7 +53,7 @@ pubs_dtm <- word_counts %>%
   cast_dtm(publication, word, n)
 ```
 
-```{r}
+```{r, echo=FALSE, eval=FALSE}
 
 # in this snippet, we will be logging start/end times 
 mat_start <- data.frame(event="mat_start", time=now("EST"))
@@ -77,8 +77,7 @@ FindTopicsNumber_plot(finding_k)
 
 ```
 
-
-```{r, fig.width=11.5}
+```{r, fig.width=11.5, echo=FALSE, eval=FALSE}
 # in this snippet, we will be logging start/end times 
 mat_start <- data.frame(event="mat_start", time=now("EST"))
 
@@ -95,13 +94,12 @@ saveRDS(time_log, "time_log.rds")
 
 ```{r}
 
+pubs_lda <- readRDS("pubs_lda.rds")
 pubs_lda_td <- tidy(pubs_lda)
-pubs_lda_td
 
 all_terms <- pubs_lda_td %>%
   drop_na(term) %>% 
   group_by(topic) %>%
-  #top_n(5, beta) %>%
   ungroup() %>%
   arrange(topic, -beta)
 
@@ -174,7 +172,6 @@ top_terms %>%
   scale_x_reordered() +
   facet_wrap(~ topic, scales = "free_x")
 
-
 all_terms <- all_terms %>% 
   mutate(general_class = recode(topic, 
   "1"="population_science","2"="population_science","3"="population_science","4"="population_science","5"="bio_science",
@@ -211,7 +208,153 @@ all_terms %>%
   group_by(defined_topic) %>% 
   count(defined_topic)
 
+top_terms <- all_terms %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) 
+
+length(unique(all_terms$general_class))
+length(unique(all_terms$defined_topic))
+
+bio_science_topics <- top_terms %>% filter(general_class == "bio_science")
+unique(bio_science_topics$defined_topic)
+
+pop_science_topics <- top_terms %>% filter(general_class == "population_science")
+unique(pop_science_topics$defined_topic)
 ```
+
+```{r}
+pop_science_topics %>% 
+  filter(defined_topic == "human_genetics") %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+12/37
+```
+```{r}
+pop_science_topics %>% 
+  filter(defined_topic == "clinical" | defined_topic == "research_ethics") %>%
+  #filter(defined_topic == "racial_diversity" | defined_topic == "sex/gender") %>% 
+  #filter(defined_topic == "mental_health" | defined_topic == "healthcare") %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+7/37
+```
+```{r}
+pop_science_topics %>% 
+  #filter(defined_topic == "racial_diversity" | defined_topic == "sex/gender") %>% 
+  filter(defined_topic == "mental_health" | defined_topic == "healthcare" |
+           defined_topic == "nutrition" | defined_topic == "dental" | defined_topic == "reproduction" |
+         defined_topic == "sexual_health" | defined_topic == "asthma" | defined_topic == "surgerical") %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+11/37
+```
+```{r}
+#topic_names <- c("2" = "Racial", "10" = "Deafness/Hearing", 
+#                 "24" = "Ethnic",  "34" = "Sex/Gender", 
+#                 "50" = "Medical Education", "60" = "Age/Language",
+#                 "30" = "Research Ethics", "52" = "Nursing",  "64" = "Nephrology",
+#                 "1" = "Human Genetics", "6" = "Human Genetics", "61" = "Human Genetics"
+#                 )
+
+topic_names <- c("4" = "Racial", "8" = "Deafness/Hearing", 
+                 "5" = "Ethnic",  "6" = "Sex/Gender", 
+                 "10" = "Medical Education", "7" = "Age/Language",
+                 "9" = "Research Ethics", "11" = "Nursing",  "12" = "Nephrology",
+                 "1" = "Human Genetics", "2" = "Human Genetics", "3" = "Human Genetics"
+                 )
+
+all_terms %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(8, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  filter(topic == "2" | topic == "10" | topic == "24" | topic == "30"  | topic == "34" |
+         topic == "50" | topic == "52" | topic == "60" | topic == "64" | 
+         topic == "1" | topic == "6" | topic == "61" ) %>% 
+  #mutate(topic = recode(topic, 
+  #                      "1" = "1", "6" = "2", "61" = "3",
+  #                      "2" = "4", "24" = "5", "34" = "6",
+  #                      "60" = "7", "10" = "8", "30" = "9",
+  #                      "50" = "10", "52" = "11", "64" = "12")) %>% 
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x", 
+             ncol = 3, nrow = 4,
+             labeller = as_labeller(topic_names)) +
+  theme_bw() +
+  theme(axis.title.x=element_blank(),
+        axis.text.y=element_text(size=6),
+        axis.text.x=element_text(size=6),
+        plot.title = element_text(hjust = 0.5)
+        ) + ggtitle("Figure 4. Select Topics Relating to \n Population Diversity using Latent Dirichlet Allocation")
+7/37
+```
+
+```{r}
+
+prince_tidy %>%
+  filter(!year == "NA") %>% #remove songs without years
+  filter(word %in% c("music", "party", "dance")) %>%
+  group_by(year) %>%
+  mutate(topic_7_count = n()) %>%
+  select(year, topic_7_count) %>%
+  distinct() %>%
+  ggplot(aes(year, topic_7_count)) + geom_smooth(se = FALSE, col = "red")
+
+```
+
+```{r}
+pop_science_network <- all_terms %>% 
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  filter(general_class == "population_science") %>% 
+  mutate(source = topic, target = term, weight = beta ) %>% 
+  select(source, target, weight )
+
+pop_science_network %>% 
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = weight, edge_width = weight), edge_colour = "cyan4") +
+  geom_node_point(size = 3) +
+  geom_node_text(aes(label = name), repel = TRUE, 
+                 point.padding = unit(0.2, "lines")) + theme_void()
+
+
+```
+
+
+
+```{r}
+
+pubs_documents <- tidy(pubs_lda, matrix = "gamma")
+pubs_documents
+
+tidy(text_data) %>%
+  filter(document == 1) %>%
+  arrange(desc(count))
+
+
+```
+
+
 
 
 Citations 

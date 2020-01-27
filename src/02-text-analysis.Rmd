@@ -89,7 +89,7 @@ general_pop_terms <- abstract_data %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), yes = "sex/gender", no = term)) %>% 
   #mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), yes = "sexuality", no = term)) %>% 
   
-  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|polygyny|polygynous|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), 
                        yes = "sexuality", no = term)) %>%
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
