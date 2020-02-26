@@ -14,8 +14,8 @@ In our analyses below, we are examining the growth of in the use of the term "di
 
 ```{r setup, include = FALSE}
 #rm(list = ls())
-knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ### Overall Growth of Publications 
@@ -75,19 +75,10 @@ Now that we have the basics out of the way, we want to look at how the most rele
 ```{r figure 2a, fig.width=9.5, echo=FALSE}
 # recoding race*, ethnicity* and cultural* terminology
 general_pop_terms <- abstract_data %>% 
-  #mutate(term = ifelse(test = str_detect(string = word, 
-  #                     pattern = "\\b(?i)(race|racial|racially)\\b"), 
-  #                     yes = "racial*", no = word)) %>% 
-  #mutate(term = ifelse(test = str_detect(string = word, 
-  #                     pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
-  #                     yes = "ethnic*", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
                        yes = "race/ethnicity", no = word)) %>% 
-  #mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls)\\b"), yes = "male/female", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), yes = "sex/gender", no = term)) %>% 
-  #mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), yes = "sexuality", no = term)) %>% 
-  
   mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|polygyny|polygynous|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), 
                        yes = "sexuality", no = term)) %>%
   mutate(term = ifelse(test = str_detect(string = word, 
@@ -215,83 +206,75 @@ What is interesting about that term is that "diversity", as a term that arises i
 
 ### Growth in US-Specific Population Terms Over Time
 
-Now we want to look at all [US-specific population terminology](https://www.census.gov/topics/population/race/about.html). This is not much different than what we have already done except for the small technical problem of tidytext separating hyphenated words in our original analysis (e.g. African-Americans). While the package quanteda has an option to unnest tokens while ignoring hyphenated words, quanteda takes a lot of RAM and ushers in other potential methodological inconsistencies compared to the approach used above. Instead, we are going to create bigrams of key US-specific terms in [tidytext](https://www.tidytextmining.com/ngrams.html) and then add them back into our larger dataset for trend anaylsis. 
+Now we want to look at all [US-specific population terminology](https://www.census.gov/topics/population/race/about.html). This is not much different than what we have already done except for the small technical problem of tidytext separating hyphenated words in our original analysis (e.g. African-Americans). While the package quanteda has an option to unnest tokens while ignoring hyphenated words, quanteda takes a lot of RAM and ushers in other potential methodological inconsistencies of switching back and forth between two packages. Instead, we found bigrams of key US-specific terms in [tidytext](https://www.tidytextmining.com/ngrams.html) and then add them back into our larger dataset for trend anaylsis. 
 
 ```{r figure 3a, fig.width=9.5, echo=FALSE}
-# first we need to recode variations of us-specific words (an alternative to stemming) 
-us_pop_counts <- abstract_data %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = "\\b(?i)(caucasian|caucasians)\\b"), 
-                       yes = "caucasian", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(americans)\\b"), 
-                       yes = "american", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hispanics)\\b"), 
-                       yes = "hispanic", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(indians)\\b"), 
-                       yes = "indian", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(islanders)\\b"), 
-                       yes = "islander", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(alaska|alaskans)\\b"), 
-                       yes = "alaskan", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hawaii|hawaiians)\\b"), 
-                       yes = "hawaiian", no = term)) %>%
-  select(-word) %>% rename(word = term) %>% 
-# create a bigram of us-specific words 
-  unnest_tokens(bigram, word, token = "ngrams", n = 2) %>% 
-  separate(bigram, c("word1", "word2"), sep = " ") %>%          
-  filter(!word1 %in% stop_words$word) %>%
-  filter(!word2 %in% stop_words$word) %>% 
-# unite the birgrams together with a hyphen
-  unite(word, word1, word2, sep = "-") %>% 
-  filter(word == "african-american" | word == "mexican-american" |
-         word == "american-indian" | word == "native-american" | 
-         word == "alaskan-native" | word == "native-hawaiian" | 
-         word == "pacific-islander" ) %>% 
-  count(word, year, sort = TRUE) 
+# recoding frequently occuring population-related bigrams 
+us_pop_bigrams <- text_data %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(african american|african americans|afro american|afro americans)\\b"), 
+                       yes = "african-american", no = bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(native american|native americans|american indian|american indians|alaskan native|alaskan natives|alaska native|alaska natives)\\b"), 
+                       yes = "native-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(pacific islander|pacific islanders|native hawaiian|native hawaiians)\\b"), 
+                       yes = "pacific-islander", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(mexican american|mexican americans)\\b"), 
+                       yes = "hispanic-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(cambodian american|cambodian americans|chinese american|chinese americans|indian american|indian americans|japanese american|japanese americans|korean american|korean americans|malaysian american|malaysian americans|pakistani american|pakistani americans|filipino american|filipino americans|thai american|thai americans|vietnamese american|vietnamese americans)\\b"), 
+  yes = "asian-american", no = rc_bigram)) %>%
+  select(-bigram) %>% 
+  filter(rc_bigram == "african-american" | 
+         rc_bigram == "native-american" | 
+         rc_bigram == "hispanic-american" |
+         rc_bigram == "asian-american" |
+         rc_bigram == "pacific-islander") %>% 
+  count(rc_bigram, year, sort = TRUE) %>% 
+  rename(word = rc_bigram)
+
 # combining the hyphenated words to our full dataset 
-us_pop_counts_pt1 <- abstract_data %>% 
-  group_by(year) %>% count(word, sort = TRUE) %>% ungroup() %>% 
-  select(word, year, n) %>% bind_rows(us_pop_counts) %>% 
+us_pop_counts <- abstract_data %>% 
+  group_by(year) %>% 
+  count(word, sort = TRUE) %>% 
+  ungroup() %>% 
+  select(word, year, n) %>% 
+  bind_rows(us_pop_bigrams) %>% 
   arrange(-n)
 
-# graphing us-specific terms over time 
-us_pop_terms <- us_pop_counts_pt1 %>% 
+# graphing us-specific terms over time using census categories 
+# https://www.census.gov/topics/population/race/about.html
+us_pop_terms <- us_pop_counts %>% 
   mutate(term = ifelse(test = str_detect(string = word,
                        pattern = "\\b(?i)(black|blacks|african-american)\\b"), 
-                       yes = "african-american/black", no = word)) %>% 
+                       yes = "black", no = word)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(white|caucasian-american)\\b"), 
-                       yes = "caucasian/white", no = term)) %>% 
+                       pattern = "\\b(?i)(white|whites|caucasian|caucasians)\\b"), 
+                       yes = "white", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(asian)\\b"), 
+                       pattern = "\\b(?i)(asian|asians|asian-american)\\b"), 
                        yes = "asian", no = term)) %>%
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hispanic|mexican-american|latino|latina|latinx)\\b"), 
+  pattern = "\\b(?i)(hispanic|hispanic-american|latino|latinos|latina|latinos|latinx|latinxs)\\b"), 
                        yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(native-american|american-indian|alaskan-native)\\b"), 
-                       yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(pacific-islander|native-hawaiian)\\b"), 
-                       yes = "pacific-islander", no = term)) %>%   
   mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(race|racial|racially)\\b"), 
                        yes = "race", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
                        yes = "ethnicity", no = term)) %>% 
-  #mutate(term = ifelse(test = str_detect(string = word, 
-  #                     pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
-  #                     yes = "race/ethnicity", no = term)) %>%
-  filter(term == "african-american/black" | term == "caucasian/white" | term == "hispanic/latinx" | 
-         term == "native-american" | term == "pacific-islander" | term == "asian" |
-         term == "race" | term == "ethnicity" | term == "race/ethnicity") %>%  
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(native-american)\\b"), 
+                       yes = "native-american", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(pacific-islander)\\b"), 
+                       yes = "pacific-islander", no = term)) %>%
+  filter(term == "black" | term == "white" | term == "asian" |
+         term == "hispanic/latinx" | term == "race" | term == "ethnicity" |
+         term == "native-american" | term == "pacific-islander" ) %>%  
   group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
   labs(title = "Figure 3A. Total Growth in US-Specific Terminology (1990-2017)") + 
@@ -303,76 +286,72 @@ To make this graph of all US-specific terminology, we recoded all hyphenated wor
 
 ```{r figure 3b, fig.width=9.5, echo=FALSE}
 
-# first we need to recode variations of us-specific words (an alternative to stemming) 
-us_pop_counts <- abstract_data %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = "\\b(?i)(caucasian|caucasians)\\b"), 
-                       yes = "caucasian", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(americans)\\b"), 
-                       yes = "american", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hispanics)\\b"), 
-                       yes = "hispanic", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(indians)\\b"), 
-                       yes = "indian", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(islanders)\\b"), 
-                       yes = "islander", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(alaska|alaskans)\\b"), 
-                       yes = "alaskan", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hawaii|hawaiians)\\b"), 
-                       yes = "hawaiian", no = term)) %>%
-  select(-word) %>% rename(word = term) %>% 
-# create a bigram of us-specific words 
-  unnest_tokens(bigram, word, token = "ngrams", n = 2) %>% 
-  separate(bigram, c("word1", "word2"), sep = " ") %>%          
-  filter(!word1 %in% stop_words$word) %>%
-  filter(!word2 %in% stop_words$word) %>% 
-# unite the birgrams together with a hyphen
-  unite(word, word1, word2, sep = "-") %>% 
-  filter(word == "african-american" | word == "mexican-american" |
-         word == "american-indian" | word == "native-american" | 
-         word == "alaskan-native" | word == "native-hawaiian" | 
-         word == "pacific-islander" | word == "racial*" | word == "ethnic*" ) %>% 
-  count(word, id, year, sort = TRUE) 
+# recoding frequently occuring population-related bigrams 
+us_pop_bigrams <- text_data %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(african american|african americans|afro american|afro americans)\\b"), 
+                       yes = "african-american", no = bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(native american|native americans|american indian|american indians|alaskan native|alaskan natives|alaska native|alaska natives)\\b"), 
+                       yes = "native-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(pacific islander|pacific islanders|native hawaiian|native hawaiians)\\b"), 
+                       yes = "pacific-islander", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(mexican american|mexican americans)\\b"), 
+                       yes = "hispanic-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(cambodian american|cambodian americans|chinese american|chinese americans|indian american|indian americans|japanese american|japanese americans|korean american|korean americans|malaysian american|malaysian americans|pakistani american|pakistani americans|filipino american|filipino americans|thai american|thai americans|vietnamese american|vietnamese americans)\\b"), 
+  yes = "asian-american", no = rc_bigram)) %>%
+  select(-bigram) %>% 
+  filter(rc_bigram == "african-american" | 
+         rc_bigram == "native-american" | 
+         rc_bigram == "hispanic-american" |
+         rc_bigram == "asian-american" |
+         rc_bigram == "pacific-islander") %>% 
+  count(rc_bigram, year, sort = TRUE) %>% 
+  rename(word = rc_bigram)
+
 # combining the hyphenated words to our full dataset 
 us_pop_counts <- abstract_data %>% 
-  group_by(year) %>% count(word, id, sort = TRUE) %>% ungroup() %>% 
-  select(word, id, year, n) %>% bind_rows(us_pop_counts) 
+  group_by(year) %>% 
+  count(word, pubmed_id, sort = TRUE) %>% 
+  ungroup() %>% 
+  select(word, pubmed_id, year, n) %>% 
+  bind_rows(us_pop_bigrams) 
+
 # graphing us-specific terms over time 
 us_pop_counts <- us_pop_counts %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word,
+  mutate(term = ifelse(test = str_detect(string = word,
                        pattern = "\\b(?i)(black|blacks|african-american)\\b"), 
-                       yes = "african-american/black", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(white|caucasian-american)\\b"), 
-                       yes = "caucasian/white", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(asian)\\b"), 
+                       yes = "black", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(white|whites|caucasian|caucasians)\\b"), 
+                       yes = "white", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(asian|asians|asian-american)\\b"), 
                        yes = "asian", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(hispanic|mexican-american|latino|latina|latinx)\\b"), 
+  mutate(term = ifelse(test = str_detect(string = word, 
+  pattern = "\\b(?i)(hispanic|hispanic-american|latino|latinos|latina|latinos|latinx|latinxs)\\b"), 
                        yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(native-american|american-indian|alaskan-native)\\b"), 
-                       yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
-                       pattern = "\\b(?i)(pacific-islander|native-hawaiian)\\b"), 
-                       yes = "pacific-islander", no = term)) %>%   
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(race|racial|racially)\\b"), 
                        yes = "race", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = us_pop_counts$word, 
+  mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
                        yes = "ethnicity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(native-american)\\b"), 
+                       yes = "native-american", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(pacific-islander)\\b"), 
+                       yes = "pacific-islander", no = term)) %>% 
+  
   mutate(black = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(african-american/black)\\b"), yes = 1, no = 0)) %>% 
+                       pattern = "\\b(black)\\b"), yes = 1, no = 0)) %>% 
   mutate(white = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(caucasian/white)\\b"), yes = 1, no = 0)) %>%
+                       pattern = "\\b(white)\\b"), yes = 1, no = 0)) %>%
   mutate(asian = ifelse(test = str_detect(string = term, 
                        pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
   mutate(hispanic = ifelse(test = str_detect(string = term, 
@@ -387,47 +366,65 @@ us_pop_counts <- us_pop_counts %>%
                        pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) 
 
 # total articles each year 
-us_pop_prc_counts <- text_data %>% group_by(year) %>% 
-  count(year) %>% ungroup() %>% rename(total = n) 
+us_pop_prc_counts <- text_data %>% 
+  group_by(year) %>% 
+  count(year) %>% 
+  ungroup() %>% 
+  rename(total = n) 
+
 # articles with term mentioned each year 
-us_pop_prc_counts <- us_pop_counts %>% filter(black == 1) %>% 
-  group_by(year) %>% summarise(cnt_black = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(black == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_black = n_distinct(pubmed_id)) %>% 
   left_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_black = round(cnt_black / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts %>% filter(white == 1) %>% 
-  group_by(year) %>% summarise(cnt_white = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(white == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_white = n_distinct(pubmed_id)) %>% 
   left_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_white = round(cnt_white / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts %>% filter(asian == 1) %>% 
-  group_by(year) %>% summarise(cnt_asian = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(asian == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_asian = n_distinct(pubmed_id)) %>% 
   left_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_asian = round(cnt_asian / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts %>% filter(hispanic == 1) %>% 
-  group_by(year) %>% summarise(cnt_hispanic = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(hispanic == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_hispanic = n_distinct(pubmed_id)) %>% 
   right_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_hispanic = round(cnt_hispanic / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts %>% filter(native_american == 1) %>% 
-  group_by(year) %>% summarise(cnt_native_american = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(native_american == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_native_american = n_distinct(pubmed_id)) %>% 
   right_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_native_american = round(cnt_native_american / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts %>% filter(pacific_islander == 1) %>% 
-  group_by(year) %>% summarise(cnt_pacific_islander = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(pacific_islander == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_pacific_islander = n_distinct(pubmed_id)) %>% 
   right_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_pacific_islander = round(cnt_pacific_islander / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts %>% filter(racial == 1) %>% 
-  group_by(year) %>% summarise(cnt_racial = n_distinct(id)) %>% 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(racial == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_racial = n_distinct(pubmed_id)) %>% 
   right_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
 us_pop_prc_counts <- us_pop_counts %>% filter(ethnic == 1) %>% 
-  group_by(year) %>% summarise(cnt_ethnic = n_distinct(id)) %>% 
+  group_by(year) %>% 
+  summarise(cnt_ethnic = n_distinct(pubmed_id)) %>% 
   right_join(us_pop_prc_counts, by = "year") %>% 
   mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
 
-
 # graphing terms over time 
 us_pop_prc_counts_graph <- us_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_black, x = year, colour = "african-american/black"), stat="identity") +
-  geom_line(aes(y = prc_white, x = year, colour = "caucasian/white"), stat="identity") +
+  geom_line(aes(y = prc_black, x = year, colour = "black"), stat="identity") +
+  geom_line(aes(y = prc_white, x = year, colour = "white"), stat="identity") +
   geom_line(aes(y = prc_asian, x = year, colour = "asian"), stat="identity") +
   geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"), stat="identity") +
   geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), stat="identity") +
@@ -1840,43 +1837,7 @@ Panofsky, A., & Bliss, C. (2017). Ambiguity and scientific authority: Population
 
 Silge, J., & Robinson, D. (2016). tidytext: Text Mining and Analysis Using Tidy Data Principles in R. *Journal of Open Source Software*, 1(3), 37.
 
-```{r}
-text_data %>% 
-  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-  pattern = "\\b(?i)(african american|african americans|black american|black americans)\\b"), 
-                       yes = "african-american", no = bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-  pattern = "\\b(?i)(caucasian american|caucasian americans|white american|white americans)\\b"), 
-                       yes = "caucasian-american", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-  pattern = "\\b(?i)(hispanic american|hispanic americans|latino american|latino americans|latina american|latina americans|latin american|latin americans|latinx american|latinx americans)\\b"), 
-                       yes = "hispanic-american", no = rc_bigram)) %>%
-  select(bigram, rc_bigram) %>% 
-  filter(  rc_bigram == "african-american" | 
-           rc_bigram == "caucasian-american" | 
-           rc_bigram == "hispanic-american")
-  
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = "\\b(?i)(caucasian|caucasians)\\b"), 
-                       yes = "caucasian", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hispanics)\\b"), 
-                       yes = "hispanic", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(indians)\\b"), 
-                       yes = "indian", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(islanders)\\b"), 
-                       yes = "islander", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(alaska|alaskans)\\b"), 
-                       yes = "alaskan", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(hawaii|hawaiians)\\b"), 
-                       yes = "hawaiian", no = term)) %>%
 
-```
 
 ```{r}
 word_pairs <- text_data %>% 
