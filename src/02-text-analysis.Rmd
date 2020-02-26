@@ -1878,7 +1878,16 @@ text_data %>%
 
 ```
 
+```{r}
+word_pairs <- text_data %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) 
 
+word_cors <- austen_section_words %>%
+  group_by(word) %>%
+  filter(n() >= 20) %>%
+  pairwise_cor(word, section, sort = TRUE)
 
-
-
+word_cors
+  
+  
+```
