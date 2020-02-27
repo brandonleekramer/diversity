@@ -1588,7 +1588,7 @@ bycountry_graph <- pop_terms_bycountry %>%
 bycountry_prc_counts <- text_data %>% 
   drop_na(country) %>% 
   group_by(year) %>% 
-  count(year) %>% ungroup() %>% rename(total = n) 
+  count(year) %>% ungroup() %>% rename(total = n)  
 
 #abstract_data_Cc %>% 
 #  filter(year == 1990) %>% 

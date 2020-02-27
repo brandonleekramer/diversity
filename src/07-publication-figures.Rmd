@@ -15,7 +15,7 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2",
               "ggraph", "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 ```
 
-```{r, fig.width=7, fig.height=4}
+```{r supp fig 1, fig.width=7, fig.height=4}
 
 diversity_corpus <- read_csv("diversity_corpus.csv") %>% 
   filter(year != "2018")
@@ -285,15 +285,25 @@ grid.arrange(figure_1A, figure_1B,
 
 ```
 
-```{r}
-ggplotly(figure_2A)
-ggplotly(figure_2B)
+```{r epa figure 1ab, eval=FALSE, echo=FALSE}
+ggplotly(figure_1A)
+ggplotly(figure_1B)
 
-973/32
-243/7
-6399 / 436
-2629 / 164
-1931 / 88
+# raw count growth 
+# diversity
+4450/373
+# population 
+1191/77
+# genetic
+989/56
+# ancestry
+
+# race/ethnicity 
+
+# sex/gender
+
+# sexuality 
+
 ```
 
 ```{r figure 1cd, fig.height=5, fig.width=11.5, echo=FALSE}
@@ -499,7 +509,7 @@ grid.arrange(figure_1C, figure_1D,
 ```
 
 
-```{r, fig.height=7, fig.width=11.5, echo=FALSE}
+```{r epa figures 1cd, fig.height=7, fig.width=11.5, echo=FALSE, eval=FALSE}
 814/22
 521/19
 478/15
@@ -511,14 +521,14 @@ ggplotly(general_pop_graph_bm)
 ggplotly(gen_pop_prc_counts_graph_bm)
 ```
 
-```{r, fig.height=7, fig.width=11.5, echo=FALSE}
+```{r binding 1ab + 1cd, fig.height=7, fig.width=11.5, echo=FALSE}
 lay <- rbind(c(1,2),
              c(3,4),
              c(5,5))
 
 
-grid.arrange(figure_2A, figure_2B, 
-             figure_2C, figure_2D,
+grid.arrange(figure_1A, figure_1B, 
+             figure_1C, figure_1D,
              legend, 
              nrow = 3, ncol=2,
              layout_matrix = lay,
@@ -527,12 +537,12 @@ grid.arrange(figure_2A, figure_2B,
              )
 ```
 
-```{r figure 3 a & b, fig.height=5, fig.width=11.5, echo=FALSE}
+```{r figures 2ab, fig.height=5, fig.width=11.5, echo=FALSE}
 # pulling our list of population
 all_pop_terms <- read_csv("population_terms.csv") 
 all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
 
-figure_3A <- abstract_data %>% 
+figure_2A <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
                        yes = "population", no = word)) %>% 
@@ -545,9 +555,9 @@ figure_3A <- abstract_data %>%
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
   filter(term == "diversity" | term == "race/ethnicity" | 
          term == "population" | term == "all population terms") %>% 
-  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.5, stat="identity") + 
   theme_bw() +
-  labs(title = "     Figure 3A. Total Growth of \n Collapsed Diversity Terms (1990-2017)",
+  labs(title = "     Figure 2A. Total Growth of \n Collapsed Diversity Terms (1990-2017)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
   ylab("Number of Articles") +
@@ -604,12 +614,12 @@ all_pop_prc_counts <- all_pop_terms_trends %>% filter(race_ethnicity == 1) %>%
   mutate(prc_race_ethnicity = round(cnt_race_ethnicity / total * 100, digits = 2))
 
 # graphing the patterns over time
-figure_3B <- all_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1, stat="identity") +
-  geom_line(aes(y = prc_all_pop, x = year, colour = "all population terms"), size = 1, stat="identity") + 
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1, stat="identity") + 
-  geom_line(aes(y = prc_race_ethnicity, x = year, colour = "race/ethnicity"), size = 1, stat="identity") + 
-  labs(title = "    Figure 3B. Proportional Growth of \n Collapsed Diversity Terms (1990-2017)",
+figure_2B <- all_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.5, stat="identity") +
+  geom_line(aes(y = prc_all_pop, x = year, colour = "all population terms"), size = 1.5, stat="identity") + 
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.5, stat="identity") + 
+  geom_line(aes(y = prc_race_ethnicity, x = year, colour = "race/ethnicity"), size = 1.5, stat="identity") + 
+  labs(title = "    Figure 2B. Proportional Growth of \n Collapsed Diversity Terms (1990-2017)",
        color =  "Term") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -620,16 +630,17 @@ figure_3B <- all_pop_prc_counts %>% ggplot() +
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#E21F00", "#3B9AB2", "#61B329", "#E2B306")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
 # legend plot 
-legend_3AB <- all_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1, stat="identity") +
-  geom_line(aes(y = prc_all_pop, x = year, colour = "all population terms"), size = 1, stat="identity") + 
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1, stat="identity") + 
+legend_2AB <- all_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.5, stat="identity") +
+  geom_line(aes(y = prc_all_pop, x = year, colour = "all population terms"), size = 1.5, stat="identity") + 
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.5, stat="identity") + 
   geom_line(aes(y = prc_race_ethnicity, x = year, colour = "race/ethnicity"), stat="identity") + 
-  labs(title = "    Figure 3B. Proportional Growth of \n Collapsed Diversity Terms (1990-2017)",
+  labs(title = "    Figure 2B. Proportional Growth of \n Collapsed Diversity Terms (1990-2017)",
        color =  "Term") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -640,24 +651,25 @@ legend_3AB <- all_pop_prc_counts %>% ggplot() +
         legend.position = "bottom",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#E21F00", "#3B9AB2", "#61B329", "#E2B306")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
-legend_3AB <- get_legend(legend_3AB)
+legend_2AB <- get_legend(legend_2AB)
 
 #grid.arrange(general_pop_graph, gen_pop_prc_counts_graph, nrow = 1, ncol = 2)
 
-grid.arrange(figure_3A, figure_3B, 
-             legend_3AB, 
+grid.arrange(figure_2A, figure_2B, 
+             legend_2AB, 
              nrow = 2, ncol=2,
              layout_matrix = rbind(c(1,2), c(3,3)),
              #widths = c(2.7, 2.7), 
              heights = c(2.5, 0.4)
              )
-ggplotly(figure_3A)
+#ggplotly(figure_3A)
 ```
 
-```{r figure 3cd, fig.height=5, fig.width=11.5, echo=FALSE}
+```{r figures 2cd, fig.height=5, fig.width=11.5, echo=FALSE}
 setwd("C:/Users/bkram/CloudStation/Diversity/Data")
 # pulling in concatenated population terms from our dataset 
 general_pop_terms <- read_csv("population_terms.csv") %>% 
@@ -739,14 +751,14 @@ pop_terms_bycats <- abstract_data %>%
   mutate(population = ifelse(test = str_detect(string = term, 
                        pattern = "\\b((?<!general )population)\\b"), yes = 1, no = 0))  
   
-figure_3C <- pop_terms_bycats %>%   
+figure_2C <- pop_terms_bycats %>%   
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
   filter(term == "diversity" | term == "population" | 
          term == "general population terms" | term == "us-specific terms" |
          term == "continental terms" | term == "national terms" | term == "all ethnic terms") %>% 
-  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.5, stat="identity") + 
   theme_bw() +
-  labs(title = "     Figure 3C. Total Growth of \n Parsed Diversity Terms (1990-2017)",
+  labs(title = "     Figure 2C. Total Growth of \n Parsed Diversity Terms (1990-2017)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
   ylab("Number of Articles") +
@@ -755,6 +767,7 @@ figure_3C <- pop_terms_bycats %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E2B306", "#E21F00", "#E86F00", "#00468b")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
@@ -787,14 +800,14 @@ bycats_prc_counts <- pop_terms_bycats %>% filter(population == 1) %>%
   right_join(bycats_prc_counts, by = "year") %>% 
   mutate(prc_population = round(cnt_population / total * 100, digits = 2))
 
-figure_3D <- bycats_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_general_terms, x = year, colour = "general population terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_us_terms, x = year, colour = "us-specific terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_continental_terms, x = year, colour = "continental terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_national_terms, x = year, colour = "national terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_all_ethnic_terms, x = year, colour = "all ethnic terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_population, x = year, colour = "population"), size=1, stat="identity") +
-  labs(title = "    Figure 3D. Proportional Growth of \n Parsed Diversity Terms (1990-2017)",
+figure_2D <- bycats_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_general_terms, x = year, colour = "general population terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_us_terms, x = year, colour = "us-specific terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_continental_terms, x = year, colour = "continental terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_national_terms, x = year, colour = "national terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_all_ethnic_terms, x = year, colour = "all ethnic terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_population, x = year, colour = "population"), size=1.5, stat="identity") +
+  labs(title = "    Figure 2D. Proportional Growth of \n Parsed Diversity Terms (1990-2017)",
        color =  "Term") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -805,18 +818,19 @@ figure_3D <- bycats_prc_counts %>% ggplot() +
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E2B306", "#E21F00", "#E86F00", "#00468b")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
 # legend plot 
-legend_3CD <- bycats_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_general_terms, x = year, colour = "general population terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_us_terms, x = year, colour = "us-specific terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_continental_terms, x = year, colour = "continental terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_national_terms, x = year, colour = "national terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_all_ethnic_terms, x = year, colour = "all ethnic terms"), size=1, stat="identity") +
-  geom_line(aes(y = prc_population, x = year, colour = "population"), size=1, stat="identity") +
-  labs(title = "    Figure 3D. Proportional Growth of \n Parsed Diversity Terms (1990-2017)",
+legend_2CD <- bycats_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_general_terms, x = year, colour = "general population terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_us_terms, x = year, colour = "us-specific terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_continental_terms, x = year, colour = "continental terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_national_terms, x = year, colour = "national terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_all_ethnic_terms, x = year, colour = "all ethnic terms"), size=1.5, stat="identity") +
+  geom_line(aes(y = prc_population, x = year, colour = "population"), size=1.5, stat="identity") +
+  labs(title = "    Figure 2D. Proportional Growth of \n Parsed Diversity Terms (1990-2017)",
        color =  "Term") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -827,15 +841,16 @@ legend_3CD <- bycats_prc_counts %>% ggplot() +
         legend.position = "bottom",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E2B306", "#E21F00", "#E86F00", "#00468b")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
-legend_3CD <- get_legend(legend_3CD)
+legend_2CD <- get_legend(legend_2CD)
 
 #grid.arrange(general_pop_graph, gen_pop_prc_counts_graph, nrow = 1, ncol = 2)
 
-grid.arrange(figure_3C, figure_3D, 
-             legend_3CD, 
+grid.arrange(figure_2C, figure_2D, 
+             legend_2CD, 
              nrow = 2, ncol=2,
              layout_matrix = rbind(c(1,2), c(3,3)),
              #widths = c(2.7, 2.7), 
@@ -843,7 +858,7 @@ grid.arrange(figure_3C, figure_3D,
              )
 ```
 
-```{r figure 3ef, fig.height=5, fig.width=11.5, echo=FALSE}
+```{r figures 3ef, fig.height=5, fig.width=11.5, echo=FALSE}
 
 # pulling our list of population
 setwd("C:/Users/bkram/CloudStation/Diversity/Data")
@@ -1611,8 +1626,7 @@ abstract_data_Cc <- text_data %>%
   unnest_tokens(word, abstract) %>% 
   anti_join(stop_words)
 # adding custom set of stopwords 
-my_stopwords <- tibble(word = c(as.character(1:14), 
-                                "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", 
+my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
                                 "rights", "reserved", "copyright", "elsevier"))
 abstract_data_Cc <- abstract_data_Cc %>% anti_join(my_stopwords); rm(my_stopwords)
 # most frequent word count in abstracts 
@@ -1634,7 +1648,7 @@ pop_terms_bycountry <- abstract_data_Cc %>%
   mutate(all_pop_terms = ifelse(test = str_detect(string = term, 
          pattern = "\\b(all population terms)\\b"), yes = 1, no = 0)) 
 
-figure_3E <- pop_terms_bycountry %>%   
+figure_2E <- pop_terms_bycountry %>%   
     drop_na(country) %>%
   group_by(year) %>% 
   count(term, country, sort = TRUE) %>% 
@@ -1645,8 +1659,8 @@ figure_3E <- pop_terms_bycountry %>%
   #         | country == "France" | country == "Canada" | country == "Netherlands" 
   #         | country == "Australia" | country == "Spain"   
            ) %>%  
-  ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1, stat="identity") +
-  labs(title = "    Figure 3E. Total Growth of All \n Population Terms by Country (1990-2017)") + 
+  ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1.5, stat="identity") +
+  labs(title = "    Figure 2E. Total Growth of All \n Population Terms by Country (1990-2017)") + 
   theme_bw() +
   ylab("Proportion of Articles") +
   theme(axis.title.x = element_blank(), 
@@ -1656,6 +1670,7 @@ figure_3E <- pop_terms_bycountry %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
@@ -1672,7 +1687,7 @@ bycountry_prc_counts <- pop_terms_bycountry %>%
   right_join(bycountry_prc_counts, by = "year") %>% 
   mutate(prc_pop_terms = round(cnt_pop_terms / total * 100, digits = 2))
 # graphing 
-figure_3F <- bycountry_prc_counts %>% 
+figure_2F <- bycountry_prc_counts %>% 
   drop_na(country) %>% 
   filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
            country == "Germany" | country == "Australia" 
@@ -1680,8 +1695,8 @@ figure_3F <- bycountry_prc_counts %>%
   #         | country == "Australia" | country == "Spain"   
            ) %>% 
   ggplot() + 
-  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1, stat="identity") +
-  labs(title = "    Figure 3F. Proportional Growth of All \n Population Terms by Country (1990-2017)",
+  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.5, stat="identity") +
+  labs(title = "    Figure 2F. Proportional Growth of All \n Population Terms by Country (1990-2017)",
        color =  "Country") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -1692,11 +1707,12 @@ figure_3F <- bycountry_prc_counts %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
 
-legend_3EF <- bycountry_prc_counts %>% 
+legend_2EF <- bycountry_prc_counts %>% 
   drop_na(country) %>% 
   filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
            country == "Germany" | country == "Australia" 
@@ -1704,8 +1720,8 @@ legend_3EF <- bycountry_prc_counts %>%
   #         | country == "Australia" | country == "Spain"   
            ) %>% 
   ggplot() + 
-  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1, stat="identity") +
-  labs(title = "    Figure 3F. Proportional Growth of All \n Population Terms by Country (1990-2017)",
+  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.5, stat="identity") +
+  labs(title = "    Figure 2F. Proportional Growth of All \n Population Terms by Country (1990-2017)",
        color =  "Country") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -1716,15 +1732,16 @@ legend_3EF <- bycountry_prc_counts %>%
         legend.position = "bottom",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
-legend_3EF <- get_legend(legend_3EF)
+legend_2EF <- get_legend(legend_2EF)
 
 #grid.arrange(general_pop_graph, gen_pop_prc_counts_graph, nrow = 1, ncol = 2)
 
-grid.arrange(figure_3E, figure_3F, 
-             legend_3EF, 
+grid.arrange(figure_2E, figure_2F, 
+             legend_2EF, 
              nrow = 2, ncol=2,
              layout_matrix = rbind(c(1,2), c(3,3)),
              #widths = c(2.7, 2.7), 
@@ -1733,7 +1750,7 @@ grid.arrange(figure_3E, figure_3F,
 
 ```
 
-```{r}
+```{r extra country analysis, eval=FALSE, echo = FALSE}
 pop_terms_bycountry %>% 
   filter(all_pop_terms == 1) %>% 
   group_by(country, year) %>% 
@@ -1749,7 +1766,7 @@ figure_3F <- bycountry_prc_counts %>%
   #         | country == "Australia" | country == "Spain"   
            ) %>% 
   ggplot() + 
-  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1, stat="identity") +
+  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.5, stat="identity") +
   labs(title = "    Figure 3F. Proportional Growth of All \n Population Terms by Country (1990-2017)",
        color =  "Country") + 
   theme_bw() +
@@ -1761,11 +1778,12 @@ figure_3F <- bycountry_prc_counts %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5, face="bold")) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015));ggplotly()
 ```
 
-```{r figure 3gh, fig.height=5, fig.width=11.5, echo=FALSE}
+```{r figure 2gh, fig.height=5, fig.width=11.5, echo=FALSE}
 # recoding frequently occuring population-related bigrams 
 us_pop_bigrams <- text_data %>% 
   unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
@@ -1804,7 +1822,7 @@ us_pop_counts <- abstract_data %>%
 
 # graphing us-specific terms over time using census categories 
 # https://www.census.gov/topics/population/race/about.html
-figure_3G <- us_pop_counts %>% 
+figure_2G <- us_pop_counts %>% 
   mutate(term = ifelse(test = str_detect(string = word,
                        pattern = "\\b(?i)(black|blacks|african-american)\\b"), 
                        yes = "black", no = word)) %>% 
@@ -1835,7 +1853,7 @@ figure_3G <- us_pop_counts %>%
   group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.5, stat="identity") + 
   theme_bw() +
-  labs(title = "     Figure 3G. Total Growth of \n US-Specific Terms (1990-2017)",
+  labs(title = "     Figure 2G. Total Growth of \n US-Specific Terms (1990-2017)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
   ylab("Number of Articles") +
@@ -1934,7 +1952,7 @@ us_pop_prc_counts <- text_data %>%
   group_by(year) %>% 
   count(year) %>% 
   ungroup() %>% 
-  rename(total = n) 
+  rename(total = n)  
 
 # articles with term mentioned each year 
 us_pop_prc_counts <- us_pop_counts %>% 
@@ -1987,7 +2005,7 @@ us_pop_prc_counts <- us_pop_counts %>% filter(ethnic == 1) %>%
 
 
 # graphing terms over time 
-figure_3H <- us_pop_prc_counts %>% ggplot() + 
+figure_2H <- us_pop_prc_counts %>% ggplot() + 
   geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.5, stat="identity") +
   geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.5, stat="identity") +
   geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.5,stat="identity") +
@@ -1996,7 +2014,7 @@ figure_3H <- us_pop_prc_counts %>% ggplot() +
   geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.5,stat="identity") +
   geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.5,stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.5, stat="identity") +
-  labs(title = "    Figure 3H. Proportional Growth of \n US-Specific Terms (1990-2017)",
+  labs(title = "    Figure 2H. Proportional Growth of \n US-Specific Terms (1990-2017)",
        color =  "Term") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -2011,7 +2029,7 @@ figure_3H <- us_pop_prc_counts %>% ggplot() +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
-legend_3GH <- us_pop_prc_counts %>% ggplot() + 
+legend_2GH <- us_pop_prc_counts %>% ggplot() + 
   geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.5, stat="identity") +
   geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.5, stat="identity") +
   geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.5,stat="identity") +
@@ -2020,7 +2038,7 @@ legend_3GH <- us_pop_prc_counts %>% ggplot() +
   geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.5,stat="identity") +
   geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.5,stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.5, stat="identity") +
-  labs(title = "    Figure 3H. Proportional Growth of \n US-Specific Terms (1990-2017)",
+  labs(title = "    Figure 2H. Proportional Growth of \n US-Specific Terms (1990-2017)",
        color =  "Term") + 
   theme_bw() +
   ylab("Proportion of Articles") +
@@ -2035,12 +2053,12 @@ legend_3GH <- us_pop_prc_counts %>% ggplot() +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015))
 
-legend_3GH <- get_legend(legend_3GH)
+legend_2GH <- get_legend(legend_2GH)
 
 #grid.arrange(general_pop_graph, gen_pop_prc_counts_graph, nrow = 1, ncol = 2)
 
-grid.arrange(figure_3G, figure_3H, 
-             legend_3GH, 
+grid.arrange(figure_2G, figure_2H, 
+             legend_2GH, 
              nrow = 2, ncol=2,
              layout_matrix = rbind(c(1,2), c(3,3)),
              #widths = c(2.7, 2.7), 
@@ -2058,14 +2076,14 @@ lay <- rbind(c(1,2),
              c(10,11),
              c(12,12))
 
-grid.arrange(figure_3A, figure_3B, 
-             legend_3AB,
-             figure_3C, figure_3D, 
-             legend_3CD,
-             figure_3E, figure_3F, 
-             legend_3EF,
-             figure_3G, figure_3H,
-             legend_3GH,
+grid.arrange(figure_2A, figure_2B, 
+             legend_2AB,
+             figure_2C, figure_2D, 
+             legend_2CD,
+             figure_2E, figure_2F, 
+             legend_2EF,
+             figure_2G, figure_2H,
+             legend_2GH,
              nrow = 8, ncol=2,
              layout_matrix = lay,
              #widths = c(2.7, 2.7), 
@@ -2073,10 +2091,9 @@ grid.arrange(figure_3A, figure_3B,
              )
 ```
 
-```{r}
-pal <- wes_palette("Zissou1", 8, type = "continuous")
-pal
+Supplementary Notes: Color Palettes
 
+```{r supplementary color palettes, eval=FALSE}
 test_pal <- c("#61B329", # first (green)
               "#3B9AB2", # second (Light Blue)
               "#E21F00", # third (Red )
@@ -2086,12 +2103,15 @@ test_pal <- c("#61B329", # first (green)
               "#E86F00", # seventh (orange)
               "#E2B306") # last (yellow)
 
-scale_color_manual(values=c("#6b0f6b", "#61B329", "#E21F00", "#E2B306", "#E86F00", "#3B9AB2",  "#00468b", "#d23ccc"))  # 8 color palette - first graphs 
+scale_color_manual(values=c("#6b0f6b", "#61B329", "#E21F00", "#E2B306", "#E86F00", "#3B9AB2",  "#00468b", "#d23ccc"))  # 8 color palette - 1A + 1B graphs 
 
-scale_color_manual(values=c("#E21F00", "#3B9AB2", "#61B329", "#E2B306"))  # 4 color palette - 3A + 3B graphs
+scale_color_manual(values=c("#E21F00", "#3B9AB2", "#61B329", "#E2B306"))  # 4 color palette - 2A + 2B graphs
+
+scale_color_manual(values=c("#61B329", "#3B9AB2", "#E2B306", "#E21F00", "#E86F00", "#00468b")) + # parsed diversity terms
+
+scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) + # international county analyses 
 
 scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#d23ccc", "#6b0f6b",  "#E86F00", "#E2B306"))  # 8 color palette - last graphs 
-
 ```
 
 
