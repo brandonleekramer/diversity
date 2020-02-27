@@ -15,7 +15,8 @@ In our analyses below, we are examining the growth of in the use of the term "di
 ```{r setup, include = FALSE}
 #rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+knitr::opts_knit$set(root.dir = "~/diversity-data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ### Overall Growth of Publications 
@@ -25,8 +26,8 @@ In this first chunk, we load our data and examine the overall growth of articles
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "tm",
-              "ggraph", "data.table", "countrycode",
-              "widyr", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+               "data.table", "countrycode",
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
 # filtering 2018 articles because they seem to be incomplete 
