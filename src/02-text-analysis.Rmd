@@ -1839,17 +1839,3 @@ Panofsky, A., & Bliss, C. (2017). Ambiguity and scientific authority: Population
 Silge, J., & Robinson, D. (2016). tidytext: Text Mining and Analysis Using Tidy Data Principles in R. *Journal of Open Source Software*, 1(3), 37.
 
 
-
-```{r}
-word_pairs <- text_data %>% 
-  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) 
-
-word_cors <- austen_section_words %>%
-  group_by(word) %>%
-  filter(n() >= 20) %>%
-  pairwise_cor(word, section, sort = TRUE)
-
-word_cors
-  
-  
-```

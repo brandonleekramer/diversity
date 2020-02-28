@@ -7,20 +7,19 @@ output: html_document
 
 ```{r setup, include = FALSE}
 #rm(list = ls())
-knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-#knitr::opts_knit$set(root.dir = "~/diversity-data")
+#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+knitr::opts_knit$set(root.dir = "~/diversity-data")
 #knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", #"ldatuning", 
-              "lubridate", "plotly", "stringi", "ggraph")) {library(pkg, character.only = TRUE)}
+              "lubridate", "plotly", "stringi", "ggraph", "LDAvis")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
 # filtering 2018 articles because they seem to be incomplete 
   filter(year != "2018") 
-
 ```
 
 ```{r}
@@ -224,7 +223,7 @@ pop_science_topics <- top_terms %>% filter(general_class == "population_science"
 unique(pop_science_topics$defined_topic)
 ```
 
-```{r}
+```{r, fig.width=11.5}
 pop_science_topics %>% 
   filter(defined_topic == "human_genetics") %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
@@ -234,7 +233,7 @@ pop_science_topics %>%
   facet_wrap(~ topic, scales = "free_x")
 12/37
 ```
-```{r}
+```{r, fig.width=11.5}
 pop_science_topics %>% 
   filter(defined_topic == "clinical" | defined_topic == "research_ethics") %>%
   #filter(defined_topic == "racial_diversity" | defined_topic == "sex/gender") %>% 
@@ -246,7 +245,7 @@ pop_science_topics %>%
   facet_wrap(~ topic, scales = "free_x")
 7/37
 ```
-```{r}
+```{r, fig.width=11.5}
 pop_science_topics %>% 
   #filter(defined_topic == "racial_diversity" | defined_topic == "sex/gender") %>% 
   filter(defined_topic == "mental_health" | defined_topic == "healthcare" |
@@ -259,20 +258,20 @@ pop_science_topics %>%
   facet_wrap(~ topic, scales = "free_x")
 11/37
 ```
-```{r}
-#topic_names <- c("2" = "Racial", "10" = "Deafness/Hearing", 
-#                 "24" = "Ethnic",  "34" = "Sex/Gender", 
-#                 "50" = "Medical Education", "60" = "Age/Language",
-#                 "30" = "Research Ethics", "52" = "Nursing",  "64" = "Nephrology",
-#                 "1" = "Human Genetics", "6" = "Human Genetics", "61" = "Human Genetics"
-#                 )
-
-topic_names <- c("4" = "Racial", "8" = "Deafness/Hearing", 
-                 "5" = "Ethnic",  "6" = "Sex/Gender", 
-                 "10" = "Medical Education", "7" = "Age/Language",
-                 "9" = "Research Ethics", "11" = "Nursing",  "12" = "Nephrology",
-                 "1" = "Human Genetics", "2" = "Human Genetics", "3" = "Human Genetics"
+```{r, fig.width=11.5}
+topic_names <- c("2" = "Racial", "10" = "Deafness/Hearing", 
+                 "24" = "Ethnic",  "34" = "Sex/Gender", 
+                 "50" = "Medical Education", "60" = "Age/Language",
+                 "30" = "Research Ethics", "52" = "Nursing",  "64" = "Nephrology",
+                 "1" = "Human Genetics", "6" = "Human Genetics", "61" = "Human Genetics"
                  )
+
+#topic_names <- c("4" = "Racial", "8" = "Deafness/Hearing", 
+#                 "5" = "Ethnic",  "6" = "Sex/Gender", 
+#                 "10" = "Medical Education", "7" = "Age/Language",
+#                 "9" = "Research Ethics", "11" = "Nursing",  "12" = "Nephrology",
+#                 "1" = "Human Genetics", "2" = "Human Genetics", "3" = "Human Genetics"
+#                 )
 
 all_terms %>%
   drop_na(term) %>% 
@@ -300,9 +299,65 @@ all_terms %>%
         axis.text.y=element_text(size=6),
         axis.text.x=element_text(size=6),
         plot.title = element_text(hjust = 0.5)
-        ) + ggtitle("Figure 4. Select Topics Relating to \n Population Diversity using Latent Dirichlet Allocation")
-7/37
+        ) + ggtitle("Figure 4. Select Topics Relating to Population Diversity using Latent Dirichlet Allocation")
+
 ```
+
+```{r}
+#pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234)) 
+
+pubs_lda@alpha
+
+theta <- t(apply(pubs_lda$document_sums + alpha, 2, function(x) x/sum(x)))
+phi <- t(apply(t(pubs_lda$topics) + eta, 2, function(x) x/sum(x)))
+
+lda_list <- list(phi = phi,
+                 theta = theta,
+                 doc.length = doc.length,
+                 vocab = vocab, 
+                 term.frequency = term.frequency)
+
+json <- createJSON(phi = lda_list$phi, 
+                   theta = lda_list$theta, 
+                   doc.length = lda_list$doc.length, 
+                   vocab = lda_list$vocab, 
+                   term.frequency = lda_list$term.frequency)
+
+serVis(json, out.dir = 'vis', open.browser = FALSE)
+
+?createJSON
+
+data(TwentyNewsgroups, package="LDAvis")
+
+class(TwentyNewsgroups)
+# create the json object, start a local file server, open in default browser
+json <- with(TwentyNewsgroups,
+             createJSON(phi, theta, doc.length, vocab, term.frequency))
+serVis(json)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ```{r}
 
@@ -342,6 +397,7 @@ pop_science_network %>%
 
 
 ```{r}
+
 
 pubs_documents <- tidy(pubs_lda, matrix = "gamma")
 pubs_documents

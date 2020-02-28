@@ -2334,7 +2334,7 @@ figure_3D <- bysubject_graph %>%
   labs(title = "   Figure 3D. Proportional Growth of All \n Population Terms by Discipline (1990-2017)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
-  ylab("Number of Articles") +
+  ylab("Proportion of Articles") +
   theme(axis.title.x = element_blank(), 
         #axis.title.y = element_blank(), 
         legend.position = "none",
@@ -2367,7 +2367,7 @@ legend_3CD <- bysubject_graph %>%
   labs(title = "   Figure 3D. Proportional Growth of All \n Population Terms by Discipline (1990-2017)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
-  ylab("Number of Articles") +
+  ylab("Proportion of Articles") +
   theme(axis.title.x = element_blank(), 
         #axis.title.y = element_blank(), 
         legend.position = "bottom",
@@ -2387,7 +2387,7 @@ grid.arrange(figure_3C, figure_3D,
              #widths = c(2.7, 2.7), 
              heights = c(2.5, 0.4)
              )
-
+#ggplotly(figure_3A)
 ```
 
 ```{r binding 3ab + 3cd, fig.height=7, fig.width=11.5, echo=FALSE}
@@ -2405,6 +2405,10 @@ grid.arrange(figure_3A, figure_3B,
              #widths = c(2.7, 2.7), 
              heights = c(4.2, 0.4, 4.2, 0.8)
              )
+```
+```{r}
+
+
 ```
 
 Supplementary Notes: Color Palettes
@@ -2433,14 +2437,6 @@ c("#E2B306", "#E86F00", "#E21F00", "#6b0f6b", "#00468b", "#3B9AB2", "#d23ccc", "
   
 c("#E21F00", "#E2B306", "#61B329", "#3B9AB2")) + #collapsed field 
   
-  subject == "genetics & heredity" | 3
-         subject == "biochemistry & molecular biology" | 1
-         subject == "immunology" | 4
-         subject == "microbiology" | 6
-         subject == "pharmacology & pharmacy" | 7 
-         subject == "infectious diseases" | 5 
-         subject == "behavioral sciences" | 2
-         subject == "sociology" 8 ) %>%
 ```
 
 
