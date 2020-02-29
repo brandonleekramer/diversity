@@ -6,7 +6,7 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-#rm(list = ls())
+rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
 knitr::opts_knit$set(root.dir = "~/diversity-data")
 #knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
@@ -15,7 +15,7 @@ knitr::opts_knit$set(root.dir = "~/diversity-data")
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", #"ldatuning", 
-              "lubridate", "plotly", "stringi", "ggraph", "LDAvis")) {library(pkg, character.only = TRUE)}
+              "lubridate", "plotly", "stringi", "ggraph", "LDAvis", "textstem")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
 # filtering 2018 articles because they seem to be incomplete 
@@ -24,7 +24,8 @@ text_data <- read_csv("diversity_corpus.csv") %>%
 
 ```{r}
 
-text_data <- text_data %>% 
+# changing pnas journal title 
+tm_data <- text_data %>% 
   mutate(publication = tolower(publication)) %>% 
   separate(publication, into = c("publication", "void"), 
            sep = "[(]") %>% 
@@ -34,21 +35,37 @@ text_data <- text_data %>%
   pattern = "\\b(?i)(proceedings of the national academy of sciences of the united states of america)\\b"), 
   yes = "pnas", no = publication)) 
 
-by_abstract <- text_data %>% 
-  unnest_tokens(word, abstract)
+# adding in pub_ids
+tm_data <- tm_data %>% 
+  mutate (pub_id = row_number()) %>% 
+  select(pub_id, everything())
 
-my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
+# and a quick look author_year_id 
+tm_data <- tm_data %>% 
+  mutate(tmp = stringr::word(text_data$author, 1, sep = " ")) %>% 
+  mutate(tmp = tolower(tmp)) 
+tm_data$article_info <- paste0(tm_data$tmp,"_",tm_data$year)
+
+# lemmatizing 
+tm_data <- tm_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  select (pub_id, article_info, publication, word) %>%
+  mutate(word = lemmatize_words(word))
+
+# removing standard and custom stopwords 
+my_stop_words <- tibble(word = c(as.character(1:14), "[0-9]", 
                                 "rights", "reserved", "copyright", "elsevier"))
 
-word_counts <- by_abstract %>% 
+tm_data <- tm_data %>% 
   anti_join(stop_words) %>% 
-  anti_join(my_stopwords) %>% 
-  count(publication, word, sort = TRUE)
-  
-word_counts
+  anti_join(my_stop_words); rm(my_stop_words)
+
+word_counts <- tm_data %>% 
+  count(article_info, word, pub_id, sort = TRUE); word_counts
 
 pubs_dtm <- word_counts %>%
-  cast_dtm(publication, word, n)
+  cast_dtm(pub_id, word, n)
+
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
@@ -58,18 +75,19 @@ mat_start <- data.frame(event="mat_start", time=now("EST"))
 
 finding_k <- FindTopicsNumber(
   pubs_dtm,
-  topics = seq(from = 10, to = 150, by = 10),
+  topics = seq(from = 10, to = 120, by = 10),
   metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
   method = "Gibbs",
   control = list(seed = 77),
-  #mc.cores = 2L, # defaults to NA and finds cores available 
+  mc.cores = 7L, 
   verbose = TRUE)
 
 # logging the times and saving the work in RDS files 
 mat_end <- data.frame(event="mat_end", time=now("EST"))
 time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
-#saveRDS(bp_matrix, "bp_matrix.rds")
-saveRDS(time_log, "time_log.rds")
+
+saveRDS(finding_k, "finding_k.rds")
+saveRDS(time_log, "finding_k_time_log.rds")
 
 FindTopicsNumber_plot(finding_k)
 
@@ -306,6 +324,33 @@ all_terms %>%
 ```{r}
 #pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234)) 
 
+pubs_lda
+topics <- topicmodels::topics(pubs_lda, 1)
+?topics
+
+terms <- as.data.frame(topicmodels::terms(pubs_lda, 30), stringsAsFactors = FALSE)
+terms[1:10,]
+
+topicmodels2LDAvis <- function(x, ...){
+  post <- topicmodels::posterior(x)
+  if (ncol(post[["topics"]]) < 3) stop("The model must contain > 2 topics")
+  mat <- x@wordassignments
+  LDAvis::createJSON(
+    phi = post[["terms"]], 
+    theta = post[["topics"]],
+    vocab = colnames(post[["terms"]]),
+    doc.length = slam::row_sums(mat, na.rm = TRUE),
+    term.frequency = slam::col_sums(mat, na.rm = TRUE)
+  )
+}
+
+serVis(topicmodels2LDAvis(pubs_lda))
+
+```
+
+
+
+```{r}
 pubs_lda@alpha
 
 theta <- t(apply(pubs_lda$document_sums + alpha, 2, function(x) x/sum(x)))
