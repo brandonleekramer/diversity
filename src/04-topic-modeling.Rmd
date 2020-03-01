@@ -8,13 +8,13 @@ output: html_document
 ```{r setup, include = FALSE}
 rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "~/diversity-data")
-#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "~/diversity-data")
+knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", #"ldatuning", 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", "ldatuning", "parallel",
               "lubridate", "plotly", "stringi", "ggraph", "LDAvis", "textstem")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
@@ -64,22 +64,25 @@ word_counts <- tm_data %>%
   count(article_info, word, pub_id, sort = TRUE); word_counts
 
 pubs_dtm <- word_counts %>%
-  cast_dtm(pub_id, word, n)
+  cast_dtm(pub_id, word, n) %>%
+  removeSparseTerms(sparse = .999)
 
 ```
 
 ```{r, echo=FALSE, eval=FALSE}
+
+num_cores <- (detectCores() - 1)
 
 # in this snippet, we will be logging start/end times 
 mat_start <- data.frame(event="mat_start", time=now("EST"))
 
 finding_k <- FindTopicsNumber(
   pubs_dtm,
-  topics = seq(from = 10, to = 120, by = 10),
+  topics = seq(from = 10, to = 100, by = 10),
   metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
   method = "Gibbs",
   control = list(seed = 77),
-  mc.cores = 7L, 
+  mc.cores = num_cores, 
   verbose = TRUE)
 
 # logging the times and saving the work in RDS files 
@@ -107,6 +110,36 @@ time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
 saveRDS(time_log, "time_log.rds")
 
 ```
+
+Next step is running this: 
+http://www.bernhardlearns.com/2017/05/topic-models-lda-and-ctm-in-r-with.html
+
+Determining the best model fit using perplexity:
+https://cfss.uchicago.edu/notes/topic-modeling/#perplexity
+
+And then visualize using the LDAvis package:
+https://cfss.uchicago.edu/notes/topic-modeling/#importing-our-own-lda-model
+
+other interesting stuff here:
+https://rpubs.com/ShilpaBhat/552451
+
+```{r}
+para <- tibble(k = c(2,3,9,12,50)) # change based on results 
+
+system.time(
+  lemma_tm <- para %>%
+    mutate(lda = map(k, 
+                   function(k) LDA(
+                     k=k, 
+                     x=dtm_lemma, 
+                     method="Gibbs", 
+                     control=control_list_gibbs
+                     )
+                   )
+         )
+)
+```
+
 
 ```{r}
 
@@ -466,17 +499,46 @@ https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html
 https://rpubs.com/MNidhi/NumberoftopicsLDA
 
 
+New Citations 
+
+Finding K with Cross validation:
+https://www.r-bloggers.com/cross-validation-of-topic-modelling/
+
+Video on Gibbs-Sampling in Topic Modeling:
+https://www.youtube.com/watch?v=u7l5hhmdc0M
+
+More on Gibbs-Sampling in Topic Modeling: 
+https://cs.brown.edu/courses/csci1460/assets/files/topicmod.pdf
+https://medium.com/analytics-vidhya/topic-modeling-using-lda-and-gibbs-sampling-explained-49d49b3d1045
+http://www.mit.edu/~ilkery/papers/GibbsSampling.pdf
+
+A Biterm Topic Model for Short Texts:
+http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.402.4032&rep=rep1&type=pdf
+
+Correlated Topic Modeling:
+http://www.cs.columbia.edu/~blei/papers/BleiLafferty2007.pdf
+http://www.bernhardlearns.com/2017/05/topic-models-lda-and-ctm-in-r-with.html  ***
+
+lda package:
+https://cran.r-project.org/web/packages/lda/lda.pdf
+https://www.rdocumentation.org/packages/lda/versions/1.4.2/topics/lda.collapsed.gibbs.sampler
 
 
+Coursera course on ML clustering:
+https://www.coursera.org/learn/ml-clustering-and-retrieval
 
+Running Gibbs-Sampling before LDAvis:
+https://ldavis.cpsievert.me/reviews/reviews.html
+https://rpubs.com/ShilpaBhat/552451
+https://github.com/cpsievert/LDAvis/
+https://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf
+https://cfss.uchicago.edu/notes/topic-modeling/#importing-our-own-lda-model
 
+More on LDA:
+https://medium.com/@lettier/how-does-lda-work-ill-explain-using-emoji-108abf40fa7d
 
-
-
-
-
-
-
+Determining the best model fit using perplexity:
+https://cfss.uchicago.edu/notes/topic-modeling/#perplexity
 
 
 
