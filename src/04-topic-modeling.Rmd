@@ -64,8 +64,7 @@ word_counts <- tm_data %>%
   count(article_info, word, pub_id, sort = TRUE); word_counts
 
 pubs_dtm <- word_counts %>%
-  cast_dtm(pub_id, word, n) %>%
-  removeSparseTerms(sparse = .999)
+  cast_dtm(pub_id, word, n) 
 
 ```
 
@@ -78,7 +77,7 @@ mat_start <- data.frame(event="mat_start", time=now("EST"))
 
 finding_k <- FindTopicsNumber(
   pubs_dtm,
-  topics = seq(from = 10, to = 100, by = 10),
+  topics = seq(from = 10, to = 200, by = 10),
   metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
   method = "Gibbs",
   control = list(seed = 77),
@@ -89,8 +88,8 @@ finding_k <- FindTopicsNumber(
 mat_end <- data.frame(event="mat_end", time=now("EST"))
 time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
 
-saveRDS(finding_k, "finding_k.rds")
-saveRDS(time_log, "finding_k_time_log.rds")
+saveRDS(finding_k, "topic_number_030320.rds")
+saveRDS(time_log, "time_log_030320.rds")
 
 FindTopicsNumber_plot(finding_k)
 

@@ -1,0 +1,104 @@
+---
+title: "Funding Mechanisms"
+author: "Brandon L. Kramer"
+date: "3/12/2020"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+#rm(list = ls())
+#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "~/diversity-data")
+knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+```
+
+Step 1: Loading Packages, Ingesting Data and Unnesting Tokens 
+
+```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+# loading packages 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "tm",
+               "data.table", "countrycode",
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+# loading the .csv file 
+text_data <- read_csv("diversity_corpus.csv") %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+```
+
+```{r figure 4b, fig.width=9.5, echo=FALSE}
+# pulling our list of population
+all_pop_terms <- read_csv("population_terms.csv") 
+all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
+
+# creating vectors to designate whether 
+population_data <- text_data %>% 
+  mutate(abstract = str_to_lower(abstract)) %>% 
+  mutate(abstract = str_to_lower(abstract)) %>% 
+  mutate(all_pop = ifelse(test = str_detect(string = abstract, 
+                       pattern = all_pop_terms), yes = 1, no = 0)) %>% 
+  mutate(race_ethnic = ifelse(test = str_detect(string = abstract, 
+                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+                       yes = 1, no = 0)) 
+```
+
+Step 2: Checking the Counts of Funding Mechanisms 
+
+First, I used these snippets to find the most common funding mechanisms. 
+
+```{r}
+text_data %>% 
+  unnest_tokens(bigram, grant_information, token = "ngrams", n = 3) %>% 
+  count(bigram) %>% 
+  arrange(-n)
+
+text_data %>% 
+  select(grant_information) %>% 
+  filter(!is.na(grant_information))
+
+text_data %>% 
+  unnest_tokens(word, grant_information) %>% 
+  count(word) %>% 
+  arrange(-n)
+```
+
+medical research council 
+hhs|department of health and human services|phs|public health service
+cihr|Canadian Institutes of Health Research
+Howard Hughes Medical Institute|Howard Hughes 
+Biotechnology and Biological Sciences Research Council|BBSRC
+british heart foundation
+european research council
+CDC|Centers for Disease Control|Centers for Disease Control and Prevention|nccdphp|National Center for Chronic Disease and Health Promotion
+austrian science fund|FWF
+world health organization|WHO
+arthritis research uk
+
+```{r creating nih dictionary}
+nih_funding <- read_csv("nih_funding.csv") 
+nih_funding <- paste(c("\\b(?i)(zcx", nih_funding$nih_office, nih_funding$abbreviation, "zxc)\\b"), collapse = "|")
+nih_funding
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
