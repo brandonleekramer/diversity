@@ -37,6 +37,9 @@ population_data <- text_data %>%
                        pattern = all_pop_terms), yes = 1, no = 0)) %>% 
   mutate(race_ethnic = ifelse(test = str_detect(string = abstract, 
                        pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
+                       yes = 1, no = 0)) %>% 
+  mutate(sex_gender = ifelse(test = str_detect(string = abstract, 
+                       pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), 
                        yes = 1, no = 0)) 
 ```
 
@@ -111,12 +114,18 @@ funding_data <- population_data %>%
           euro, biotech, foundation, university, other)
 ```
 
-```{r}
-summary(lm(all_pop ~ nih + nsf + hhs + euro + 
-           biotech + foundation + university + other, data=funding_data))
+```{r all_pop_lm}
+summary(glm(all_pop ~ nih + nsf + hhs + euro + biotech + foundation + 
+              university + other, family = binomial, data = funding_data))
 ```
-
-
+```{r race_ethnic_lm}
+summary(glm(race_ethnic ~ nih + nsf + hhs + euro + biotech + foundation + 
+              university + other, family = binomial, data = funding_data))
+```
+```{r race_ethnic_lm}
+summary(glm(sex_gender ~ nih + nsf + hhs + euro + biotech + foundation + 
+              university + other, family = binomial, data = funding_data))
+```
 
 
 
