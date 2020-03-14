@@ -6,18 +6,18 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-#rm(list = ls())
+rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
 #knitr::opts_knit$set(root.dir = "~/diversity-data")
 knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
-Step 1: Loading Packages, Ingesting Data and Unnesting Tokens 
+# Step 1: Loading Packages, Ingesting Data and Unnesting Tokens 
 
-```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+```{r load_packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "tm",
-               "data.table", "countrycode",
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", 
+              "tm", "countrycode", "tidytable",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
@@ -25,14 +25,13 @@ text_data <- read_csv("diversity_corpus.csv") %>%
   filter(year != "2018") 
 ```
 
-```{r figure 4b, fig.width=9.5, echo=FALSE}
+```{r all_pop_terms, fig.width=9.5, echo=FALSE}
 # pulling our list of population
 all_pop_terms <- read_csv("population_terms.csv") 
 all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
 
 # creating vectors to designate whether 
 population_data <- text_data %>% 
-  mutate(abstract = str_to_lower(abstract)) %>% 
   mutate(abstract = str_to_lower(abstract)) %>% 
   mutate(all_pop = ifelse(test = str_detect(string = abstract, 
                        pattern = all_pop_terms), yes = 1, no = 0)) %>% 
@@ -41,11 +40,11 @@ population_data <- text_data %>%
                        yes = 1, no = 0)) 
 ```
 
-Step 2: Checking the Counts of Funding Mechanisms 
+# Step 2: Checking the Counts of Funding Mechanisms 
 
 First, I used these snippets to find the most common funding mechanisms. 
 
-```{r}
+```{r inductive_funding_epa, eval=FALSE, include=FALSE}
 text_data %>% 
   unnest_tokens(bigram, grant_information, token = "ngrams", n = 3) %>% 
   count(bigram) %>% 
@@ -61,30 +60,61 @@ text_data %>%
   arrange(-n)
 ```
 
-medical research council 
-hhs|department of health and human services|phs|public health service
-cihr|Canadian Institutes of Health Research
-Howard Hughes Medical Institute|Howard Hughes 
-Biotechnology and Biological Sciences Research Council|BBSRC
-british heart foundation
-european research council
-CDC|Centers for Disease Control|Centers for Disease Control and Prevention|nccdphp|National Center for Chronic Disease and Health Promotion
-austrian science fund|FWF
-world health organization|WHO
-arthritis research uk
+These snippets provided some insights into the big medical/bio funders like NIH and NSF as well as a couple private funders like Wellcome Trust and Howard Hughes, but I ultimately took an approach that generated a [more comprehensive list](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=1403535448).
 
-```{r creating nih dictionary}
-nih_funding <- read_csv("nih_funding.csv") 
-nih_funding <- paste(c("\\b(?i)(zcx", nih_funding$nih_office, nih_funding$abbreviation, "zxc)\\b"), collapse = "|")
-nih_funding
+```{r creating_funding_dictionary}
+funding_mechanisms <- read_csv("funding_mechanisms.csv") 
+nih <- funding_mechanisms %>% filter(logit_category == "US NIH")
+nsf <- funding_mechanisms %>% filter(logit_category == "US NSF")
+hhs <- funding_mechanisms %>% filter(logit_category == "US HHS")
+uk  <- funding_mechanisms %>% filter(logit_category == "UK")
+euro <- funding_mechanisms %>% filter(logit_category == "Europe")
+biotech <- funding_mechanisms %>% filter(logit_category == "Biotech")
+foundation <- funding_mechanisms %>% filter(logit_category == "Foundation")
+other <- funding_mechanisms %>% filter(logit_category == "International" | 
+                                               logit_category == "Africa" | 
+                                               logit_category == "Asia" | 
+                                               logit_category == "Australia" |
+                                               logit_category == "Americas")
+
+nih <- paste(c("\\b(?i)(zcx", nih$funder, nih$abbreviation, "zxc)\\b"), collapse = "|")
+nsf <- paste(c("\\b(?i)(zcx", nsf$funder, nsf$abbreviation, "zxc)\\b"), collapse = "|")
+hhs <- paste(c("\\b(?i)(zcx", hhs$funder, hhs$abbreviation, "zxc)\\b"), collapse = "|")
+uk <- paste(c("\\b(?i)(zcx", uk$funder, uk$abbreviation, "zxc)\\b"), collapse = "|")
+euro <- paste(c("\\b(?i)(zcx", euro$funder, euro$abbreviation, "zxc)\\b"), collapse = "|")
+biotech <- paste(c("\\b(?i)(zcx", biotech$funder, biotech$abbreviation, "zxc)\\b"), collapse = "|")
+foundation <- paste(c("\\b(?i)(zcx", foundation$funder, foundation$abbreviation, "zxc)\\b"), collapse = "|")
+university <- paste(c("\\b(?i)(zcx|university|college|univ.|zxc)\\b"), collapse = "|")
+other <- paste(c("\\b(?i)(zcx", other$funder, other$abbreviation, "zxc)\\b"), collapse = "|")
+
+# creating vectors to designate whether 
+funding_data <- population_data %>% 
+  mutate(nih = ifelse(test = str_detect(string = grant_information, 
+                       pattern = nih), yes = 1, no = 0)) %>% 
+  mutate(nsf = ifelse(test = str_detect(string = grant_information, 
+                       pattern = nsf), yes = 1, no = 0)) %>% 
+  mutate(hhs = ifelse(test = str_detect(string = grant_information, 
+                       pattern = hhs), yes = 1, no = 0)) %>% 
+  mutate(uk = ifelse(test = str_detect(string = grant_information, 
+                       pattern = uk), yes = 1, no = 0)) %>% 
+  mutate(euro = ifelse(test = str_detect(string = grant_information, 
+                       pattern = euro), yes = 1, no = 0)) %>% 
+  mutate(biotech = ifelse(test = str_detect(string = grant_information, 
+                       pattern = biotech), yes = 1, no = 0)) %>% 
+  mutate(foundation = ifelse(test = str_detect(string = grant_information, 
+                       pattern = foundation), yes = 1, no = 0)) %>% 
+  mutate(university = ifelse(test = str_detect(string = grant_information, 
+                       pattern = university), yes = 1, no = 0)) %>% 
+  mutate(other = ifelse(test = str_detect(string = grant_information, 
+                       pattern = other), yes = 1, no = 0)) %>% 
+  drop_na(all_pop, race_ethnic, nih, nsf, hhs, 
+          euro, biotech, foundation, university, other)
 ```
 
-
-
-
-
-
-
+```{r}
+summary(lm(all_pop ~ nih + nsf + hhs + euro + 
+           biotech + foundation + university + other, data=funding_data))
+```
 
 
 
