@@ -1,0 +1,98 @@
+---
+title: "Network Relations"
+author: "Brandon L. Kramer"
+date: "3/28/2020"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+rm(list = ls())
+#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+```
+
+### Overall Growth of Publications 
+
+```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+# loading packages 
+for (pkg in c("igraph", "tidytext", "tidyverse", "ggplot2", "stringr", "bibliometrix")) {library(pkg, character.only = TRUE)}
+# loading the .csv file 
+
+#text_data <- read_csv("biomedical_corpus.csv") 
+#sci2_data <- read_csv("raw_data_from_sci2.csv") 
+
+# diversity corpus 
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+files <- dir(pattern = "*.txt")
+files <- readFiles(files)
+test_corpus <- convert2df(files, dbsource = "isi", format = "plaintext")
+
+```
+
+```{r}
+
+test_data <- test_corpus %>% 
+  rename(authors = AU, addresses = C1, year = PY, 
+         abstract = AB, title = TI, journal = SO, 
+         volume = VL, issue = IS, page = PG, doi = DI, funding = FU, 
+         reference_list = CR, reference_count = NR, pubmed_id = PM) %>% 
+  select(authors, addresses, year, abstract, title, 
+         journal, volume, page, doi, 
+         reference_list, reference_count, pubmed_id) %>% 
+  top_n(10)
+
+
+edgelist <- test_data %>% 
+  select(authors, year, volume, page, doi, reference_list) %>% 
+  mutate(source = gsub("\\;.*", "", authors)) %>% 
+  mutate(source = str_c(source, ", ", year, ", V", page, ", P", volume, ", DOI ", doi)) %>% 
+  unnest(target = strsplit(reference_list, ";")) %>% 
+  select(source, target)
+
+
+#edgelist %>% 
+#  unnest(target = strsplit(reference_list, ";")) %>% 
+#  select(source, target)
+
+test_data
+
+edgelist
+
+```
+
+```{r}
+
+?cocMatrix
+
+citation_network <- cocMatrix(test_corpus, Field = "CR", type = "sparse", sep = ";")
+
+test_network <- graph_from_adjacency_matrix(citation_network)
+
+test <- graph_from_adjacency_matrix(test, mode="undirected", weighted=NULL)
+
+?graph.adjacency
+
+
+
+# recreating the sci2 function for creating bipartite networks
+sci2_data %>% 
+  rename(authors = Authors, year = `Publication Year`) %>% 
+  select(authors, year, Volume, DOI) %>% 
+  mutate(CiteMeAs = gsub("\\|.*", "", authors)) %>% 
+  mutate(CiteMeAs = str_c(CiteMeAs, ", ", year, ", V ", Volume, ", Doi ", DOI)) %>% 
+  select(CiteMeAs)
+
+text_data %>% 
+  rename(authors = AU, year = PY) %>% 
+  mutate(authors = tolower(authors)) %>% 
+  select(authors, year, Volume, DOI) %>% 
+  mutate(CiteMeAs = gsub("\\|.*", "", authors)) %>% 
+  mutate(CiteMeAs = str_c(CiteMeAs, ", ", year, ", V ", Volume, ", Doi ", DOI)) %>% 
+  select(CiteMeAs)
+
+
+
+cite_me_as = first_author, year, __, Doi 
+mutate(new = substr(Authors, 1, regexpr("\\|", Authors)-1))
+
+```
