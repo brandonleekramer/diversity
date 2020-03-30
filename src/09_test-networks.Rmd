@@ -11,62 +11,122 @@ rm(list = ls())
 knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
-### Overall Growth of Publications 
+# Load Data and Create CSV 
 
 ```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
-for (pkg in c("igraph", "tidytext", "tidyverse", "ggplot2", "stringr", "bibliometrix")) {library(pkg, character.only = TRUE)}
+for (pkg in c("igraph", "tidytext", "tidyverse", "ggplot2", "stringr", "bibliometrix", "sna")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 
 #text_data <- read_csv("biomedical_corpus.csv") 
 #sci2_data <- read_csv("raw_data_from_sci2.csv") 
 
 # diversity corpus 
-setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Diversity Top Core Files")
 files <- dir(pattern = "*.txt")
 files <- readFiles(files)
-test_corpus <- convert2df(files, dbsource = "isi", format = "plaintext")
-
+diversity_raw <- convert2df(files, dbsource = "isi", format = "plaintext")
+write.csv(diversity_raw, "diversity_raw.csv")
 ```
+
+# Create NodeID/Source and Output Data for [Table2Net](https://medialab.github.io/table2net)
 
 ```{r}
 
-test_data <- test_corpus %>% 
+# import data 
+setwd("C:/Users/bkram/CloudStation/Diversity/Data")
+diversity_raw <- read_csv("diversity_raw.csv")
+
+# rename columns 
+diversity_select <- diversity_raw %>% 
   rename(authors = AU, addresses = C1, year = PY, 
-         abstract = AB, title = TI, journal = SO, 
+         abstract = AB, title = TI, journal = SO, abb_journal = J9, 
          volume = VL, issue = IS, page = PG, doi = DI, funding = FU, 
          reference_list = CR, reference_count = NR, pubmed_id = PM) %>% 
   select(authors, addresses, year, abstract, title, 
-         journal, volume, page, doi, 
-         reference_list, reference_count, pubmed_id) %>% 
-  top_n(10)
+         journal, abb_journal, volume, page, doi, 
+         reference_list, reference_count, pubmed_id) 
 
-
-edgelist <- test_data %>% 
-  select(authors, year, volume, page, doi, reference_list) %>% 
+diversity_select <- diversity_select %>% 
+  select(authors, year, abb_journal, volume, page, doi, reference_list) %>% 
   mutate(source = gsub("\\;.*", "", authors)) %>% 
-  mutate(source = str_c(source, ", ", year, ", V", page, ", P", volume, ", DOI ", doi)) %>% 
-  unnest(target = strsplit(reference_list, ";")) %>% 
-  select(source, target)
+  mutate(source = str_c(source, ", ", year, ", ", abb_journal, ", V", page, ", P", volume, ", DOI ", doi)) %>% 
+  select(source, everything())
 
-
-#edgelist %>% 
-#  unnest(target = strsplit(reference_list, ";")) %>% 
-#  select(source, target)
-
-test_data
-
-edgelist
+write.csv(diversity_select, "diversity_select.csv")
 
 ```
 
 ```{r}
+
+# create edgelist 
+edgelist <- diversity_select %>% 
+  select(authors, year, volume, page, doi, reference_list) %>% 
+  drop_na(authors, reference_list) %>% 
+  mutate(source = gsub("\\;.*", "", authors)) %>% 
+  mutate(source = str_c(source, ", ", year, ", V", page, ", P", volume, ", DOI ", doi)) %>% 
+  unnest(target = strsplit(reference_list, ";")) %>% 
+  mutate(source = tolower(source), target = tolower(target)) %>% 
+  filter(!grepl("(^[0-9])", target)) %>% 
+  drop_na(source, target) %>% 
+  select(source, target)
+
+edgelist %>% 
+  count(target) %>% 
+  arrange(-n)
+
+source <- unique(edgelist$source)
+target <- edgelist %>% rename(source = target) 
+target <- unique(target)
+double_check <- bind_rows(source, target)
+double_check <- unique(double_check)
+
+rbind(unique(edgelist$source), unique(edgelist$target))
+
+
+```
+
+
+```{r}
+library(sna)
+sna_network <- network(edgelist, matrix.type="edgelist", directed=TRUE)
+
+summary(sna_network)
+
+
+
+
+```
+
+```{r}
+
+test_network <- graph_from_data_frame(edgelist, directed = TRUE)
+
+degree(test_network, mode = "in")
+
+
+
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+network <- read_graph("bipartite.graphml", format = "graphml")
+
+
+library(rgexf)
+# You have to create a file connection.
+g1.gexf <- igraph.to.gexf(g1)
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+gexf1   <- read.gexf("network.gexf")
+igraph1 <- gexf.to.igraph(gexf1)
+
+
+
+
+?read.graph
 
 ?cocMatrix
 
 citation_network <- cocMatrix(test_corpus, Field = "CR", type = "sparse", sep = ";")
 
-test_network <- graph_from_adjacency_matrix(citation_network)
+
 
 test <- graph_from_adjacency_matrix(test, mode="undirected", weighted=NULL)
 
