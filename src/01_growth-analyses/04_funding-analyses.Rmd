@@ -8,8 +8,8 @@ output: html_document
 ```{r setup, include = FALSE}
 rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-#knitr::opts_knit$set(root.dir = "~/diversity-data")
-knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+knitr::opts_knit$set(root.dir = "~/diversity-data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 # Step 1: Loading Packages, Ingesting Data and Unnesting Tokens 
@@ -17,7 +17,7 @@ knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```{r load_packages, message = FALSE, results = FALSE, echo=FALSE}
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", 
-              "tm", "countrycode", "tidytable",
+              "tm", "countrycode", "tidytable", "InformationValue",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 # loading the .csv file 
 text_data <- read_csv("diversity_corpus.csv") %>% 
@@ -28,19 +28,19 @@ text_data <- read_csv("diversity_corpus.csv") %>%
 ```{r all_pop_terms, fig.width=9.5, echo=FALSE}
 # pulling our list of population
 all_pop_terms <- read_csv("population_terms.csv") 
-all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
+us_specific_terms <- all_pop_terms %>% filter(category == "us_specific")
+all_pop_terms <- paste(c("\\b(?i)(zqx", all_pop_terms$term, "zqx)\\b"), collapse = "|")
+us_specific_terms <- paste(c("\\b(?i)(zqx", us_specific_terms$term, "zqx)\\b"), collapse = "|")
+divictionary <- read_csv("diversity_dictionary.csv") 
 
 # creating vectors to designate whether 
 population_data <- text_data %>% 
   mutate(abstract = str_to_lower(abstract)) %>% 
-  mutate(all_pop = ifelse(test = str_detect(string = abstract, 
-                       pattern = all_pop_terms), yes = 1, no = 0)) %>% 
-  mutate(race_ethnic = ifelse(test = str_detect(string = abstract, 
-                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
-                       yes = 1, no = 0)) %>% 
-  mutate(sex_gender = ifelse(test = str_detect(string = abstract, 
-                       pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), 
-                       yes = 1, no = 0)) 
+  mutate(all_pop = ifelse(test = str_detect(string = abstract, pattern = all_pop_terms), yes = 1, no = 0)) %>% 
+  mutate(race_ethnic = ifelse(test = str_detect(string = abstract, pattern = 
+         paste(c("\\b(?i)(zqx",na.omit(divictionary$race_ethnicity),us_specific_terms,"zqx)\\b"), collapse = "|")), yes = 1, no = 0)) %>%  
+  mutate(sex_gender = ifelse(test = str_detect(string = abstract, pattern = 
+         paste(c("\\b(?i)(zqx", na.omit(divictionary$sex_gender), "zqx)\\b"), collapse = "|")), yes = 1, no = 0)) 
 ```
 
 # Step 2: Checking the Counts of Funding Mechanisms 
@@ -60,13 +60,14 @@ text_data %>%
 text_data %>% 
   unnest_tokens(word, grant_information) %>% 
   count(word) %>% 
+  filter(!is.na(word)) %>% 
   arrange(-n)
 ```
 
 These snippets provided some insights into the big medical/bio funders like NIH and NSF as well as a couple private funders like Wellcome Trust and Howard Hughes, but I ultimately took an approach that generated a [more comprehensive list](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=1403535448).
 
 ```{r creating_funding_dictionary}
-funding_mechanisms <- read_csv("funding_mechanisms.csv") 
+funding_mechanisms <- read_csv("funding_information.csv") 
 nih <- funding_mechanisms %>% filter(logit_category == "US NIH")
 nsf <- funding_mechanisms %>% filter(logit_category == "US NSF")
 hhs <- funding_mechanisms %>% filter(logit_category == "US HHS")
@@ -110,22 +111,92 @@ funding_data <- population_data %>%
                        pattern = university), yes = 1, no = 0)) %>% 
   mutate(other = ifelse(test = str_detect(string = grant_information, 
                        pattern = other), yes = 1, no = 0)) %>% 
-  drop_na(all_pop, race_ethnic, nih, nsf, hhs, 
-          euro, biotech, foundation, university, other)
+  drop_na(all_pop, race_ethnic, sex_gender, nih, nsf, hhs, euro, uk, biotech, foundation, university, other) %>% 
+  select(abstract, year, all_pop, race_ethnic, sex_gender, nih, nsf, hhs, euro, uk, biotech, foundation, university, other) %>% 
+  filter(year > 1993)
+```
+
+```{r}
+funding_data %>% 
+  count()
+funding_data %>% 
+  count(year)
+
+table(funding_data$race_ethnic)
+table(funding_data$sex_gender)
+table(funding_data$all_pop)
+
+table(funding_data$nih)
+table(funding_data$nsf) # only 23
+table(funding_data$hhs)
+table(funding_data$euro) # 144
+table(funding_data$uk)
+table(funding_data$biotech) #only 2
+table(funding_data$foundation)
+table(funding_data$university) # only 10
+table(funding_data$other)
+
+```
+```{r}
+
+# http://r-statistics.co/Logistic-Regression-With-R.html
+
+# Create Training Data
+input_ones <- funding_data[which(funding_data$race_ethnic == 1), ]  # all 1's
+input_zeros <- funding_data[which(funding_data$race_ethnic == 0), ]  # all 0's
+set.seed(100)  # for repeatability of samples
+input_ones_training_rows <- sample(1:nrow(input_ones), 0.7*nrow(input_ones))  # 1's for training
+input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.7*nrow(input_ones))  # 0's for training. Pick as many 0's as 1's
+training_ones <- input_ones[input_ones_training_rows, ]  
+training_zeros <- input_zeros[input_zeros_training_rows, ]
+trainingData <- rbind(training_ones, training_zeros)  # row bind the 1's and 0's 
+
+# Create Test Data
+test_ones <- input_ones[-input_ones_training_rows, ]
+test_zeros <- input_zeros[-input_zeros_training_rows, ]
+testData <- rbind(test_ones, test_zeros)  # row bind the 1's and 0's 
+
+table(trainingData$race_ethnic)
+
+```
+
+```{r race_ethnic_lm}
+race_model <- glm(race_ethnic ~ nih + nsf + hhs + euro + uk + biotech + foundation + 
+              university + other, family = binomial, data = funding_data)
+predicted <- plogis(predict(race_model, testData))
+
+optCutOff <- optimalCutoff(testData$race_ethnic, predicted)[1]
+
+summary(race_model)
+
+car::vif(race_model)
+
+misClassError(testData$race_ethnic, predicted, threshold = optCutOff)
+
+plotROC(testData$race_ethnic, predicted)
+
+Concordance(testData$race_ethnic, predicted)
+
+sensitivity(testData$race_ethnic, predicted, threshold = optCutOff)
+
+specificity(testData$race_ethnic, predicted, threshold = optCutOff)
+
+confusionMatrix(testData$race_ethnic, predicted, threshold = optCutOff)
+
+```
+
+```{r race_ethnic_lm}
+summary(glm(sex_gender ~ nih + nsf + hhs + euro + uk + biotech + foundation + 
+              university + other, family = binomial, data = funding_data))
+
+
 ```
 
 ```{r all_pop_lm}
 summary(glm(all_pop ~ nih + nsf + hhs + euro + biotech + foundation + 
-              university + other, family = binomial, data = funding_data))
+        university + other, family = binomial, data = funding_data))
 ```
-```{r race_ethnic_lm}
-summary(glm(race_ethnic ~ nih + nsf + hhs + euro + biotech + foundation + 
-              university + other, family = binomial, data = funding_data))
-```
-```{r race_ethnic_lm}
-summary(glm(sex_gender ~ nih + nsf + hhs + euro + biotech + foundation + 
-              university + other, family = binomial, data = funding_data))
-```
+
 
 
 

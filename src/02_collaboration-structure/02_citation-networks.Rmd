@@ -7,8 +7,8 @@ output: html_document
 
 ```{r setup, include = FALSE}
 rm(list = ls())
-#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
 ### Overall Growth of Publications 
@@ -22,7 +22,7 @@ for (pkg in c("igraph", "tidytext", "tidyverse", "ggplot2", "stringr", "bibliome
 #sci2_data <- read_csv("raw_data_from_sci2.csv") 
 
 # diversity corpus 
-setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+setwd("/sfs/qumulo/qhome/kb7hp/diversity-data/test_data")
 files <- dir(pattern = "*.txt")
 files <- readFiles(files)
 test_corpus <- convert2df(files, dbsource = "isi", format = "plaintext")
@@ -38,9 +38,7 @@ test_data <- test_corpus %>%
          reference_list = CR, reference_count = NR, pubmed_id = PM) %>% 
   select(authors, addresses, year, abstract, title, 
          journal, volume, page, doi, 
-         reference_list, reference_count, pubmed_id) %>% 
-  top_n(10)
-
+         reference_list, reference_count, pubmed_id) 
 
 edgelist <- test_data %>% 
   select(authors, year, volume, page, doi, reference_list) %>% 
@@ -49,16 +47,17 @@ edgelist <- test_data %>%
   unnest(target = strsplit(reference_list, ";")) %>% 
   select(source, target)
 
-
-#edgelist %>% 
-#  unnest(target = strsplit(reference_list, ";")) %>% 
-#  select(source, target)
-
-test_data
-
-edgelist
+write.csv(edgelist, "/sfs/qumulo/qhome/kb7hp/diversity-data/test_data/edgelist.csv", row.names = FALSE)
 
 ```
+```{r}
+
+network <- graph_from_data_frame(edgelist, directed = FALSE)
+
+plot(network)
+```
+
+
 
 ```{r}
 

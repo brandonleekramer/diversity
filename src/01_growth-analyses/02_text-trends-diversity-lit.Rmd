@@ -74,32 +74,57 @@ abstract_data %>%
 Now that we have the basics out of the way, we want to look at how the most relevant words vary over time. We chose to include words like diversity and its various sub-types (i.e. genetic, cultural, and population) as well as racially-specific and ethnically-specific terms. 
 
 ```{r figure 2a, fig.width=9.5, echo=FALSE}
+# lets draw all of our strings from the diversity_dictionary
+divictionary <- read_csv("diversity_dictionary.csv") 
+
 # recoding race*, ethnicity* and cultural* terminology
 general_pop_terms <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
-                       yes = "race/ethnicity", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), yes = "sex/gender", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|polygyny|polygynous|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), 
-                       yes = "sexuality", no = term)) %>%
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$aging), "zqx)\\b"), collapse = "|")), 
+         yes = "aging", no = word)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
-                       yes = "cultural", no = term)) %>% 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$ancestry), "zqx)\\b"), collapse = "|")), 
+         yes = "ancestry", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population", no = term)) %>% 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$cultural), "zqx)\\b"), collapse = "|")), 
+         yes = "cultural", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern =
-  "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
-                       yes = "ancestry", no = term)) %>%
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$diversity), "zqx)\\b"), collapse = "|")), 
+         yes = "diversity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$genetic), "zqx)\\b"), collapse = "|")), 
+         yes = "genetic", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$linguistic), "zqx)\\b"), collapse = "|")), 
+         yes = "linguistic", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$minority), "zqx)\\b"), collapse = "|")), 
+         yes = "minority", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$population), "zqx)\\b"), collapse = "|")), 
+         yes = "population", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$race_ethnicity), "zqx)\\b"), collapse = "|")), 
+         yes = "race/ethnicity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$sex_gender), "zqx)\\b"), collapse = "|")), 
+         yes = "sex/gender", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$sexuality), "zqx)\\b"), collapse = "|")), 
+         yes = "sexuality", no = term)) %>% 
 # grouping by year and filter relevant population terms 
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
-  filter(term == "diversity" | term == "cultural" | term == "genetic" | 
-         term == "sex/gender" | term == "sexuality" |  
+  filter(term == "diversity" | term == "cultural" | term == "genetic" | term == "minority" |
+         term == "sex/gender" | term == "sexuality" |  term == "aging" | term == "linguistic" |
          term == "population" | term == "race/ethnicity" | term == "ancestry") %>% 
 # graphing terms over time 
-  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity") + 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), stat="identity", size = 1) + 
   labs(title = "Figure 2A. Total Growth in Diversity-Related Terminology (1990-2017)") + 
+  scale_color_manual(labels=c("aging","ancestry","cultural","diversity","genetic","linguistic",
+                              "minority","population","race/ethnicity","sex/gender","sexuality"),
+                   values=c("#3B9AB2", "#000000", "#61B329", "#E21F00", "#E86F00", "#6b0f6b", 
+                            "#d23ccc", "#f2be00", "#00468b", "#1b7524", "#ff8396")) + 
+  theme_minimal() + 
   theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
         legend.title = element_blank()); ggplotly()
 ```
@@ -107,41 +132,67 @@ general_pop_terms <- abstract_data %>%
 As the graph shows, the rise of diversity does not necessarily mean that researchers focus on race or ethnicity. This could mean that diversity is being used as a catch-all in the scientific literature (i.e. that the multiplicity of the term makes it mean anything and everything) or that diversity is most used in fields like immunology or oncology. We will explore that hypothesis a bit more below. Let's take a look at our first graph.
 
 ```{r figure 2b, fig.width=9.5, echo=FALSE}
+# lets draw all of our strings from the diversity_dictionary
+divictionary <- read_csv("diversity_dictionary.csv") 
+
 # recoding race*, ethnicity* and cultural* terminology
 general_pop_terms <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(race|racial|racially|ethnic|ethnicity|ethnically)\\b"), 
-                       yes = "race/ethnicity", no = word)) %>% 
-  mutate(di_racial = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) %>%
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$aging), "zqx)\\b"), collapse = "|")), 
+         yes = "aging", no = word)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(culture|cultural|culturally)\\b"), 
-                       yes = "cultural", no = term)) %>% 
-  mutate(di_cultural = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(cultural)\\b"), yes = 1, no = 0)) %>% 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$ancestry), "zqx)\\b"), collapse = "|")), 
+         yes = "ancestry", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population", no = term)) %>% 
-  mutate(di_population = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(population)\\b"), yes = 1, no = 0)) %>%
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$cultural), "zqx)\\b"), collapse = "|")), 
+         yes = "cultural", no = term)) %>% 
   mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern =
-  "\\b(?i)(ancestry|ancestries|ancestral|ancestor|ancestors|descent|descendent|descendents)\\b"), 
-                       yes = "ancestry", no = term)) %>% 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$diversity), "zqx)\\b"), collapse = "|")), 
+         yes = "diversity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$genetic), "zqx)\\b"), collapse = "|")), 
+         yes = "genetic", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$linguistic), "zqx)\\b"), collapse = "|")), 
+         yes = "linguistic", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$minority), "zqx)\\b"), collapse = "|")), 
+         yes = "minority", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$population), "zqx)\\b"), collapse = "|")), 
+         yes = "population", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$race_ethnicity), "zqx)\\b"), collapse = "|")), 
+         yes = "race/ethnicity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$sex_gender), "zqx)\\b"), collapse = "|")), 
+         yes = "sex/gender", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$sexuality), "zqx)\\b"), collapse = "|")), 
+         yes = "sexuality", no = term)) %>% 
+  mutate(di_aging = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(aging)\\b"), yes = 1, no = 0)) %>%
   mutate(di_ancestry = ifelse(test = str_detect(string = term, 
                        pattern = "\\b(ancestry)\\b"), yes = 1, no = 0)) %>% 
+  mutate(di_cultural = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(cultural)\\b"), yes = 1, no = 0)) %>%
   mutate(di_diversity = ifelse(test = str_detect(string = term, 
-                       pattern = "diversity"), yes = 1, no = 0)) %>% 
+                       pattern = "diversity"), yes = 1, no = 0)) %>%
   mutate(di_genetic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(genetic)\\b"), yes = 1, no = 0)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(man|men|male|males|boy|boys|woman|women|female|females|girl|girls|XX|XY|XXY|sex|sexes|gender|genders|sexed|gendered|transgender|transgendered|transsexual|transsexuals|maletofemale|femaletomale)\\b"), yes = "sex/gender", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, pattern = "\\b(?i)(sexuality|sexualities|homosexual|homosexuals|homosexuality|heterosexual|heterosexuals|heterosexuality|bisexual|bisexuality|monogamous|monogamy|polygamous|polygamy|lgb|lgbt|lgbtq|lesbian|lesbians|gay|gays|queer|queers)\\b"), yes = "sexuality", no = term)) %>%
+                       pattern = "\\b(genetic)\\b"), yes = 1, no = 0)) %>%
+  mutate(di_linguistic = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(linguistic)\\b"), yes = 1, no = 0)) %>% 
+  mutate(di_minority = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(minority)\\b"), yes = 1, no = 0)) %>%
+  mutate(di_population = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(population)\\b"), yes = 1, no = 0)) %>%
+  mutate(di_racial = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) %>%
   mutate(di_sexgender = ifelse(test = str_detect(string = term, 
                        pattern = "\\b(sex/gender)\\b"), yes = 1, no = 0)) %>%
   mutate(di_sexuality = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(sexuality)\\b"), yes = 1, no = 0)) 
+                       pattern = "\\b(sexuality)\\b"), yes = 1, no = 0))
   
-
 # total articles each year 
 gen_pop_prc_counts <- text_data %>% 
   group_by(year) %>% 
@@ -150,55 +201,82 @@ gen_pop_prc_counts <- text_data %>%
   rename(total = n) 
 # articles with term mentioned each year 
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_racial == 1) %>% 
-  group_by(year) %>% summarise(cnt_racial = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_racial = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>%  
   mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
 #gen_pop_prc_counts <- general_pop_terms %>% filter(di_ethnic == 1) %>% 
-#  group_by(year) %>% summarise(cnt_ethnic = n_distinct(id)) %>% 
+#  group_by(year) %>% summarise(cnt_ethnic = n_distinct(pubmed_id)) %>% 
 #  right_join(gen_pop_prc_counts, by = "year") %>% 
 #  mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_cultural == 1) %>% 
-  group_by(year) %>% summarise(cnt_cultural = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_cultural = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_cultural = round(cnt_cultural / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_population == 1) %>% 
-  group_by(year) %>% summarise(cnt_population = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_population = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_population = round(cnt_population / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_ancestry == 1) %>% 
-  group_by(year) %>% summarise(cnt_ancestry = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_ancestry = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_ancestry = round(cnt_ancestry / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_diversity == 1) %>% 
-  group_by(year) %>% summarise(cnt_diversity = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_diversity = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_genetic == 1) %>% 
-  group_by(year) %>% summarise(cnt_genetic = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_genetic = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_genetic = round(cnt_genetic / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_sexgender == 1) %>% 
-  group_by(year) %>% summarise(cnt_sexgender = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_sexgender = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_sexgender = round(cnt_sexgender / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% filter(di_sexuality == 1) %>% 
-  group_by(year) %>% summarise(cnt_sexuality = n_distinct(id)) %>% 
+  group_by(year) %>% summarise(cnt_sexuality = n_distinct(pubmed_id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_sexuality = round(cnt_sexuality / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% filter(di_aging == 1) %>% 
+  group_by(year) %>% summarise(cnt_aging = n_distinct(pubmed_id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_aging = round(cnt_aging / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% filter(di_linguistic == 1) %>% 
+  group_by(year) %>% summarise(cnt_linguistic = n_distinct(pubmed_id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_linguistic = round(cnt_linguistic / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% filter(di_minority == 1) %>% 
+  group_by(year) %>% summarise(cnt_minority = n_distinct(pubmed_id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_minority = round(cnt_minority / total * 100, digits = 2))
+
 
 # graphing terms over time 
-gen_pop_prc_counts <- gen_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), stat="identity") +
-  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), stat="identity") +
-  geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), stat="identity") +
-  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), stat="identity") +
-  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), stat="identity") +
-  geom_line(aes(y = prc_population, x = year, colour = "population"), stat="identity") +
+gen_pop_prc_graph <- gen_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_aging, x = year, colour = "aging"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_linguistic, x = year, colour = "linguistic"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_minority, x = year, colour = "minority"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), stat="identity", size = 1) +
+  geom_line(aes(y = prc_population, x = year, colour = "population"), stat="identity", size = 1) +
   labs(title = "Figure 2B. Proportional Growth in Diversity-Related Terminology (1990-2017)") + 
-  theme(axis.title.x = element_blank(), axis.title.y = element_blank(), 
-        legend.title = element_blank()); ggplotly() 
+  scale_color_manual(labels=c("aging","ancestry","cultural","diversity","genetic","linguistic",
+                              "minority","population","race/ethnicity","sex/gender","sexuality"),
+                   values=c("#3B9AB2", "#000000", "#61B329", "#E21F00", "#E86F00", "#6b0f6b", 
+                            "#d23ccc", "#f2be00", "#00468b", "#1b7524", "#ff8396")) + 
+  theme_minimal() + theme(axis.title.x = element_blank(), 
+                          axis.title.y = element_blank(), 
+                          legend.title = element_blank()); ggplotly()
+```
+
+```{r}
+
+# heatmap of co-occurences of each category 
+
 ```
 
 While Figure 2A looks at the raw counts of words mentioned across our dataset, we also want to know what percentage of abstracts that these terms are mentioned in. Figure 2B shows how often general diversity-related terms occur within the corpus of abstracts. As you can see, "diversity" still occurs most often, which is not surprising given our search terms bias the inclusion of that term in a big way. (Note that the search terms include any entry that has diversity in its title, abstract or keywords, which is why we don't see diversity included in 100% of our dataset in any given year.) 
