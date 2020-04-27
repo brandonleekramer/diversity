@@ -12,9 +12,9 @@ knitr::opts_knit$set(root.dir = "~/diversity-data")
 #knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
-# Step 1: Loading Packages, Ingesting Data and Unnesting Tokens 
+# Step 1: Loading Packages & Ingesting Data 
 
-```{r load_packages, message = FALSE, results = FALSE, echo=FALSE}
+```{r load_packages, message = FALSE, results = FALSE, echo=FALSE, warning=FALSE}
 # loading packages 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", 
               "tm", "countrycode", "tidytable", "InformationValue",
@@ -25,7 +25,7 @@ text_data <- read_csv("diversity_corpus.csv") %>%
   filter(year != "2018") 
 ```
 
-```{r all_pop_terms, fig.width=9.5, echo=FALSE}
+```{r all_pop_terms, message = FALSE, results = FALSE, warning=FALSE}
 # pulling our list of population
 all_pop_terms <- read_csv("population_terms.csv") 
 us_specific_terms <- all_pop_terms %>% filter(category == "us_specific")
@@ -43,20 +43,20 @@ population_data <- text_data %>%
          paste(c("\\b(?i)(zqx", na.omit(divictionary$sex_gender), "zqx)\\b"), collapse = "|")), yes = 1, no = 0)) 
 ```
 
-# Step 2: Checking the Counts of Funding Mechanisms 
+# Step 2: Exploratory Data Analysis of Funders 
 
-First, I used these snippets to find the most common funding mechanisms. 
+First, I used these snippets to find the most common funding mechanisms using an n-gram of 3.
 
-```{r inductive_funding_epa, eval=FALSE, include=FALSE}
+```{r inductive_funding_epa_pt1}
 text_data %>% 
   unnest_tokens(bigram, grant_information, token = "ngrams", n = 3) %>% 
   count(bigram) %>% 
   arrange(-n)
+```
 
-text_data %>% 
-  select(grant_information) %>% 
-  filter(!is.na(grant_information))
+Then I unnested all the single tokens. 
 
+```{r inductive_funding_epa_pt2}
 text_data %>% 
   unnest_tokens(word, grant_information) %>% 
   count(word) %>% 
@@ -64,9 +64,13 @@ text_data %>%
   arrange(-n)
 ```
 
-These snippets provided some insights into the big medical/bio funders like NIH and NSF as well as a couple private funders like Wellcome Trust and Howard Hughes, but I ultimately took an approach that generated a [more comprehensive list](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=1403535448).
+Looks like the HHS, the various divisions of the NIH and the National Research Council are the biggest funders. However, I ultimately took an approach that generated a [more comprehensive list](https://docs.google.com/spreadsheets/d/1Gs-aSgXlnwo8rP3wnpMB0kdrU_VS76aDT3DCiI8OmVU/edit#gid=1403535448) using some online searching of biggest private and public funders across the US, UK and Europe. 
 
-```{r creating_funding_dictionary}
+# Step 3: Creating a funding dataset with EDA categories
+
+To create this dataset, I recoded all funding information into the following categories: NIH, NSF, HHS, UK or European funders, biotech, foundation, or other funding. I then removed all of the cases missing either funding or abstract information. 
+
+```{r creating_funding_dictionary, message = FALSE, results = FALSE, warning=FALSE}
 funding_mechanisms <- read_csv("funding_information.csv") 
 nih <- funding_mechanisms %>% filter(logit_category == "US NIH")
 nsf <- funding_mechanisms %>% filter(logit_category == "US NSF")
@@ -93,6 +97,10 @@ other <- paste(c("\\b(?i)(zcx", other$funder, other$abbreviation, "zxc)\\b"), co
 
 # creating vectors to designate whether 
 funding_data <- population_data %>% 
+  drop_na(abstract, grant_information) %>% 
+  mutate(race_ethnic = as.factor(race_ethnic),
+         sex_gender = as.factor(sex_gender),
+         all_pop = as.factor(all_pop)) %>% 
   mutate(nih = ifelse(test = str_detect(string = grant_information, 
                        pattern = nih), yes = 1, no = 0)) %>% 
   mutate(nsf = ifelse(test = str_detect(string = grant_information, 
@@ -111,42 +119,62 @@ funding_data <- population_data %>%
                        pattern = university), yes = 1, no = 0)) %>% 
   mutate(other = ifelse(test = str_detect(string = grant_information, 
                        pattern = other), yes = 1, no = 0)) %>% 
-  drop_na(all_pop, race_ethnic, sex_gender, nih, nsf, hhs, euro, uk, biotech, foundation, university, other) %>% 
-  select(abstract, year, all_pop, race_ethnic, sex_gender, nih, nsf, hhs, euro, uk, biotech, foundation, university, other) %>% 
+  select(abstract, year, grant_information, all_pop, race_ethnic, sex_gender, 
+         nih, nsf, hhs, euro, uk, biotech, foundation, university, other) %>% 
   filter(year > 1993)
 ```
 
-```{r}
+# Step 4: Dataset Descriptives  
+
+Let's check how many cases we have left (n = 13,768)
+
+```{r data_count}
 funding_data %>% 
   count()
+```
+
+And see that breakdown by year (after 1993). 
+
+```{r _count_by_year}
 funding_data %>% 
   count(year)
+```
 
+We also need to check how many cases we have for each outcome variable to make sure the classes don't have bias (i.e. they need to be about the same). 
+
+```{r checking_bias}
 table(funding_data$race_ethnic)
 table(funding_data$sex_gender)
 table(funding_data$all_pop)
+```
+Since these outcomes have bias, we will need to create training sets that sample equally from both sides to run each model.
 
+Before doing that, let's check to see if our predictor variables have enough cases... 
+
+```{r removing_small_cells}
 table(funding_data$nih)
 table(funding_data$nsf) # only 23
 table(funding_data$hhs)
-table(funding_data$euro) # 144
+table(funding_data$euro) # only 144
 table(funding_data$uk)
 table(funding_data$biotech) #only 2
 table(funding_data$foundation)
 table(funding_data$university) # only 10
 table(funding_data$other)
-
 ```
-```{r}
+Looks like we cannot really use NSF funding, biotech funding or university funding since those totals are so low. Those low totals should not be that surprising since NSF funding is not usually allocated to biomedical research, biotech companies ususally invest in private research and are motivated to conceal their funding, and university funding is not all that common for biomedical research either. 
 
-# http://r-statistics.co/Logistic-Regression-With-R.html
+# Step 5: Race/Ethnicity Model 
 
+Next, we need to create a training dataset to make sure we don't have tons of bias in our outcome variable. 
+
+```{r race_training_data}
 # Create Training Data
 input_ones <- funding_data[which(funding_data$race_ethnic == 1), ]  # all 1's
 input_zeros <- funding_data[which(funding_data$race_ethnic == 0), ]  # all 0's
 set.seed(100)  # for repeatability of samples
 input_ones_training_rows <- sample(1:nrow(input_ones), 0.7*nrow(input_ones))  # 1's for training
-input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.7*nrow(input_ones))  # 0's for training. Pick as many 0's as 1's
+input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.7*nrow(input_ones))  # 0's for training (pick as many 0's as 1's)
 training_ones <- input_ones[input_ones_training_rows, ]  
 training_zeros <- input_zeros[input_zeros_training_rows, ]
 trainingData <- rbind(training_ones, training_zeros)  # row bind the 1's and 0's 
@@ -155,53 +183,179 @@ trainingData <- rbind(training_ones, training_zeros)  # row bind the 1's and 0's
 test_ones <- input_ones[-input_ones_training_rows, ]
 test_zeros <- input_zeros[-input_zeros_training_rows, ]
 testData <- rbind(test_ones, test_zeros)  # row bind the 1's and 0's 
-
 table(trainingData$race_ethnic)
-
 ```
 
-```{r race_ethnic_lm}
-race_model <- glm(race_ethnic ~ nih + nsf + hhs + euro + uk + biotech + foundation + 
-              university + other, family = binomial, data = funding_data)
-predicted <- plogis(predict(race_model, testData))
+Let's run this model and see what we get. 
 
-optCutOff <- optimalCutoff(testData$race_ethnic, predicted)[1]
-
+```{r race_ethnic_logit}
+race_model <- glm(race_ethnic ~ nih  + hhs + euro + uk  + foundation + other, 
+                  family = binomial(link = "logit"), data = testData)
 summary(race_model)
+```
 
+Here, we see that almost all sources of funding tend to *decrease* the probability that racial/ethnic or US-specific population terminology is used in biomedical abstracts. The only exception is HHS funding, which slightly increases the probability. That is a big surprise. 
+
+Let's check the validity of the model. First, let's check for multicolinearity using the variance inflation factor. 
+
+```{r}
 car::vif(race_model)
+```
 
+According to [this post](http://www.sthda.com/english/articles/39-regression-model-diagnostics/160-multicollinearity-essentials-and-vif-in-r/), a VIF that exceeds 5 is problematic. None of your predictors are that high, so we should be OK for this model.
+
+```{r}
+predicted <- plogis(predict(race_model, testData))
+optCutOff <- optimalCutoff(testData$race_ethnic, predicted)[1]
 misClassError(testData$race_ethnic, predicted, threshold = optCutOff)
+```
 
+Our misclassification error (i.e. the percentage mismatch of predicted vs actuals) is also low, which is good news. 
+
+```{r}
 plotROC(testData$race_ethnic, predicted)
+```
 
+Now, let's check our ROC (i.e. Receiver Operating Characteristics Curve traces the percentage of true positives accurately predicted by a given logit model as the prediction probability cutoff is lowered from 1 to 0). A good model is closer to 1 and anything around 0.5 suggests the model is no better than chance. As you can see, our model is not very good at predicting the use of race/ethnicity. Thus, while our results might be interesting, we cannot have much confidence that (these) funding mechanisms really help explain the outcome. 
+
+```{r}
+# Concordance
 Concordance(testData$race_ethnic, predicted)
-
+# sensitivity and specificity
 sensitivity(testData$race_ethnic, predicted, threshold = optCutOff)
-
 specificity(testData$race_ethnic, predicted, threshold = optCutOff)
+# Confusion Matrix 
+#confusionMatrix(testData$race_ethnic, predicted, threshold = optCutOff)
+```
+When we look at the concordance, which is closer to 1 than 0 in good models, we see again this model is poor at predicting our outcome. Furthermore, the sensitivity and specificity show that the model is not good at predicting the 1's (actuals) in the model despite being decent at predicting the 0's (actuals). 
 
-confusionMatrix(testData$race_ethnic, predicted, threshold = optCutOff)
+# Step 6: Sex/Gender Model 
 
+Now, let's repeat that same process with sex/gender as the outcome. 
+
+```{r}
+# Create Training Data
+input_ones <- funding_data[which(funding_data$sex_gender == 1), ] 
+input_zeros <- funding_data[which(funding_data$sex_gender == 0), ]  
+set.seed(100) 
+input_ones_training_rows <- sample(1:nrow(input_ones), 0.7*nrow(input_ones))  
+input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.7*nrow(input_ones))  
+training_ones <- input_ones[input_ones_training_rows, ]  
+training_zeros <- input_zeros[input_zeros_training_rows, ]
+trainingData <- rbind(training_ones, training_zeros)  
+
+# Create Test Data
+test_ones <- input_ones[-input_ones_training_rows, ]
+test_zeros <- input_zeros[-input_zeros_training_rows, ]
+testData <- rbind(test_ones, test_zeros) 
+table(trainingData$sex_gender)
 ```
 
-```{r race_ethnic_lm}
-summary(glm(sex_gender ~ nih + nsf + hhs + euro + uk + biotech + foundation + 
-              university + other, family = binomial, data = funding_data))
+Let's run this model and see what we get. 
 
-
+```{r sex_gender_logit}
+gender_model <- glm(sex_gender ~ nih  + hhs + euro + uk  + foundation + other, 
+                  family = binomial(link = "logit"), data = testData)
+summary(gender_model)
 ```
 
-```{r all_pop_lm}
-summary(glm(all_pop ~ nih + nsf + hhs + euro + biotech + foundation + 
-        university + other, family = binomial, data = funding_data))
+Here, we see that almost none of the funding sources have any impact on the use of sex/gender terminology. 
+
+```{r}
+car::vif(gender_model)
 ```
 
+Let's check the validity of the model. HHS could have some multicolinearity. 
 
+```{r}
+predicted <- plogis(predict(gender_model, testData))
+optCutOff <- optimalCutoff(testData$sex_gender, predicted)[1]
+misClassError(testData$sex_gender, predicted, threshold = optCutOff)
+```
 
+Our misclassification error (i.e. the percentage mismatch of predicted vs actuals) is low. 
 
+```{r}
+plotROC(testData$sex_gender, predicted)
+```
 
+ROC suggests that this is a useless model.  
 
+```{r}
+# Concordance
+Concordance(testData$sex_gender, predicted)
+# sensitivity and specificity
+sensitivity(testData$sex_gender, predicted, threshold = optCutOff)
+specificity(testData$sex_gender, predicted, threshold = optCutOff)
+# Confusion Matrix 
+#confusionMatrix(testData$race_ethnic, predicted, threshold = optCutOff)
+```
+# Step 7: All Population Terms Model 
+
+Now, let's repeat that same process with all population terms as the outcome. 
+
+```{r}
+# Create Training Data
+input_ones <- funding_data[which(funding_data$all_pop == 1), ] 
+input_zeros <- funding_data[which(funding_data$all_pop == 0), ]  
+set.seed(100)  
+input_ones_training_rows <- sample(1:nrow(input_ones), 0.7*nrow(input_ones))  
+input_zeros_training_rows <- sample(1:nrow(input_zeros), 0.7*nrow(input_ones))  
+training_ones <- input_ones[input_ones_training_rows, ]  
+training_zeros <- input_zeros[input_zeros_training_rows, ]
+trainingData <- rbind(training_ones, training_zeros)
+
+# Create Test Data
+test_ones <- input_ones[-input_ones_training_rows, ]
+test_zeros <- input_zeros[-input_zeros_training_rows, ]
+testData <- rbind(test_ones, test_zeros)  
+table(trainingData$all_pop)
+```
+
+Let's run this model and see what we get. 
+
+```{r allpop_logit}
+allpop_model <- glm(all_pop ~ nih  + hhs + euro + uk  + foundation + other, 
+                  family = binomial(link = "logit"), data = testData)
+summary(allpop_model)
+```
+
+Here, we see that almost none of the funding sources have any impact on the use of population terminology. 
+
+```{r}
+car::vif(allpop_model)
+```
+
+Let's check the validity of the model. NIH and HHS could have some multicolinearity. 
+
+```{r}
+predicted <- plogis(predict(allpop_model, testData))
+optCutOff <- optimalCutoff(testData$all_pop, predicted)[1]
+misClassError(testData$all_pop, predicted, threshold = optCutOff)
+```
+
+Our misclassification error (i.e. the percentage mismatch of predicted vs actuals) is low. 
+
+```{r}
+plotROC(testData$all_pop, predicted)
+```
+
+ROC suggests that this is a useless model.  
+
+```{r}
+# Concordance
+Concordance(testData$all_pop, predicted)
+# sensitivity and specificity
+sensitivity(testData$all_pop, predicted, threshold = optCutOff)
+specificity(testData$all_pop, predicted, threshold = optCutOff)
+# Confusion Matrix 
+#confusionMatrix(testData$race_ethnic, predicted, threshold = optCutOff)
+```
+```{r eval = FALSE}
+#References 
+#http://r-statistics.co/Logistic-Regression-With-R.html
+#http://www.sthda.com/english/articles/39-regression-model-diagnostics/160-multicollinearity-essentials-and-vif-in-r/
+```
 
 
 
