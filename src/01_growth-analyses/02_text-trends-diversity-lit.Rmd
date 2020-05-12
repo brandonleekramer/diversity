@@ -15,7 +15,7 @@ In our analyses below, we are examining the growth of in the use of the term "di
 ```{r setup, include = FALSE}
 #rm(list = ls())
 #knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
-knitr::opts_knit$set(root.dir = "~/diversity-data")
+knitr::opts_knit$set(root.dir = "~/data/diversity-data")
 #knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
 ```
 
@@ -75,7 +75,7 @@ Now that we have the basics out of the way, we want to look at how the most rele
 
 ```{r figure 2a, fig.width=9.5, echo=FALSE}
 # lets draw all of our strings from the diversity_dictionary
-divictionary <- read_csv("diversity_dictionary.csv") 
+divictionary <- read_csv("diversity_project - h1_categories.csv") 
 
 # recoding race*, ethnicity* and cultural* terminology
 general_pop_terms <- abstract_data %>% 
