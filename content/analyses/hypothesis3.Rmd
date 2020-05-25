@@ -1,0 +1,200 @@
+---
+title: "Hypothesis 3"
+description: "The use of terms like genetic ancestry as well as national and continental terms have outpaced racial and ethnic terms in biomedical literature."
+output: html_document
+---
+
+To test Hypothesis 3, we parsed our dictionary of 2,100 population terms into a set of more nuanced categories. Our main objective is to test Fujimura and Rajagopalan's (2011) assertion that researchers now use national and continental terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent and country terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.e. race, ethnicity, etc.), and a category of all available ethnic terms in our compiled dictionary. 
+
+```{r prereqs, message = FALSE, results = FALSE, echo=FALSE}
+rm(list = ls())
+
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", 
+              "grid", "gridExtra", "reshape2", "extrafont",
+               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+
+setwd("~/Documents/Diversity/Data")
+# loading the .csv file 
+text_data <- read_csv("diversity_corpus.csv") %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+# tokenizing the abstract data into words 
+abstract_data <- text_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words)
+# adding custom set of stopwords 
+my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
+                                "rights", "reserved", "copyright", "elsevier"))
+abstract_data <- abstract_data %>% anti_join(my_stopwords); rm(my_stopwords)
+
+# lets draw all of our strings from the diversity_dictionary
+setwd("~/Documents/Diversity/Data")
+divictionary <- read_csv("diversity_project - h1_categories.csv") 
+# pulling our list of population
+all_pop_terms <- read_csv("population_terms.csv") 
+all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
+# pulling in concatenated population terms from our dataset 
+general_pop_terms <- read_csv("diversity_project - h2h3_categories.csv") %>% 
+  filter(sub_category == "population_general")
+us_specific_terms <- read_csv("diversity_project - h2h3_categories.csv") %>% 
+  filter(sub_category == "us_specific")
+continental_terms <- read_csv("diversity_project - h2h3_categories.csv") %>%
+  filter(category == "continental" | category == "subcontinental")
+ling_religious_terms <- read_csv("diversity_project - h2h3_categories.csv") %>%
+  filter(category == "linguistic_religious")
+national_terms <- read_csv("diversity_project - h2h3_categories.csv") %>%
+  filter(category == "national")
+south_american_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
+  filter(category == "south_america")
+african_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
+  filter(category == "africa")
+north_american_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>%
+  filter(category == "north_america")
+european_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>%
+  filter(category == "europe")
+asian_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
+  filter(category == "asia")
+all_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
+  filter(category == "south_america" | category == "africa" | category == "asia" | 
+         category == "north_america" | category == "europe")
+# creating detection string patterns for all the categories
+general_pop_terms <- paste(c("\\b(?i)(zxz", 
+                     general_pop_terms$term, "zxz)\\b"), collapse = "|")
+us_specific_terms <- paste(c("\\b(?i)(zxz", 
+                     us_specific_terms$term, "zxz)\\b"), collapse = "|")
+continental_terms <- paste(c("\\b(?i)(zxz", 
+                     continental_terms$term, "zxz)\\b"), collapse = "|")
+ling_religious_terms <- paste(c("\\b(?i)(zxz", 
+                     ling_religious_terms$term, "zxz)\\b"), collapse = "|")
+national_terms <- paste(c("\\b(?i)(zxz", 
+                     national_terms$term, "zxz)\\b"), collapse = "|")
+south_american_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     south_american_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+african_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     african_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+north_american_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     north_american_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+european_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     european_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+asian_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     asian_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+all_ethnic_groups <- paste(c("\\b(?i)(zxz", 
+                     all_ethnic_groups$term, "zxz)\\b"), collapse = "|")
+
+# graphing the population terms into various categories 
+pop_terms_bycats <- abstract_data %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = general_pop_terms), 
+                       yes = "general population terms", no = word)) %>%
+  mutate(general_terms = ifelse(test = str_detect(string = term, 
+                       pattern = "general population terms"), yes = 1, no = 0)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = us_specific_terms), 
+                       yes = "us-specific terms", no = term)) %>%
+  mutate(us_terms = ifelse(test = str_detect(string = term, 
+                       pattern = "us-specific terms"), yes = 1, no = 0)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = continental_terms), 
+                       yes = "continental terms", no = term)) %>%
+  mutate(continental_terms = ifelse(test = str_detect(string = term, 
+                       pattern = "continental terms"), yes = 1, no = 0)) %>% 
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = national_terms), 
+                       yes = "national terms", no = term)) %>%
+  mutate(national_terms = ifelse(test = str_detect(string = term, 
+                       pattern = "national terms"), yes = 1, no = 0)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = all_ethnic_groups), 
+                       yes = "all ethnic groups", no = term)) %>% 
+  mutate(all_ethnic_terms = ifelse(test = str_detect(string = term, 
+                       pattern = "all ethnic groups"), yes = 1, no = 0)) %>%
+  mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population", no = term)) %>% 
+  mutate(population = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b((?<!general )population)\\b"), yes = 1, no = 0))  
+```
+
+```{r figure 3a, echo=FALSE}
+figure_3A <- pop_terms_bycats %>%   
+  group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
+  filter(term == "diversity" | term == "population" | 
+         term == "general population terms" | term == "us-specific terms" |
+         term == "continental terms" | term == "national terms" | term == "all ethnic terms") %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "     Figure 3A. Total Growth of \n Separated Diversity Terms (1990-2017)",
+       color =  "Term") + 
+  #scale_linetype_manual( values=linetype) +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E2B306", "#E21F00", "#E86F00", "#00468b")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+In support of Fujimura and Rajagopalan (2011), Figures 3A & 3B reveal that continental and national terms outgrew the use of racial, ethnic, US-Specific and more general population terms over the past three decades. More specifically, Figure 3A shows that continental terms have increased the most notably, especially since 2005, followed closely by the use of national terminology. Ethnic terms have also increased, growing at roughly the same rate as the term "population." On the other hand, US Census terms and general population terms have increased relatively little over the past three decades, suggesting a potential disfavor for those terms by scientists who work on the topic of diversity. 
+
+```{r figure 3b, echo=FALSE}
+# total articles each year 
+bycats_prc_counts <- text_data %>% group_by(year) %>% 
+  count(year) %>% ungroup() %>% rename(total = n) 
+# articles with term mentioned each year 
+bycats_prc_counts <- pop_terms_bycats %>% filter(general_terms == 1) %>% 
+  group_by(year) %>% summarise(cnt_general_terms = n_distinct(pubmed_id)) %>% 
+  right_join(bycats_prc_counts, by = "year") %>% 
+  mutate(prc_general_terms = round(cnt_general_terms / total * 100, digits = 2))
+bycats_prc_counts <- pop_terms_bycats %>% filter(us_terms == 1) %>% 
+  group_by(year) %>% summarise(cnt_us_terms = n_distinct(pubmed_id)) %>% 
+  right_join(bycats_prc_counts, by = "year") %>% 
+  mutate(prc_us_terms = round(cnt_us_terms / total * 100, digits = 2))
+bycats_prc_counts <- pop_terms_bycats %>% filter(continental_terms == 1) %>% 
+  group_by(year) %>% summarise(cnt_continental_terms = n_distinct(pubmed_id)) %>% 
+  right_join(bycats_prc_counts, by = "year") %>% 
+  mutate(prc_continental_terms = round(cnt_continental_terms / total * 100, digits = 2))
+bycats_prc_counts <- pop_terms_bycats %>% filter(national_terms == 1) %>% 
+  group_by(year) %>% summarise(cnt_national_terms = n_distinct(pubmed_id)) %>% 
+  right_join(bycats_prc_counts, by = "year") %>% 
+  mutate(prc_national_terms = round(cnt_national_terms / total * 100, digits = 2))
+bycats_prc_counts <- pop_terms_bycats %>% filter(all_ethnic_terms == 1) %>% 
+  group_by(year) %>% summarise(cnt_all_ethnic_terms = n_distinct(pubmed_id)) %>% 
+  right_join(bycats_prc_counts, by = "year") %>% 
+  mutate(prc_all_ethnic_terms = round(cnt_all_ethnic_terms / total * 100, digits = 2))
+bycats_prc_counts <- pop_terms_bycats %>% filter(population == 1) %>% 
+  group_by(year) %>% summarise(cnt_population = n_distinct(pubmed_id)) %>% 
+  right_join(bycats_prc_counts, by = "year") %>% 
+  mutate(prc_population = round(cnt_population / total * 100, digits = 2))
+
+figure_3B <- bycats_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_general_terms, x = year, colour = "general population terms"), size=1.3, stat="identity") +
+  geom_line(aes(y = prc_us_terms, x = year, colour = "us-specific terms"), size=1.3, stat="identity") +
+  geom_line(aes(y = prc_continental_terms, x = year, colour = "continental terms"), size=1.3, stat="identity") +
+  geom_line(aes(y = prc_national_terms, x = year, colour = "national terms"), size=1.3, stat="identity") +
+  geom_line(aes(y = prc_all_ethnic_terms, x = year, colour = "all ethnic terms"), size=1.3, stat="identity") +
+  geom_line(aes(y = prc_population, x = year, colour = "population"), size=1.3, stat="identity") +
+  labs(title = "    Figure 3B. Proportional Growth of \n Separated Diversity Terms (1990-2017)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E2B306", "#E21F00", "#E86F00", "#00468b")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+Figure 3B shows the increase of population terminology as proportions. National or country-specific terms have grown from 10% to 35% of abstracts. In contrast, continental terms have only risen about 8% over that time period. When we compare Figures 3A and 3B, it seems that continental terms are more likely than national terms to be used multiple times in abstract, which accounts for the divergence in the raw and proportional trends. Also mirroring trends from our first hypothesis, general population terms and US-specific terms follow a parabolic trend that increases until the mid-2000s before falling over the past 10-15 years. Moreover, ethnic terms have deviated very little since 1990, vacillating between 2-4% during that time. 
+
+### Main Takeaway 
+
+Together, these analyses reveal that continental and national terms outgrow the use of racial, ethnic, US-Specific and more general population terms. This trend holds for both the raw counts and proportions in Figures 3A & 3B. These findings strongly support Fujimura and Rajagopalan’s (2011) thesis that national and continental terms are now more commonly used than racial and ethnic terms in the scientific literature, suggesting that those in science & technology studies and other scholars of diversity must be attentive to the emerging strategies that biomedical researchers use to enact population differences in their research. Focusing solely on discourses related to race and ethnicity would likely fail to capture the more subtle ways that biomedicine creates new and potential dangerous forms of difference.  
+

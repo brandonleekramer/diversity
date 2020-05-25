@@ -1,0 +1,52 @@
+---
+title: "Supplementary Materials"
+#description: "Descriptive Analyses of Data Sources"
+output: html_document
+---
+
+```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+# loading packages 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "tm",
+               "data.table", "countrycode",
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+setwd("~/Documents/Diversity/Data")
+# loading the .csv file 
+diversity_data <- read_csv("diversity_corpus.csv") %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+
+biomed_data <- read_csv("biomedical_corpus.csv") %>% 
+  rowid_to_column(var = "id") %>% 
+  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
+         abstract = AB, references = CR, year = PY, times_cited = TC) %>% 
+  select(id, authors, title, year, publication, abstract, references, year, times_cited) %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+```
+
+```{r growth in diversity corpus, echo=FALSE}
+# checking to see how the overall data looks 
+pubs_by_year <- diversity_data %>% 
+  group_by(year) %>% 
+  count(year, sort = TRUE) %>% 
+  rename(diversity = n)
+
+pubs_by_year <- biomed_data %>% 
+  group_by(year) %>% 
+  count(year, sort = TRUE) %>% 
+  rename(biomedical = n) %>% 
+  full_join(pubs_by_year, by = "year")
+
+supp_graph <- pubs_by_year %>% ggplot() + 
+  geom_line(aes(y = diversity, x = year, colour="#5D8C5D"), stat="identity", size = 1.3) + 
+  geom_line(aes(y = biomedical, x = year, colour="#3787D7"), stat="identity", size = 1.3) + 
+  labs(title = "Supplementary Figure 1. \n Growth of Publications in Diversity and Biomedical Corpora (1990-2017)", caption = "Data Source: Web of Science") + 
+  theme_minimal() +
+  scale_color_manual(labels=c("biomedical","diversity"),
+                   values=c("#5D8C5D", "#3787D7")) +
+  theme(axis.title.x = element_blank(), 
+        axis.title.y = element_blank(),
+        plot.title = element_text(hjust = 0.46),
+        legend.position = "none"); ggplotly()
+```
+

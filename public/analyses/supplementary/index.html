@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en-us">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Supplementary Materials</title>
+        <link rel="canonical" href="/analyses/supplementary/">
+        <style>
+
+    html body {
+        font-family: 'Heebo', sans-serif;
+        background-color: #ffffff;
+    }
+
+    :root {
+        --accent: #000000;
+        --border-width:  0 ;
+    }
+
+</style>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Heebo">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=VT323">
+
+
+ <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/styles/lakeside-light.min.css"> 
+
+
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.0/css/all.css" integrity="sha384-Mmxa0mLqhmOeaE8vgOSbKacftZcsNYDjQzuCOm6D02luYSzBG8vpaOykv9lFQ51Y" crossorigin="anonymous">
+
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+
+
+ 
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/highlight.min.js"></script>
+
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/r.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/bash.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.12.0/languages/go.min.js"></script>
+    
+
+    <script>hljs.initHighlightingOnLoad();</script>
+
+
+
+
+
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+
+<script>$(document).on('click', function() { $('.collapse').collapse('hide'); })</script>
+
+
+<script>
+$(document).ready(function(){
+    
+  var input = $('#night-mode-toggle');
+  var container = $('#bigbody');
+  var stat = $('#button-status');
+  
+  container.toggleClass(localStorage.toggled);
+  stat.bootstrapToggle(localStorage.button).change();
+  
+  input.on('click', function() {
+      if (localStorage.toggled != "-nightmode" ) {
+          container.toggleClass("-nightmode", true );
+          localStorage.toggled = "-nightmode";
+          localStorage.button = "on";
+       } else {
+          container.toggleClass("-nightmode", false );
+          localStorage.toggled = "";
+          localStorage.button = "off"
+       }
+  })
+});
+</script>
+ <meta name="generator" content="Hugo 0.69.2" />
+        <link href="" rel="alternate" type="application/rss+xml" title="Supplementary Materials" />
+        <link href="" rel="feed" type="application/rss+xml" title="Supplementary Materials" />
+        
+
+    
+    <link rel="apple-touch-icon" sizes="180x180" href="/img/favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/img/favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/img/favicon/favicon-16x16.png">
+    <link rel="manifest" href="/img/favicon/site.webmanifest">
+    <link rel="mask-icon" href="/img/favicon/safari-pinned-tab.svg" color="#000000">
+    <link rel="shortcut icon" href="/img/favicon/favicon.ico">
+    <meta name="msapplication-TileColor" content="#da532c">
+    <meta name="msapplication-config" content="/img/favicon/browserconfig.xml">
+    <meta name="theme-color" content="#ffffff">
+    
+    
+    
+    <meta property="og:title" content="Supplementary Materials">
+    <meta property="og:type" content="article">
+      
+      <meta name="twitter:card" content="summary">
+      <meta name="twitter:image" content="/favicon/network-labels-new.png" >
+      
+    <meta property="description" content="">
+    <meta property="og:description" content="">
+    
+    <meta name="twitter:creator" content="">
+    <meta name="twitter:site" content="">
+    
+    </head>
+
+    
+    
+    <script type="text/javascript" async
+      src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML">
+    </script>
+    
+
+    <body id = "bigbody">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <a class="navbar-brand visible-xs" href="#">Supplementary Materials</a>
+                    <button class="navbar-toggle" data-target=".navbar-collapse" data-toggle="collapse">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                </div>
+                <div class="collapse navbar-collapse">
+                    
+                        <ul class="nav navbar-nav">
+                            
+                                <li><a href="/">Home</a></li>
+                            
+                                <li><a href="/description/">Project Description</a></li>
+                            
+                                <li><a href="/analyses/">ASR Analyses</a></li>
+                            
+                        </ul>
+                    
+                    
+                        <ul class="nav navbar-nav navbar-right">
+                            
+                                <li class="navbar-icon"><a href="https://journals.sagepub.com/home/asr"><i class="fas fa-book"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="https://github.com/brandonleekramer/diversity"><i class="fab fa-github"></i></a></li>
+                            
+                                <li class="navbar-icon"><a href="mailto:brandonleekramer@gmail.com"><i class="far fa-envelope"></i></a></li>
+                            
+                            <li id="night-mode-toggle">
+    <input type="checkbox" id = "button-status"
+        data-toggle="toggle"
+        data-width = "10"
+        data-height = "1"
+        data-on="<i class='far fa-moon fa-lg'></i>"
+        data-off= "<i class='far fa-sun fa-lg'></i>"
+        data-style="ios"
+        data-onstyle = "default">
+</li>
+                        </ul>
+                    
+                </div>
+            </div>
+        </nav>
+
+
+<main>
+
+    <div class="item">
+
+    
+    
+    
+
+    
+    
+    
+    
+
+    <h4><a href="/analyses/supplementary/">Supplementary Materials</a></h4>
+    
+    <h5></h5>
+
+    
+    
+
+</div>
+
+
+    <br> <div class="text-justify">
+<script src="/rmarkdown-libs/htmlwidgets/htmlwidgets.js"></script>
+<script src="/rmarkdown-libs/plotly-binding/plotly.js"></script>
+<script src="/rmarkdown-libs/typedarray/typedarray.min.js"></script>
+<script src="/rmarkdown-libs/jquery/jquery.min.js"></script>
+<link href="/rmarkdown-libs/crosstalk/css/crosstalk.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/crosstalk/js/crosstalk.min.js"></script>
+<link href="/rmarkdown-libs/plotly-htmlwidgets-css/plotly-htmlwidgets.css" rel="stylesheet" />
+<script src="/rmarkdown-libs/plotly-main/plotly-latest.min.js"></script>
+
+
+<div id="htmlwidget-1" style="width:672px;height:480px;" class="plotly html-widget"></div>
+<script type="application/json" data-for="htmlwidget-1">{"x":{"data":[{"x":[1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017],"y":[504,521,725,735,852,1000,1116,1267,1272,1401,1589,1731,1905,2125,2291,2401,2596,2722,2775,3112,3417,3523,3898,4197,4297,4847,5016,5098],"text":["year: 1990<br />diversity:  504<br />colour: #5D8C5D","year: 1991<br />diversity:  521<br />colour: #5D8C5D","year: 1992<br />diversity:  725<br />colour: #5D8C5D","year: 1993<br />diversity:  735<br />colour: #5D8C5D","year: 1994<br />diversity:  852<br />colour: #5D8C5D","year: 1995<br />diversity: 1000<br />colour: #5D8C5D","year: 1996<br />diversity: 1116<br />colour: #5D8C5D","year: 1997<br />diversity: 1267<br />colour: #5D8C5D","year: 1998<br />diversity: 1272<br />colour: #5D8C5D","year: 1999<br />diversity: 1401<br />colour: #5D8C5D","year: 2000<br />diversity: 1589<br />colour: #5D8C5D","year: 2001<br />diversity: 1731<br />colour: #5D8C5D","year: 2002<br />diversity: 1905<br />colour: #5D8C5D","year: 2003<br />diversity: 2125<br />colour: #5D8C5D","year: 2004<br />diversity: 2291<br />colour: #5D8C5D","year: 2005<br />diversity: 2401<br />colour: #5D8C5D","year: 2006<br />diversity: 2596<br />colour: #5D8C5D","year: 2007<br />diversity: 2722<br />colour: #5D8C5D","year: 2008<br />diversity: 2775<br />colour: #5D8C5D","year: 2009<br />diversity: 3112<br />colour: #5D8C5D","year: 2010<br />diversity: 3417<br />colour: #5D8C5D","year: 2011<br />diversity: 3523<br />colour: #5D8C5D","year: 2012<br />diversity: 3898<br />colour: #5D8C5D","year: 2013<br />diversity: 4197<br />colour: #5D8C5D","year: 2014<br />diversity: 4297<br />colour: #5D8C5D","year: 2015<br />diversity: 4847<br />colour: #5D8C5D","year: 2016<br />diversity: 5016<br />colour: #5D8C5D","year: 2017<br />diversity: 5098<br />colour: #5D8C5D"],"type":"scatter","mode":"lines","line":{"width":4.91338582677165,"color":"rgba(55,135,215,1)","dash":"solid"},"hoveron":"points","name":"#5D8C5D","legendgroup":"#5D8C5D","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null},{"x":[1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017],"y":[735,785,890,926,1100,1181,1203,1396,1560,1729,1969,2060,2387,2796,3438,3439,3227,3311,3670,4080,4260,4667,5083,5862,6297,6768,6839,7006],"text":["year: 1990<br />biomedical:  735<br />colour: #3787D7","year: 1991<br />biomedical:  785<br />colour: #3787D7","year: 1992<br />biomedical:  890<br />colour: #3787D7","year: 1993<br />biomedical:  926<br />colour: #3787D7","year: 1994<br />biomedical: 1100<br />colour: #3787D7","year: 1995<br />biomedical: 1181<br />colour: #3787D7","year: 1996<br />biomedical: 1203<br />colour: #3787D7","year: 1997<br />biomedical: 1396<br />colour: #3787D7","year: 1998<br />biomedical: 1560<br />colour: #3787D7","year: 1999<br />biomedical: 1729<br />colour: #3787D7","year: 2000<br />biomedical: 1969<br />colour: #3787D7","year: 2001<br />biomedical: 2060<br />colour: #3787D7","year: 2002<br />biomedical: 2387<br />colour: #3787D7","year: 2003<br />biomedical: 2796<br />colour: #3787D7","year: 2004<br />biomedical: 3438<br />colour: #3787D7","year: 2005<br />biomedical: 3439<br />colour: #3787D7","year: 2006<br />biomedical: 3227<br />colour: #3787D7","year: 2007<br />biomedical: 3311<br />colour: #3787D7","year: 2008<br />biomedical: 3670<br />colour: #3787D7","year: 2009<br />biomedical: 4080<br />colour: #3787D7","year: 2010<br />biomedical: 4260<br />colour: #3787D7","year: 2011<br />biomedical: 4667<br />colour: #3787D7","year: 2012<br />biomedical: 5083<br />colour: #3787D7","year: 2013<br />biomedical: 5862<br />colour: #3787D7","year: 2014<br />biomedical: 6297<br />colour: #3787D7","year: 2015<br />biomedical: 6768<br />colour: #3787D7","year: 2016<br />biomedical: 6839<br />colour: #3787D7","year: 2017<br />biomedical: 7006<br />colour: #3787D7"],"type":"scatter","mode":"lines","line":{"width":4.91338582677165,"color":"rgba(93,140,93,1)","dash":"solid"},"hoveron":"points","name":"#3787D7","legendgroup":"#3787D7","showlegend":true,"xaxis":"x","yaxis":"y","hoverinfo":"text","frame":null}],"layout":{"margin":{"t":43.7625570776256,"r":7.30593607305936,"b":25.5707762557078,"l":34.337899543379},"font":{"color":"rgba(0,0,0,1)","family":"","size":14.6118721461187},"title":{"text":"Supplementary Figure 1. <br /> Growth of Publications in Diversity and Biomedical Corpora (1990-2017)","font":{"color":"rgba(0,0,0,1)","family":"","size":17.5342465753425},"x":0.46,"xref":"paper"},"xaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[1988.65,2018.35],"tickmode":"array","ticktext":["1990","2000","2010"],"tickvals":[1990,2000,2010],"categoryorder":"array","categoryarray":["1990","2000","2010"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"y","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"yaxis":{"domain":[0,1],"automargin":true,"type":"linear","autorange":false,"range":[178.9,7331.1],"tickmode":"array","ticktext":["2000","4000","6000"],"tickvals":[2000,4000,6000],"categoryorder":"array","categoryarray":["2000","4000","6000"],"nticks":null,"ticks":"","tickcolor":null,"ticklen":3.65296803652968,"tickwidth":0,"showticklabels":true,"tickfont":{"color":"rgba(77,77,77,1)","family":"","size":11.689497716895},"tickangle":-0,"showline":false,"linecolor":null,"linewidth":0,"showgrid":true,"gridcolor":"rgba(235,235,235,1)","gridwidth":0.66417600664176,"zeroline":false,"anchor":"x","title":{"text":"","font":{"color":null,"family":null,"size":0}},"hoverformat":".2f"},"shapes":[{"type":"rect","fillcolor":null,"line":{"color":null,"width":0,"linetype":[]},"yref":"paper","xref":"paper","x0":0,"x1":1,"y0":0,"y1":1}],"showlegend":false,"legend":{"bgcolor":null,"bordercolor":null,"borderwidth":0,"font":{"color":"rgba(0,0,0,1)","family":"","size":11.689497716895}},"hovermode":"closest","barmode":"relative"},"config":{"doubleClick":"reset","showSendToCloud":false},"source":"A","attrs":{"8775991a5b9":{"x":{},"y":{},"colour":{},"type":"scatter"},"877539171997":{"x":{},"y":{},"colour":{}}},"cur_data":"8775991a5b9","visdat":{"8775991a5b9":["function (y) ","x"],"877539171997":["function (y) ","x"]},"highlight":{"on":"plotly_click","persistent":false,"dynamic":false,"selectize":false,"opacityDim":0.2,"selected":{"opacity":1},"debounce":0},"shinyEvents":["plotly_hover","plotly_click","plotly_selected","plotly_relayout","plotly_brushed","plotly_brushing","plotly_clickannotation","plotly_doubleclick","plotly_deselect","plotly_afterplot"],"base_url":"https://plot.ly"},"evals":[],"jsHooks":[]}</script>
+</div>
+
+    
+    
+
+    
+
+    
+
+    
+
+    
+
+</main>
+
+        <footer id = "bigfooter">
+            <div style = "padding:15px;">
+                <p>Powered by <a href="https://gohugo.io">Hugo</a>. Themed by <a href="https://github.com/nathancday/min_night">min_night</a>. Designed by Anonymized.
+                </p>
+                <a rel="license" href="https://creativecommons.org/licenses/by/4.0/"
+                title="Creative Commons Attribution 4.0 International license">
+                <i class="fab fa-creative-commons" aria-hidden="true"></i> Attribution 4.0 International license
+                </a>
+            </div>
+        </footer>
+        
+        <script async src="https://www.googletagmanager.com/gtag/js?id="></script>
+        <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments)};
+          gtag('js', new Date());
+          gtag('config', '');
+        </script>
+       
+    </body>
+
+</html>
+

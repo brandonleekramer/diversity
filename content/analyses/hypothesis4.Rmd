@@ -1,0 +1,1151 @@
+---
+title: "Hypothesis 4"
+description: "Because US-based researchers are most likely to use population terms, we hypothesize that US-specific racial and ethnic categories, as outlined in the US-Census and OMB Directive 15, have grown in use in biomedical abstracts since 1990."
+output: html_document
+---
+
+Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. our dictionary of 2,100 terms) were used from researchers in each country. 
+
+```{r prereqs_4ab, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
+rm(list = ls())
+
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", 
+              "grid", "gridExtra", "reshape2", "extrafont",
+               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+
+setwd("~/Documents/Diversity/Data")
+# loading the .csv file 
+text_data <- read_csv("diversity_corpus.csv") %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+
+# pulling our list of population
+#setwd("C:/Users/bkram/CloudStation/Diversity/Data")
+all_pop_terms <- read_csv("population_terms.csv") 
+all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
+
+# first we have to recode all the strings that could arise in the location colunmn as country codes 
+af	<- "\\b(?i)(Afghanistan)\\b"
+ax	<- "\\b(?i)(Åland Islands|Aland Islands)\\b"
+al	<- "\\b(?i)(Albania)\\b"
+dz	<- "\\b(?i)(Algeria)\\b"
+as	<- "\\b(?i)(American Samoa)\\b"
+ad	<- "\\b(?i)(Andorra)\\b"
+ao	<- "\\b(?i)(Angola)\\b"
+ai	<- "\\b(?i)(Anguilla)\\b"
+aq	<- "\\b(?i)(Antarctica|Antartica)\\b"
+ag	<- "\\b(?i)(Antigua|Barbuda)\\b"
+ar	<- "\\b(?i)(Argentina|Buenos Aires|La plata)\\b"
+am	<- "\\b(?i)(Armenia)\\b"
+aw	<- "\\b(?i)(Aruba)\\b"
+au	<- "\\b(?i)(Australia|Melbourne(?!, )FL|Sydney(?!, Nova)|Wollongong|Brisbane|Canberra)\\b"
+at  <- "\\b(?i)(Austria|Vienna(?!, V))\\b"
+az	<- "\\b(?i)(Azerbaijan)\\b"
+bh	<- "\\b(?i)(Bahrain)\\b"
+bs	<- "\\b(?i)(Bahamas)\\b"
+bd	<- "\\b(?i)(Bangladesh|Dhaka)\\b"
+bb	<- "\\b(?i)(Barbados)\\b"
+by	<- "\\b(?i)(Belarus)\\b"
+be  <- "\\b(?i)(Belgium|Brussels)\\b"
+bz	<- "\\b(?i)(Belize)\\b"
+bj	<- "\\b(?i)(Benin(?! City))\\b"
+bm	<- "\\b(?i)(Bermuda)\\b"
+bt	<- "\\b(?i)(Bhutan)\\b"
+bo	<- "\\b(?i)(Bolivia)\\b"
+bq	<- "\\b(?i)(Bonaire)\\b"
+ba	<- "\\b(?i)(Bosnia|Herzegovina)\\b"
+bw	<- "\\b(?i)(Botswana)\\b"
+bv	<- "\\b(?i)(Bouvet Island)\\b"
+br  <- "\\b(?i)(Brazil|Brasil|Aracaju|Sao Paulo|San Paulo|Rio de Janeiro|Brasilia|Brasília|Fortaleza|Araraquara|Barueri|Belo Horizonte|BR,|Brazilian|Campina Grande|Florianpolis|Fortaleza|Goinia-GO|Goinia|Joo Pessoa|Porto Alegre|Rio de |Rio Grande|So Jos dos|So Paulo)\\b"
+bn	<- "\\b(?i)(Brunei Darussalam|Brunei)\\b"
+bg  <- "\\b(?i)(Bulgaria)\\b"
+bf	<- "\\b(?i)(Burkina Faso)\\b"
+bi	<- "\\b(?i)(Burundi)\\b"
+kh	<- "\\b(?i)(Cambodia)\\b"
+cm	<- "\\b(?i)(Cameroon)\\b"
+ca  <- "\\b(?i)(Canada|Ontario(?!, CA)|Quebec|nova scotia|new brunswick(?!, N)|manitoba|british columbia|, BC|prince edward island|saskatchewan|alberta|newfoundland|toronto|Vancouver(?!\\, W)|, ON|Winnipeg|, B.C.|,ON|Victoria|Burnaby|Fredericton|Montreal|Qubec)\\b"
+cv	<- "\\b(?i)(Cape Verde)\\b"
+ky	<- "\\b(?i)(Cayman Islands)\\b"
+cf	<- "\\b(?i)(Central African Republic)\\b"
+td	<- "\\b(?i)(Chad)\\b"
+cl	<- "\\b(?i)(Chile)\\b"
+cn  <- "\\b(?i)(China|Beijing|GuangZhou|Shanghai|Tianjin|Shenzhen|Chengdu|Dongguan|Chongqing|Guangdong|ZhuHaiChina|Zhu haiChina|Zhengzhou|ZheJiang|HangZhou|zh-cn|(?<![Zurich|Lausanne]), CH|, CHN|Xiamen|Wuhan|beijingchina|Changsha|Hunan|ChengduChina|chinabeijing|ChinaShenzhen|^guang|^Hangz|Harbin Institute|Hefei|Hunan|^jiang|^Nanjing|^ShenZhen)\\b"
+cx	<- "\\b(?i)(Christmas Island)\\b"
+cc	<- "\\b(?i)(Cocos Islands)\\b"
+co	<- "\\b(?i)(Colombia|Bogataa|Medellin)\\b"
+km	<- "\\b(?i)(Comoros)\\b"
+cg	<- "\\b(?i)((?<!Democratic Republic of the )Congo)\\b"
+cd	<- "\\b(?i)(Democratic Republic of the Congo|Brazzaville)\\b"
+ck	<- "\\b(?i)(Cook Islands)\\b"
+cr	<- "\\b(?i)(Costa Rica)\\b"
+ci	<- "\\b(?i)(Côte dIvoire|Cote dIvoire|Cote d'Ivoire)\\b"
+hr	<- "\\b(?i)(Croatia|Zagreb)\\b"
+cu	<- "\\b(?i)(Cuba)\\b"
+cw	<- "\\b(?i)(Curaçao)\\b"
+cy	<- "\\b(?i)(Cyprus)\\b"
+cz	<- "\\b(?i)(Czech Republic|Czech|Czechia|Prague|Brno|CzechRepublic)\\b"
+dk	<- "\\b(?i)(Denmark|Copenhagen)\\b"
+dj	<- "\\b(?i)(Djibouti)\\b"
+dm	<- "\\b(?i)(Dominica)\\b"
+do	<- "\\b(?i)(Dominican Republic|, DR|dominican|Dominican)\\b"
+ec	<- "\\b(?i)(Ecuador)\\b"
+eg	<- "\\b(?i)(Egypt)\\b"
+sv	<- "\\b(?i)(El Salvador)\\b"
+gq	<- "\\b(?i)(Equatorial Guinea)\\b"
+er	<- "\\b(?i)(Eritrea)\\b"
+ee	<- "\\b(?i)(Estonia)\\b"
+et	<- "\\b(?i)(Ethiopia)\\b"
+fk	<- "\\b(?i)(Falkland Islands|Malvinas)\\b"
+fo	<- "\\b(?i)(Faroe Islands|Faroe)\\b"
+fj	<- "\\b(?i)(Fiji)\\b"
+fi	<- "\\b(?i)(Finland|Helsinki)\\b"
+fr	<- "\\b(?i)(France|Paris|, FR|Toulouse|French Riviera|French Alps|Lille|Lyon|Sophia Antipolis)\\b"
+gf	<- "\\b(?i)(French Guiana)\\b"
+pf	<- "\\b(?i)(French Polynesia)\\b"
+tf	<- "\\b(?i)(French Southern Territories)\\b"
+ga	<- "\\b(?i)(Gabon)\\b"
+gm	<- "\\b(?i)(Gambia)\\b"
+# we decided to code instances of "georgia" as us since there was no easy way to demarcate and most seemed like they from the us 
+ge	<- "\\b(?i)(Tbilisi|Batumi|Kutaisi)\\b" #"\\b(?i)((?<!, )Georgia(?!, U)|Tbilisi)\\b"
+de <- "\\b(?i)(Germany|German|Deutschland|Berlin|Bavaria|Bayern|Munich|Dresden|Frankfurt|Hamburg)\\b"
+gh	<- "\\b(?i)(Ghana)\\b"
+gi	<- "\\b(?i)(Gibraltar)\\b"
+gr	<- "\\b(?i)(Greece)\\b"
+gl	<- "\\b(?i)(Greenland)\\b"
+gd	<- "\\b(?i)(Grenada)\\b"
+gp	<- "\\b(?i)(Guadeloupe)\\b"
+gu	<- "\\b(?i)(Guam)\\b"
+gt	<- "\\b(?i)(Guatemala)\\b"
+gg	<- "\\b(?i)(Guernsey)\\b"
+gn	<- "\\b(?i)(Guinea)\\b"
+gw	<- "\\b(?i)(Guinea-Bissau)\\b"
+gy	<- "\\b(?i)(Guyana)\\b"
+ht	<- "\\b(?i)(Haiti)\\b"
+hm	<- "\\b(?i)(Heard Island|McDonald Islands)\\b"
+va	<- "\\b(?i)(Holy See|Vatican)\\b"
+hn	<- "\\b(?i)(Honduras)\\b"
+hk	<- "\\b(?i)(Hong Kong)\\b"
+hu	<- "\\b(?i)(Hungary|Budapest)\\b"
+is	<- "\\b(?i)(Iceland)\\b"
+id	<- "\\b(?i)(Indonesia|Yogyakarta|Bandung|Jakarta)\\b"
+ir	<- "\\b(?i)(Iran)\\b"
+iq	<- "\\b(?i)(Iraq)\\b"
+ie	<- "\\b(?i)(Ireland|Dublin(?!, [OC]))\\b"
+im	<- "\\b(?i)(Isle of Man)\\b"
+il	<- "\\b(?i)(Israel)\\b"
+it	<- "\\b(?i)(Italy|Rome(?!, GA)|Milan|Milano|Turin|Trieste|Bologna)\\b"
+jm	<- "\\b(?i)(Jamaica(?! Plain))\\b"
+jp  <- "\\b(?i)(Japan|Tokyo|Kyoto|Osaka|Yokohama|ja|ja_jp|ja-jp|Tsukuba)\\b"
+jo	<- "\\b(?i)(Jordan(?!, U))\\b"
+kz	<- "\\b(?i)(Kazakhstan)\\b"
+ke	<- "\\b(?i)(Kenya|Nairobi)\\b"
+ki	<- "\\b(?i)(Kiribati)\\b"
+kp	<- "\\b(?i)(North Korea|Pyongyang)\\b"
+kr	<- "\\b(?i)(South Korea|Seoul|Seuol|Daejeon|pangyo)\\b"
+xk  <- "\\b(?i)(Kosovo|Kosova|^Prishtina|^Prishtine|^Pristina)\\b"
+kw	<- "\\b(?i)(Kuwait)\\b"
+kg	<- "\\b(?i)(Kyrgyzstan)\\b"
+la	<- "\\b(?i)(Lao Peoples Democratic Republic|Laos)\\b"
+lv <- "\\b(?i)(Latvia)\\b"
+lb	<- "\\b(?i)(Lebanon(?! , NH))\\b"
+ls	<- "\\b(?i)(Lesotho)\\b"
+lr	<- "\\b(?i)(Liberia)\\b"
+ly	<- "\\b(?i)(Libya)\\b"
+li	<- "\\b(?i)(Liechtenstein)\\b"
+lu <- "\\b(?i)(Luxembourg)\\b"
+lt <- "\\b(?i)(Lithuania)\\b"
+mo	<- "\\b(?i)(Macao)\\b"
+mk	<- "\\b(?i)(Macedonia)\\b"
+mg	<- "\\b(?i)(Madagascar)\\b"
+mw	<- "\\b(?i)(Malawi)\\b"
+my	<- "\\b(?i)(Malaysia)\\b"
+mv	<- "\\b(?i)(Maldives)\\b"
+ml	<- "\\b(?i)(Mali)\\b"
+mt <- "\\b(?i)(Malta)\\b"
+mh	<- "\\b(?i)(Marshall Islands)\\b"
+mq	<- "\\b(?i)(Martinique)\\b"
+mr	<- "\\b(?i)(Mauritania)\\b"
+mu	<- "\\b(?i)(Mauritius)\\b"
+yt	<- "\\b(?i)(Mayotte)\\b"
+mx	<- "\\b(?i)((?<!New )Mexico|(?<!New )Mxico|Zacatecas|Mex.|, MX|Villahermosa|Colima)\\b"
+fm	<- "\\b(?i)(Micronesia)\\b"
+md <- "\\b(?i)(Moldova)\\b"
+mc <- "\\b(?i)(Monaco)\\b"
+mn	<- "\\b(?i)(Mongolia)\\b"
+me	<- "\\b(?i)(Montenegro)\\b"
+ms	<- "\\b(?i)(Montserrat)\\b"
+ma	<- "\\b(?i)(Morocco)\\b"
+mz	<- "\\b(?i)(Mozambique)\\b"
+mm	<- "\\b(?i)(Myanmar)\\b"
+na	<- "\\b(?i)(Namibia)\\b"
+nr	<- "\\b(?i)(Nauru)\\b"
+np	<- "\\b(?i)(Nepal)\\b"
+nl <- "\\b(?i)(Netherlands|Amsterdam|Holland(?!, [MO])|Zwolle|Willemstad|Curacao|Curaao|Utrecht|Breda|Eindhoven|Groningen)\\b"
+nc	<- "\\b(?i)(New Caledonia)\\b"
+nz	<- "\\b(?i)(New Zealand|Auckland|NZ|NZL)\\b"
+ni	<- "\\b(?i)(Nicaragua)\\b"
+ne	<- "\\b(?i)(Niger)\\b"
+ng	<- "\\b(?i)(Nigeria|Lagos)\\b"
+nu	<- "\\b(?i)(Niue)\\b"
+nf	<- "\\b(?i)(Norfolk Island)\\b"
+mp	<- "\\b(?i)(Northern Mariana Islands)\\b"
+no	<- "\\b(?i)(Norway)\\b"
+om	<- "\\b(?i)(Oman)\\b"
+pk	<- "\\b(?i)(Pakistan)\\b"
+pw	<- "\\b(?i)(Palau)\\b"
+ps	<- "\\b(?i)(Palestine|Gaza)\\b"
+pa	<- "\\b(?i)(Panama(?! City))\\b"
+pg	<- "\\b(?i)(Papua New Guinea)\\b"
+py	<- "\\b(?i)(Paraguay)\\b"
+pe	<- "\\b(?i)(Peru|Arequipa)\\b"
+ph	<- "\\b(?i)(Philippines)\\b"
+pn	<- "\\b(?i)(Pitcairn)\\b"
+pl <- "\\b(?i)(Poland|Warsaw|Wrocaw)\\b"
+pt <- "\\b(?i)(Portugal|Lisboa|Lisbon|Azores|Porto(?! Alegre)|Faro)\\b"
+pr	<- "\\b(?i)(Puerto Rico)\\b"
+qa	<- "\\b(?i)(Qatar)\\b"
+re	<- "\\b(?i)(Réunion)\\b"
+ro <- "\\b(?i)(Romania|Bucharest)\\b"
+ru <- "\\b(?i)(Russia|Russian|Moscow(?!, I)|Yekaterinburg|Petersburg(?!, F)|St-Petersburg(?!, F)|RU, )\\b"
+rw	<- "\\b(?i)(Rwanda)\\b"
+bl	<- "\\b(?i)(Saint Barthélemy)\\b"
+sh	<- "\\b(?i)(Saint Helena)\\b"
+kn	<- "\\b(?i)(Saint Kitts|Nevis)\\b"
+lc	<- "\\b(?i)(Saint Lucia)\\b"
+mf	<- "\\b(?i)(Saint Martin)\\b"
+pm	<- "\\b(?i)(Saint Pierre|Miquelon)\\b"
+vc	<- "\\b(?i)(Saint Vincent|Grenadines)\\b"
+ws	<- "\\b(?i)(Samoa)\\b"
+sm	<- "\\b(?i)(San Marino)\\b"
+st	<- "\\b(?i)(Sao Tome|Principe)\\b"
+sa	<- "\\b(?i)(Saudi Arabia)\\b"
+sn <- "\\b(?i)(Senegal)\\b"
+rs	<- "\\b(?i)(Serbia)\\b"
+sc	<- "\\b(?i)(Seychelles)\\b"
+sl	<- "\\b(?i)(Sierra Leone)\\b"
+sg	<- "\\b(?i)(Singapore)\\b"
+sx	<- "\\b(?i)(Sint Maarten)\\b"
+sk <- "\\b(?i)(Slovak Republic|Slovakia)\\b"
+si <- "\\b(?i)(Slovenia)\\b"
+sb	<- "\\b(?i)(Solomon Islands)\\b"
+so	<- "\\b(?i)(Somalia)\\b"
+za	<- "\\b(?i)(South Africa|Cape Town|Johannesburg)\\b"
+gs	<- "\\b(?i)(South Georgia|South Sandwich Islands|South Sandwich|Sandwich Islands)\\b"
+ss	<- "\\b(?i)(South Sudan)\\b"
+es <- "\\b(?i)(Spain|Madrid|Barcelona|Granada|Sevilla|Mallorca|Ibiza|Bilbao|Espana|Espaa|Zaragoza|Catalunya|Basque|Valencia(?!, [C|Ven])|Catalonia|Galicia)\\b"
+lk	<- "\\b(?i)(Sri Lanka|Srilanka)\\b"
+sd	<- "\\b(?i)(Sudan)\\b"
+sr	<- "\\b(?i)(Suriname)\\b"
+sj	<- "\\b(?i)(Svalbard|Jan Mayen)\\b"
+sz	<- "\\b(?i)(Swaziland)\\b"
+se <- "\\b(?i)(Sweden|Stockholm)\\b"
+ch	<- "\\b(?i)(Switzerland|Zurich|Zrich|Lausanne)\\b"
+sy	<- "\\b(?i)(Syrian Arab Republic|syria)\\b"
+tw	<- "\\b(?i)(Taiwan|^Taipei)\\b"
+tj	<- "\\b(?i)(Tajikistan)\\b"
+tz	<- "\\b(?i)(Tanzania)\\b"
+th	<- "\\b(?i)(Thailand)\\b"
+tl	<- "\\b(?i)(Timor-Leste)\\b"
+tg	<- "\\b(?i)(Togo)\\b"
+tk	<- "\\b(?i)(Tokelau)\\b"
+to	<- "\\b(?i)(Tonga)\\b"
+tt	<- "\\b(?i)(Trinidad|Tobago)\\b"
+tn	<- "\\b(?i)(Tunisia)\\b"
+tr	<- "\\b(?i)(Turkey|Istanbul|Trkiye|Estambul)\\b"
+tm	<- "\\b(?i)(Turkmenistan)\\b"
+tc	<- "\\b(?i)(Turks|Caicos Islands)\\b"
+tv	<- "\\b(?i)(Tuvalu)\\b"
+ug	<- "\\b(?i)(Uganda)\\b"
+ua	<- "\\b(?i)(Ukraine|Ukrane|Kyiv|Kiev|Zaporozhye|Dnepr|Dnipro)\\b"
+ae	<- "\\b(?i)(United Arab|Emirates|UAE|Abu Dhabi)\\b"
+gb <- "\\b(?i)(UK|UK,|United Kingdom|united-kingdom|London|(?<!New )England|Wales|U.K.|Aberdeen|Cardiff(?!, CA)|Scotland|Edinburgh|Glasglow|Brighton(?!, [M|C]))\\b"
+us	<- "\\b(?i)(?:Ala(?:(?:bam|sk)a)|American Samoa|Arizona|Arkansas|California|Colorado|Connecticut|Delaware|District of Columbia|Florida|Georgia|Guam|Hawaii|Idaho|Illinois|Indiana|Iowa|Kansas|Kentucky|Louisiana|Maine|Maryland|Massachusetts|Michigan|Minnesota|Miss(?:(?:issipp|our)i)|Montana|Nebraska|Nevada|New (?:Hampshire|Jersey|Mexico|York)|North (?:(?:Carolin|Dakot)a)|Ohio|Oklahoma|Oregon|Pennsylvania|Puerto Rico|Rhode Island|South (?:(?:Carolin|Dakot)a)|Tennessee|Texas|Utah|Vermont|Virgin(?:ia| Island(s?))|Washington|West Virginia|Wisconsin|Wyoming|United States|A[KLRSZ]|C[AOT]|D[CE]|FL|G[AU]|HI|I[ADLN]|K[SY]|LA|M[ADEINOST]|N[CDEHJMVY]|O[HKR]|P[AR]|RI|S[CD]|T[NX]|UT|V[AIT]|W[AIVY]|NYC|DC|D.C.|US|USA|Seattle|San Francisco|Chicago|Philly|Philadelphia|Los Angeles|Portland|Houston|Phoenix|San Antonio|San Diego|Oakland|Boston|Bay Area|Berkeley|Stanford|Harvard|Dallas|Silicon|San Jose|USC|Twin Cities|NYU|Yale|, Mass| Mass|newyork|new_york|U.S.|Atlanta|Austin|Albany|Manhattan|Brooklyn|Bronx|Cal|Cape Cod|Cleveland|Denver|Detroit|East Bay|Pittsburgh|Salt Lake|St. Louis|Honolulu|Miami|Minneapolis|Palo Alto|^san fran|socal)\\b"
+uy	<- "\\b(?i)(Uruguay)\\b"
+uz	<- "\\b(?i)(Uzbekistan)\\b"
+vu	<- "\\b(?i)(Vanuatu)\\b"
+ve	<- "\\b(?i)(Venezuela)\\b"
+vn	<- "\\b(?i)(Viet Nam|Vietnam)\\b"
+vg	<- "\\b(?i)(Virgin Islands, British|British Virgin Islands)\\b"
+vi	<- "\\b(?i)(Virgin Islands, U.S.|Virgin Islands, US| US Virgin Islands)\\b"
+wf	<- "\\b(?i)(Wallis and Futuna)\\b"
+eh	<- "\\b(?i)(Western Sahara)\\b"
+ye	<- "\\b(?i)(Yemen)\\b"
+zm	<- "\\b(?i)(Zambia)\\b"
+zw	<- "\\b(?i)(Zimbabwe)\\b"
+
+text_data <- text_data %>%
+  mutate(department = tm::removePunctuation(department)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, 
+                                                     pattern = af), yes = "af", no = "")) %>%  
+                                   #paste("af", detected_country, sep=","), no = "")) 
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ax), 
+                                   paste("ax", detected_country, sep=","), no = detected_country)) %>% 
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = al), 
+                                   paste("al", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = dz), 
+                                   paste("dz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = as), 
+                                   paste("as", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ad), 
+                                   paste("ad", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ao), 
+                                   paste("ao", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ai), 
+                                   paste("ai", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = aq), 
+                                   paste("aq", detected_country, sep=","), no = detected_country)) %>% # works
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ag), 
+                                   paste("ag", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ar), 
+                                   paste("ar", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = am), 
+                                   paste("am", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = aw), 
+                                   paste("aw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = au), 
+                                   paste("au", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = at), 
+                                   paste("at", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = be), 
+                                   paste("be", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bg), 
+                                   paste("bg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = br), 
+                                   paste("br", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = az), 
+                                   paste("az", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bh), 
+                                   paste("bh", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bs), 
+                                   paste("bs", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bd), 
+                                   paste("bd", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bb), 
+                                   paste("bb", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = by), 
+                                   paste("by", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bz), 
+                                   paste("bz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bj), 
+                                   paste("bj", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bm), 
+                                   paste("bm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bt), 
+                                   paste("bt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bo), 
+                                   paste("bo", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bq), 
+                                   paste("bq", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ba), 
+                                   paste("ba", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bw), 
+                                   paste("bw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bv), 
+                                   paste("bv", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bn), 
+                                   paste("bn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bf), 
+                                   paste("bf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bi), 
+                                   paste("bi", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cy), 
+                                   paste("cy", detected_country, sep=","), no = detected_country)) %>% 
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cz), 
+                                   paste("cz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cn), 
+                                   paste("cn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kh), 
+                                   paste("kh", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cm), 
+                                   paste("cm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ca), 
+                                   paste("ca", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cv), 
+                                   paste("cv", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ky), 
+                                   paste("ky", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cf), 
+                                   paste("cf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = td), 
+                                   paste("td", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cl), 
+                                   paste("cl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cx), 
+                                   paste("cx", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cc), 
+                                   paste("cc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = co), 
+                                   paste("co", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = km), 
+                                   paste("km", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ck), 
+                                   paste("ck", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cr), 
+                                   paste("cr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ci), 
+                                   paste("ci", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = hr), 
+                                   paste("hr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cu), 
+                                   paste("cu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = cw), 
+                                   paste("cw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = dk), 
+                                   paste("dk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ee), 
+                                   paste("ee", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = fi), 
+                                   paste("fi", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = fr), 
+                                   paste("fr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = dj), 
+                                   paste("dj", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = dm), 
+                                   paste("dm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = do), 
+                                   paste("do", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ec), 
+                                   paste("ec", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = eg), 
+                                   paste("eg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sv), 
+                                   paste("sv", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gq), 
+                                   paste("gq", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = er), 
+                                   paste("er", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = et), 
+                                   paste("et", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = fk), 
+                                   paste("fk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = fo), 
+                                   paste("fo", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = fj), 
+                                   paste("fj", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = de), 
+                                   paste("de", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gr), 
+                                   paste("gr", detected_country, sep=","), no = detected_country)) %>% 
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gf), 
+                                   paste("gf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pf), 
+                                   paste("pf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tf), 
+                                   paste("tf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ga), 
+                                   paste("ga", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gm), 
+                                   paste("gm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ge), 
+                                   paste("ge", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gh), 
+                                   paste("gh", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gi), 
+                                   paste("gi", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gl), 
+                                   paste("gl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gd), 
+                                   paste("gd", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gp), 
+                                   paste("gp", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gu), 
+                                   paste("gu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gt), 
+                                   paste("gt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gg), 
+                                   paste("gg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gn), 
+                                   paste("gn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gw), 
+                                   paste("gw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gy), 
+                                   paste("gy", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = hu), 
+                                   paste("hu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ie), 
+                                   paste("ie", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = it), 
+                                   paste("it", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ht), 
+                                   paste("ht", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = hm), 
+                                   paste("hm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = va), 
+                                   paste("va", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = hn), 
+                                   paste("hn", detected_country, sep=","), no = detected_country)) %>% # works
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = hk), 
+                                   paste("hk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = is), 
+                                   paste("is", detected_country, sep=","), no = detected_country)) %>% # works 
+  #mutate(detected_country = ifelse(test = str_detect(string = department, pattern = id), 
+  #                                 paste("id", detected_country, sep=","), no = detected_country)) %>% # doesnt 
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ir), 
+                                   paste("ir", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = iq), 
+                                   paste("iq", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = im), 
+                                   paste("im", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = il), 
+                                   paste("il", detected_country, sep=","), no = detected_country)) %>%
+  # i did india down here so that i didn't have to name a variable "in", which created problems 
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = "\\b(?i)(India|Mumbai|Delhi|Kolkata|Chennai|Bangalore|Hyderabad|Ahmedabad|Pune|VIT |NIT |Amritsar|(?<!Lahore[ ,])Punjab(?! Pakistan)|Bhubaneswar|Gandhinagar|Gujarat|^IIT |Indian|Jaipur|jammu|kashmir|^MNNIT)\\b"), 
+                                      paste("in", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = jp), 
+                                   paste("jp", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lv), 
+                                   paste("lv", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lu), 
+                                   paste("lu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lt), 
+                                   paste("lt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = jm), 
+                                   paste("jm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = jo), 
+                                   paste("jo", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kz), 
+                                   paste("kz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ke), 
+                                   paste("ke", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ki), 
+                                   paste("ki", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kp), 
+                                   paste("kp", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kr), 
+                                   paste("kr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kw), 
+                                   paste("kw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kg), 
+                                   paste("kg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = xk), 
+                                   paste("xk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = la), 
+                                   paste("la", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lb), 
+                                   paste("lb", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ls), 
+                                   paste("ls", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lr), 
+                                   paste("lr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ly), 
+                                   paste("ly", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = li), 
+                                   paste("li", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mt), 
+                                   paste("mt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mo), 
+                                   paste("mo", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mk), 
+                                   paste("mk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mg), 
+                                   paste("mg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mw), 
+                                   paste("mw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = my), 
+                                   paste("my", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mv), 
+                                   paste("mv", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ml), 
+                                   paste("ml", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mh), 
+                                   paste("mh", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mq), 
+                                   paste("mq", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mr), 
+                                   paste("mr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mu), 
+                                   paste("mu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mx), 
+                                   paste("mx", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = yt), 
+                                   paste("yt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = fm), 
+                                   paste("fm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = md), 
+                                   paste("md", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mc), 
+                                   paste("mc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mn), 
+                                   paste("mn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = me), 
+                                   paste("me", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ms), 
+                                   paste("ms", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ma), 
+                                   paste("ma", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mz), 
+                                   paste("mz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mm), 
+                                   paste("mm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = na), 
+                                   paste("na", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = nr), 
+                                   paste("nr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = np), 
+                                   paste("np", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = nl), 
+                                   paste("nl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = nc), 
+                                   paste("nc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = nz), 
+                                   paste("nz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ni), 
+                                   paste("ni", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ne), 
+                                   paste("ne", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ng), 
+                                   paste("ng", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = nu), 
+                                   paste("nu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = nf), 
+                                   paste("nf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mp), 
+                                   paste("mp", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = no), 
+                                   paste("no", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = om), 
+                                   paste("om", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pk), 
+                                   paste("pk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pw), 
+                                   paste("pw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ps), 
+                                   paste("ps", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pa), 
+                                   paste("pa", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pg), 
+                                   paste("pg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = py), 
+                                   paste("py", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pe), 
+                                   paste("pe", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ph), 
+                                   paste("ph", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pn), 
+                                   paste("pn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pl), 
+                                   paste("pl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pt), 
+                                   paste("pt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pr), 
+                                   paste("pr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = qa), 
+                                   paste("qa", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = re), 
+                                   paste("re", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ro), 
+                                   paste("ro", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ru), 
+                                   paste("ru", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = rw), 
+                                   paste("rw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = bl), 
+                                   paste("bl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sh), 
+                                   paste("sh", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = kn), 
+                                   paste("kn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lc), 
+                                   paste("lc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = mf), 
+                                   paste("mf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = pm), 
+                                   paste("pm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = vc), 
+                                   paste("vc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ws), 
+                                   paste("ws", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sm), 
+                                   paste("sm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = st), 
+                                   paste("st", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sa), 
+                                   paste("sa", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sn), 
+                                   paste("sn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = rs), 
+                                   paste("rs", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sc), 
+                                   paste("sc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sl), 
+                                   paste("sl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sg), 
+                                   paste("sg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sx), 
+                                   paste("sx", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sk), 
+                                   paste("sk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = si), 
+                                   paste("si", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sb), 
+                                   paste("sb", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = so), 
+                                   paste("so", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = za), 
+                                   paste("za", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gs), 
+                                   paste("gs", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ss), 
+                                   paste("ss", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = es), 
+                                   paste("es", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = lk), 
+                                   paste("lk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sd), 
+                                   paste("sd", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sr), 
+                                   paste("sr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sj), 
+                                   paste("sj", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sz), 
+                                   paste("sz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = se), 
+                                   paste("se", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ch), 
+                                   paste("ch", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = sy), 
+                                   paste("sy", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tw), 
+                                   paste("tw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tj), 
+                                   paste("tj", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tz), 
+                                   paste("tz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = th), 
+                                   paste("th", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tl), 
+                                   paste("tl", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tg), 
+                                   paste("tg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tk), 
+                                   paste("tk", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = to), 
+                                   paste("to", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tt), 
+                                   paste("tt", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tn), 
+                                   paste("tn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tr), 
+                                   paste("tr", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tm), 
+                                   paste("tm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tc), 
+                                   paste("tc", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = tv), 
+                                   paste("tv", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ug), 
+                                   paste("ug", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ua), 
+                                   paste("ua", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ae), 
+                                   paste("ae", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = gb), 
+                                   paste("gb", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = uy), 
+                                   paste("uy", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = uz), 
+                                   paste("uz", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = vu), 
+                                   paste("vu", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ve), 
+                                   paste("ve", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = vn), 
+                                   paste("vn", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = vg), 
+                                   paste("vg", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = vi), 
+                                   paste("vi", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = wf), 
+                                   paste("wf", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = eh), 
+                                   paste("eh", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = ye), 
+                                   paste("ye", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = zm), 
+                                   paste("zm", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = zw), 
+                                   paste("zw", detected_country, sep=","), no = detected_country)) %>%
+  mutate(detected_country = ifelse(test = str_detect(string = department, pattern = us), 
+                                   paste("us", detected_country, sep=","), no = detected_country)) %>% 
+  dplyr::rename(country_code = detected_country) 
+
+text_data <- text_data %>% 
+  separate_rows(country_code, sep = "," , convert = FALSE) %>% 
+  mutate(country_code = trimws(country_code)) %>% 
+  mutate(country_code = na_if(country_code, ""))
+
+# removing the commas at the end of the strings from the column just created
+text_data$country_code <- gsub("\\,$", "", text_data$country_code)
+text_data$country_code <- trimws(text_data$country_code)
+
+text_data$country <- countrycode::countrycode(text_data$country_code, 
+                                     origin = "iso2c", destination = "country.name")
+
+# tokenizing the abstract data into words 
+abstract_data_Cc <- text_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words)
+# adding custom set of stopwords 
+my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
+                                "rights", "reserved", "copyright", "elsevier"))
+abstract_data_Cc <- abstract_data_Cc %>% anti_join(my_stopwords); rm(my_stopwords)
+# most frequent word count in abstracts 
+abstract_data_Cc %>%
+  count(word, sort = TRUE)
+
+# standardizing all countries  
+pop_terms_bycountry <- abstract_data_Cc %>% 
+  separate(country, into = c("country", "void"), 
+           sep = ",", extra = "drop", fill = "right") %>% 
+  select(word, country, country_code, year, pubmed_id) %>%    
+  #mutate(country = stri_trim_both(country_code)) %>% 
+  #mutate(country = tolower(country_code)) %>%
+  mutate(diversity = ifelse(test = str_detect(string = word, 
+         pattern = "diversity"), yes = 1, no = 0)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+         pattern = all_pop_terms), 
+         yes = "all population terms", no = word)) %>%  
+  mutate(all_pop_terms = ifelse(test = str_detect(string = term, 
+         pattern = "\\b(all population terms)\\b"), yes = 1, no = 0)) 
+```
+
+```{r figure 4a, echo=FALSE}
+figure_4A <- pop_terms_bycountry %>%   
+    drop_na(country) %>%
+  group_by(year) %>% 
+  count(term, country, sort = TRUE) %>% 
+  ungroup() %>% 
+  filter(term == "all population terms" ) %>% 
+  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
+           country == "Germany" | country == "Australia" 
+  #         | country == "France" | country == "Canada" | country == "Netherlands" 
+  #         | country == "Australia" | country == "Spain"   
+           ) %>%  
+  ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1.3, stat="identity") +
+  labs(title = "    Figure 4A. Total Growth of All \n Population Terms by Country (1990-2017)") + 
+  theme_minimal() +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+Figure 4A shows the use of population terms by researchers in the top-5 countries of our dataset (i.e. the US, the UK, China, Germany and Australia). Not surprisingly, US-based scholars are by far the most avid users of population terminology, having a total that sums to nearly five times more than UK or Chinese-based scholars. In fact, it seems that there has been almost no increase in the use of population terms outside of the US and UK until after 2010. 
+
+```{r figure 4b, echo=FALSE}
+# total articles each year 
+bycountry_prc_counts <- text_data %>% 
+  drop_na(country) %>% 
+  group_by(year) %>% 
+  count(year) %>% ungroup() %>% rename(total = n) 
+
+bycountry_prc_counts <- pop_terms_bycountry %>% 
+  filter(all_pop_terms == 1) %>% 
+  group_by(country, year) %>% 
+  summarise(cnt_pop_terms = n_distinct(pubmed_id)) %>% 
+  right_join(bycountry_prc_counts, by = "year") %>% 
+  mutate(prc_pop_terms = round(cnt_pop_terms / total * 100, digits = 2))
+# graphing 
+figure_4B <- bycountry_prc_counts %>% 
+  drop_na(country) %>% 
+  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
+           country == "Germany" | country == "Australia" 
+  #         | country == "France" | country == "Canada" | country == "Netherlands" 
+  #         | country == "Australia" | country == "Spain"   
+           ) %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.3, stat="identity") +
+  labs(title = "    Figure 4B. Proportional Growth of All \n Population Terms by Country (1990-2017)",
+       color =  "Country") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+While the proportions in Figure 4B are relatively stable for the other four countries, the US exhibits nearly a 5% increase from 1993 to 1996, which is shortly after the NIH Revitalization Act was instituted in 1993 (Epstein 2007). The only other somewhat surprising result in this figure is that, like some of our results above, we actually see a decline in the use of population terminology among US-based scholars from 2006 to 2017. To find out more about what might explain these declining trends, we explored the use of US-specific terminology.
+
+Next, to further test Hypothesis 4, we looked at US-specific population terminology, including the umbrella categorizations of Black, white, Asian, Hispanic, Native American, Pacific Islander, race, and ethnicity (Figures 4A-4B). While single words were extracted using tidytext’s tokenization process, we also extracted bigrams (i.e. unique two-word combinations that arise in the corpus) for terms like African American, Native American, Pacific Islander, or the various Asian American groups listed on the US Census (2018) website. In turn, these bigrams were subsequently added back into the original US-specific classifications. For example, terms like African American and Afro American were both re-coded as “Black” while terms like Asian American or Thai American were coded as “Asian.”  
+
+```{r prereqs_4c, message = FALSE, results = FALSE, echo=FALSE}
+# recoding frequently occuring population-related bigrams 
+us_pop_bigrams <- text_data %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(african american|african americans|afro american|afro americans|african-american|african-americans|afro-american|afro-americans)\\b"), 
+                       yes = "african-american", no = bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(native american|native americans|american indian|american indians|alaskan native|alaskan natives|alaska nativez|alaska natives|native-american|native-americans|american-indian|american-indians|alaskan-native|alaskan-natives|alaska-native|alaska-natives)\\b"), yes = "native-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(pacific islander|pacific islanders|native hawaiian|native hawaiians|pacific-islander|pacific-islanders|native-hawaiian|native-hawaiians)\\b"), 
+                       yes = "pacific-islander", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(mexican american|mexican americans|mexican-american|mexican-americans|hispanic-american|hispanic american|hispanic-americans|hispanic americans)\\b"), 
+                       yes = "hispanic-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(asian-american|asian american|cambodian american|cambodian americans|chinese american|chinese americans|indian american|indian americans|japanese american|japanese americans|korean american|korean americans|malaysian american|malaysian americans|pakistani american|pakistani americans|filipino american|filipino americans|thai american|thai americans|vietnamese american|vietnamese americans|cambodian-american|cambodian-americans|chinese-american|chinese-americans|indian-american|indian-americans|japanese-american|japanese-americans|korean-american|korean-americans|malaysian-american|malaysian-americans|pakistani-american|pakistani-americans|filipino-american|filipino-americans|thai-american|thai-americans|vietnamese-american|vietnamese-americans)\\b"), 
+  yes = "asian-american", no = rc_bigram)) %>%
+  select(-bigram) %>% 
+  filter(rc_bigram == "african-american" | 
+         rc_bigram == "native-american" | 
+         rc_bigram == "hispanic-american" |
+         rc_bigram == "asian-american" |
+         rc_bigram == "pacific-islander") %>% 
+  count(rc_bigram, year, sort = TRUE) %>% 
+  rename(word = rc_bigram)
+
+# tokenizing the abstract data into words 
+abstract_data <- text_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words)
+# adding custom set of stopwords 
+my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
+                                "rights", "reserved", "copyright", "elsevier"))
+abstract_data <- abstract_data %>% anti_join(my_stopwords); rm(my_stopwords)
+
+# combining the hyphenated words to our full dataset 
+us_pop_counts <- abstract_data %>% 
+  group_by(year) %>% 
+  count(word, sort = TRUE) %>% 
+  ungroup() %>% 
+  select(word, year, n) %>% 
+  bind_rows(us_pop_bigrams) %>% 
+  arrange(-n)
+```
+
+```{r figure 4c, echo=FALSE}
+# graphing us-specific terms over time using census categories 
+# https://www.census.gov/topics/population/race/about.html
+figure_4C <- us_pop_counts %>% 
+  mutate(term = ifelse(test = str_detect(string = word,
+                       pattern = "\\b(?i)(black|blacks|negro|negros|african-american)\\b"), 
+                       yes = "black", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(white|whites|caucasian|caucasians)\\b"), 
+                       yes = "white", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(asian|asians|asian-american)\\b"), 
+                       yes = "asian", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+  pattern = "\\b(?i)(hispanic|hispanic-american|latino|latinos|latina|latinos|latinx|latinxs|latino/a|latino/as)\\b"), 
+                       yes = "hispanic/latinx", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
+                       yes = "race", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "ethnicity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(native-american)\\b"), 
+                       yes = "native-american", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(pacific-islander)\\b"), 
+                       yes = "pacific-islander", no = term)) %>%
+  filter(term == "black" | term == "white" | term == "asian" |
+         term == "hispanic/latinx" | term == "race" | term == "ethnicity" |
+         term == "native-american" | term == "pacific-islander" ) %>%  
+  group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "     Figure 4C. Total Growth of \n US-Specific Terms (1990-2017)",
+       color =  "Term") + 
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#d23ccc", "#6b0f6b",  "#E86F00", "#E2B306")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly() 
+```
+
+Figure 4C shows the growth trends in US-specific terminology as based on the vernacular used on the US-Census and OMB Directive 15. Here, we find that almost all of these terms did marginally increase in usage from 1990-2004. However, from 2005-2012, the use of these terms stabilizes and, in some cases, even decreases before another spike after 2014. The most robust growth trend occurs for ethnicity while race is the second highest. Somewhat surprisingly, the term Asian has a higher usage rate than both white and black while Hispanic/Latino, Native American and Pacific Islander have all stayed about the same since the mid-2000s. 
+
+```{r prereqs_4d, message = FALSE, results = FALSE, echo=FALSE}
+# recoding frequently occuring population-related bigrams 
+us_pop_bigrams <- text_data %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(african american|african americans|afro american|afro americans|african-american|african-americans|afro-american|afro-americans)\\b"), 
+                       yes = "african-american", no = bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(native american|native americans|american indian|american indians|alaskan native|alaskan natives|alaska nativez|alaska natives|native-american|native-americans|american-indian|american-indians|alaskan-native|alaskan-natives|alaska-native|alaska-natives)\\b"), yes = "native-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(pacific islander|pacific islanders|native hawaiian|native hawaiians|pacific-islander|pacific-islanders|native-hawaiian|native-hawaiians)\\b"), 
+                       yes = "pacific-islander", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(mexican american|mexican americans|mexican-american|mexican-americans|hispanic-american|hispanic american|hispanic-americans|hispanic americans)\\b"), 
+                       yes = "hispanic-american", no = rc_bigram)) %>%
+  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
+  pattern = "\\b(?i)(asian-american|asian american|cambodian american|cambodian americans|chinese american|chinese americans|indian american|indian americans|japanese american|japanese americans|korean american|korean americans|malaysian american|malaysian americans|pakistani american|pakistani americans|filipino american|filipino americans|thai american|thai americans|vietnamese american|vietnamese americans|cambodian-american|cambodian-americans|chinese-american|chinese-americans|indian-american|indian-americans|japanese-american|japanese-americans|korean-american|korean-americans|malaysian-american|malaysian-americans|pakistani-american|pakistani-americans|filipino-american|filipino-americans|thai-american|thai-americans|vietnamese-american|vietnamese-americans)\\b"), 
+  yes = "asian-american", no = rc_bigram)) %>%
+  select(-bigram) %>% 
+  filter(rc_bigram == "african-american" | 
+         rc_bigram == "native-american" | 
+         rc_bigram == "hispanic-american" |
+         rc_bigram == "asian-american" |
+         rc_bigram == "pacific-islander") %>% 
+  count(rc_bigram, year, sort = TRUE) %>% 
+  rename(word = rc_bigram)
+
+# combining the hyphenated words to our full dataset 
+us_pop_counts <- abstract_data %>% 
+  group_by(year) %>% 
+  count(word, pubmed_id, sort = TRUE) %>% 
+  ungroup() %>% 
+  select(word, pubmed_id, year, n) %>% 
+  bind_rows(us_pop_bigrams) 
+
+# graphing us-specific terms over time 
+us_pop_counts <- us_pop_counts %>% 
+  mutate(term = ifelse(test = str_detect(string = word,
+                       pattern = "\\b(?i)(black|blacks|negro|negros|african-american)\\b"), 
+                       yes = "black", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(white|whites|caucasian|caucasians)\\b"), 
+                       yes = "white", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(asian|asians|asian-american)\\b"), 
+                       yes = "asian", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+  pattern = "\\b(?i)(hispanic|hispanic-american|latino|latinos|latina|latinos|latinx|latinxs|latino/a|latino/as)\\b"), 
+                       yes = "hispanic/latinx", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(race|racial|racially)\\b"), 
+                       yes = "race", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(ethnic|ethnicity|ethnically)\\b"), 
+                       yes = "ethnicity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(native-american)\\b"), 
+                       yes = "native-american", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(pacific-islander)\\b"), 
+                       yes = "pacific-islander", no = term)) %>% 
+  
+  mutate(black = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(black)\\b"), yes = 1, no = 0)) %>% 
+  mutate(white = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(white)\\b"), yes = 1, no = 0)) %>%
+  mutate(asian = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
+  mutate(hispanic = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(hispanic/latinx)\\b"), yes = 1, no = 0)) %>% 
+  mutate(native_american = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(native-american)\\b"), yes = 1, no = 0)) %>% 
+  mutate(pacific_islander = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(pacific-islander)\\b"), yes = 1, no = 0)) %>% 
+  mutate(racial = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(race)\\b"), yes = 1, no = 0)) %>% 
+  mutate(ethnic = ifelse(test = str_detect(string = term, 
+                       pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) 
+
+# total articles each year 
+us_pop_prc_counts <- text_data %>% 
+  group_by(year) %>% 
+  count(year) %>% 
+  ungroup() %>% 
+  rename(total = n)  
+
+# articles with term mentioned each year 
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(black == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_black = n_distinct(pubmed_id)) %>% 
+  left_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_black = round(cnt_black / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(white == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_white = n_distinct(pubmed_id)) %>% 
+  left_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_white = round(cnt_white / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(asian == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_asian = n_distinct(pubmed_id)) %>% 
+  left_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_asian = round(cnt_asian / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(hispanic == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_hispanic = n_distinct(pubmed_id)) %>% 
+  right_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_hispanic = round(cnt_hispanic / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(native_american == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_native_american = n_distinct(pubmed_id)) %>% 
+  right_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_native_american = round(cnt_native_american / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(pacific_islander == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_pacific_islander = n_distinct(pubmed_id)) %>% 
+  right_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_pacific_islander = round(cnt_pacific_islander / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% 
+  filter(racial == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_racial = n_distinct(pubmed_id)) %>% 
+  right_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
+us_pop_prc_counts <- us_pop_counts %>% filter(ethnic == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_ethnic = n_distinct(pubmed_id)) %>% 
+  right_join(us_pop_prc_counts, by = "year") %>% 
+  mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
+```
+
+```{r figure 4d, echo=FALSE}
+# graphing terms over time 
+figure_4D <- us_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
+  labs(title = "    Figure 4D. Proportional Growth of \n US-Specific Terms (1990-2017)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#d23ccc", "#6b0f6b",  "#E86F00", "#E2B306")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+Finally, Figure 4D demonstrates the same non-linear trend discussed in our discussion of Hypothesis 1. Most prominently, the term ethnicity rises sharply from 1993 to 1996, climbs more slowly in the next decade, and then drops back to about 2% of all published abstracts in the sample. In general, all the other terms in this graph (i.e. Asian, Black, white, Hispanic/Latinx, race and ethnicity) follow the same parabolic curve with the exception of Pacific-Islander and Native-American, which show almost no variance over the entirety of the sampling period. 
+
+### Main Takeaway 
+
+Overall, Figures 4A-4C support our hypothesis that *(a)* US-based researchers tend to use population terminology at disproportionately higher rates than scientists from other countries and *(b)* that terminology based on the US-Census and OMB Directive 15 have increased since 1990. However, when looking more closely at these trends, we also find that the use of US-specific terminology has marginally decreased since 2005 - once again suggesting that biomedical scientists seem to have abandoned the use of race and ethnicity in exchange for geographic terminology to enact population differences in their research. 
+
+
+
+
