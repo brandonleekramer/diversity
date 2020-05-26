@@ -1,0 +1,46 @@
+---
+title: "Untitled"
+author: "Brandon"
+date: "5/25/2020"
+output: html_document
+---
+```{r appendix1, echo=FALSE}
+divictionary[is.na(divictionary)] <- ""
+divictionary$joint <- c("Row1","Row2","Row3","Row4","Row5","Row6","Row7","Row8","Row9","Row10",
+                        "Row1","Row2","Row3","Row4","Row5","Row6","Row7","Row8","Row9","Row10",
+                        "Row1","Row2","Row3","Row4","Row5","Row6","Row7","Row8","Row9","Row10", 
+                        "Row1","Row2","Row3","Row4")
+aging_pt1 <- divictionary %>% slice(1:10) %>% select(joint, aging) %>% rename(aging1 = aging)
+aging_pt2 <- divictionary %>% slice(11:20) %>% select(joint, aging) %>% rename(aging2 = aging)
+aging_pt3 <- divictionary %>% slice(21:30) %>% select(joint, aging) %>% rename(aging3 = aging)
+aging_pt4 <- divictionary %>% slice(31:34) %>% select(joint, aging) %>% rename(aging4 = aging)
+ancestry <- divictionary %>% slice(1:10) %>% select(joint, ancestry)
+cultural <- divictionary %>% slice(1:10) %>% select(joint, cultural) 
+appendix <- full_join(aging_pt1, aging_pt2,  by = "joint", all = TRUE)  
+appendix <- full_join(appendix, aging_pt3,  by = "joint", all = TRUE) 
+appendix <- full_join(appendix, aging_pt4,  by = "joint", all = TRUE)
+appendix <- full_join(appendix, ancestry,  by = "joint", all = TRUE)
+appendix <- full_join(appendix, cultural,  by = "joint", all = TRUE)
+appendix[is.na(appendix)] <- ""
+appendix %>% select(-joint)
+```
+```{r appendix2, echo=FALSE}
+divictionary %>% select(diversity, genetic, linguistic, minority, population, race_ethnicity)
+```
+```{r appendix3, echo=FALSE}
+sex_gender_pt1 <- divictionary %>% slice(1:10) %>% select(joint, sex_gender) %>% rename(sex_gender1 = sex_gender)
+sex_gender_pt2 <- divictionary %>% slice(11:20) %>% select(joint, sex_gender) %>% rename(sex_gender2 = sex_gender)
+sex_gender_pt3 <- divictionary %>% slice(21:30) %>% select(joint, sex_gender) %>% rename(sex_gender3 = sex_gender)
+sexuality_pt1 <- divictionary %>% slice(1:10) %>% select(joint, sexuality) %>% rename(sexuality1 = sexuality)
+sexuality_pt2 <- divictionary %>% slice(11:20) %>% select(joint, sexuality) %>% rename(sexuality2 = sexuality)
+sexuality_pt3 <- divictionary %>% slice(21:30) %>% select(joint, sexuality) %>% rename(sexuality3 = sexuality)
+appendix_pt2 <- full_join(sex_gender_pt1, sex_gender_pt2,  by = "joint", all = TRUE)  
+appendix_pt2 <- full_join(appendix_pt2, sex_gender_pt3,  by = "joint", all = TRUE)
+appendix_pt2 <- full_join(appendix_pt2, sexuality_pt1,  by = "joint", all = TRUE)
+appendix_pt2 <- full_join(appendix_pt2, sexuality_pt2,  by = "joint", all = TRUE)
+appendix_pt2 <- full_join(appendix_pt2, sexuality_pt3,  by = "joint", all = TRUE)
+appendix_pt2[is.na(appendix_pt2)] <- ""
+appendix_pt2 %>% select(-joint)
+
+knitr::kable(divictionary %>% select(-joint))
+```

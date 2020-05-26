@@ -11,6 +11,10 @@
   </url>
   
   <url>
+    <loc>/</loc>
+  </url>
+  
+  <url>
     <loc>/analyses/hypothesis1/</loc>
   </url>
   
@@ -28,10 +32,6 @@
   
   <url>
     <loc>/description/</loc>
-  </url>
-  
-  <url>
-    <loc>/</loc>
   </url>
   
   <url>

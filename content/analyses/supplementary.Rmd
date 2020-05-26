@@ -43,7 +43,7 @@ supp_graph <- pubs_by_year %>% ggplot() +
   labs(title = "Supplementary Figure 1. \n Growth of Publications in Diversity and Biomedical Corpora (1990-2017)", caption = "Data Source: Web of Science") + 
   theme_minimal() +
   scale_color_manual(labels=c("biomedical","diversity"),
-                   values=c("#5D8C5D", "#3787D7")) +
+                   values=c("#61B329", "#3B9AB2")) +
   theme(axis.title.x = element_blank(), 
         axis.title.y = element_blank(),
         plot.title = element_text(hjust = 0.46),

@@ -1,6 +1,6 @@
 baseURL = "/"
 languageCode = "en-us"
-title = "Supplementary Materials"
+title = "Diversity ∙ Supplementary Materials"
 theme = "min_night"
 disqusShortname = ""
 googleAnalytics = ""
@@ -10,7 +10,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     post = "/:year/:month/:day/:slug/"
 
 [params]
-    author = "Anonymized!"
+    author = "Anonymized"
     description = "Measuring the Growth of Diversity and Population Terminology in Biomedical Research"
     logo = "favicon/network-labels-new.png"
     accent = "#000000" # dark colors do best

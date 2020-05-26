@@ -1,6 +1,6 @@
 ---
 title: "Hypothesis 4"
-description: "Because US-based researchers are most likely to use population terms, we hypothesize that US-specific racial and ethnic categories, as outlined in the US-Census and OMB Directive 15, have grown in use in biomedical abstracts since 1990."
+description: "We hypothesize that (a) US-based researchers are most likely to use population terms and (b) that US-specific racial and ethnic categories have grown in use in biomedical abstracts over the past three decadess."
 output: html_document
 ---
 
@@ -9,7 +9,7 @@ Finally, to test Hypothesis 4, we evaluated the geographical basis of population
 ```{r prereqs_4ab, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
 rm(list = ls())
 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT",
               "grid", "gridExtra", "reshape2", "extrafont",
                "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 
@@ -21,7 +21,7 @@ text_data <- read_csv("diversity_corpus.csv") %>%
 
 # pulling our list of population
 #setwd("C:/Users/bkram/CloudStation/Diversity/Data")
-all_pop_terms <- read_csv("population_terms.csv") 
+all_pop_terms <- read_csv("diversity_project - h2h3_categories.csv") 
 all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
 
 # first we have to recode all the strings that could arise in the location colunmn as country codes 
@@ -970,7 +970,7 @@ figure_4C <- us_pop_counts %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#d23ccc", "#6b0f6b",  "#E86F00", "#E2B306")) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#6b0f6b", "#d23ccc",  "#E86F00", "#E2B306")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly() 
 ```
@@ -1135,7 +1135,7 @@ figure_4D <- us_pop_prc_counts %>% ggplot() +
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#d23ccc", "#6b0f6b",  "#E86F00", "#E2B306")) +
+  scale_color_manual(values=c("#61B329", "#3B9AB2", "#E21F00", "#00468b", "#6b0f6b", "#d23ccc",  "#E86F00", "#E2B306")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
 ```
@@ -1146,6 +1146,18 @@ Finally, Figure 4D demonstrates the same non-linear trend discussed in our discu
 
 Overall, Figures 4A-4C support our hypothesis that *(a)* US-based researchers tend to use population terminology at disproportionately higher rates than scientists from other countries and *(b)* that terminology based on the US-Census and OMB Directive 15 have increased since 1990. However, when looking more closely at these trends, we also find that the use of US-specific terminology has marginally decreased since 2005 - once again suggesting that biomedical scientists seem to have abandoned the use of race and ethnicity in exchange for geographic terminology to enact population differences in their research. 
 
-
-
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/Documents/Diversity/Data")
+terms_table <- read_csv("diversity_project - h4_categories.csv")
+terms_table <- terms_table %>% select(black, native_american,	pacific_islander,	hispanic_latinx)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table)
+```
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/Documents/Diversity/Data")
+terms_table <- read_csv("diversity_project - h4_categories.csv")
+terms_table <- terms_table %>% select(asian,	white,	race,	ethnicity)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table)
+```
 

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>Supplementary Materials</title>
+    <title>Diversity ∙ Supplementary Materials</title>
     <link>/</link>
-    <description>Recent content on Supplementary Materials</description>
+    <description>Recent content on Diversity ∙ Supplementary Materials</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     
@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/analyses/hypothesis1/</guid>
-      <description>To test Hypothesis 1, we conducted word frequency analysis to observe (1) variation in raw word counts over time and (2) to analyze variance in word frequency based on the proportion of publications that the term is used in each year. These terms included various diversity-related terms, including aging, ancestry, cultural, diversity, genetic, minority, population, race/ethnicity, sex/gender and sexuality. These analyses were conducted on both the diversity corpus and the more general corpus of biomedical abstracts.</description>
+      <description>To test Hypothesis 1, we conducted word frequency analyses that quantify (1) variation in raw word counts over time and (2) the proportion of publications that the term is used in each year. These terms included various diversity-related terms, including aging, ancestry, cultural, diversity, genetic, minority, population, race/ethnicity, sex/gender and sexuality. Although we did not include religious and linguistic terms in our final visualizations, we did analyze these terms, finding little change in their use over time.</description>
     </item>
     
     <item>
@@ -25,7 +25,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/analyses/hypothesis2/</guid>
-      <description>Next, we return to the diversity corpus to test Hypothesis 2. Here, we examine whether the use of population terminology has grown in biomedical abstracts over the past three decades. To do this, we build on Panofsky and Bliss’s (2017) exploration of how research scientists enact population differences using a polyvocality of terms, including geographic classifications like continents and countries. Drawing from their coding schema, we developed a list of over 2,100 terms that correspond to national, continental, racial, ethnic, and other general population groupings (e.</description>
+      <description>Next, we return to the diversity corpus to test Hypothesis 2. Here, we examine whether the use of population terminology has grown in biomedical abstracts over the past three decades. To do this, we build on Panofsky and Bliss’s (2017) exploration of how research scientists enact population differences using a polyvocality of terms, including geographic classifications like continents, countries, and cardinal directions (i.</description>
     </item>
     
     <item>
@@ -34,7 +34,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/analyses/hypothesis3/</guid>
-      <description>To test Hypothesis 3, we parsed our dictionary of 2,100 population terms into a set of more nuanced categories. Our main objective is to test Fujimura and Rajagopalan’s (2011) assertion that researchers now use national and continental terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent and country terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.</description>
+      <description>To test Hypothesis 3, we parsed our dictionary of 2,200+ population terms into a set of more nuanced analytic categories. Our main objective is to test Fujimura and Rajagopalan’s (2011) assertion that researchers now use biogeographic terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent, country, and directional terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.</description>
     </item>
     
     <item>
@@ -43,7 +43,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/analyses/hypothesis4/</guid>
-      <description>Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. our dictionary of 2,100 terms) were used from researchers in each country.</description>
+      <description>Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.</description>
     </item>
     
     <item>

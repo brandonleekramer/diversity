@@ -624,7 +624,7 @@ grid.arrange(figure_1A, figure_1B,
 
 ```{r figures 2ab, fig.height=5, fig.width=11.5, echo=FALSE}
 # pulling our list of population
-all_pop_terms <- read_csv("population_terms.csv") 
+all_pop_terms <- read_csv("diversity_project - h2h3_categories.csv") 
 all_pop_terms <- paste(c("\\b(?i)(zcx", all_pop_terms$term, "zxc)\\b"), collapse = "|")
 
 figure_2A <- abstract_data %>% 
@@ -660,7 +660,7 @@ figure_2A <- abstract_data %>%
 all_pop_terms_trends <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = "\\b(?i)(population|populations)\\b"), 
-                       yes = "population*", no = word)) %>% 
+                       yes = "population", no = word)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = all_pop_terms), 
                        yes = "all population terms", no = term)) %>% 
@@ -755,8 +755,7 @@ grid.arrange(figure_2A, figure_2B,
 ```{r figures 2cd, fig.height=5, fig.width=11.5, echo=FALSE}
 #setwd("C:/Users/bkram/CloudStation/Diversity/Data")
 # pulling in concatenated population terms from our dataset 
-general_pop_terms <- read_csv("diversity_project - h2h3_categories.csv") %>% 
-  filter(sub_category == "population_general")
+race_ethnicity <- paste(c("\\b(?i)(zcx", divictionary$race_ethnicity, "zxc)\\b"), collapse = "|")
 us_specific_terms <- read_csv("diversity_project - h2h3_categories.csv") %>% 
   filter(sub_category == "us_specific")
 continental_terms <- read_csv("diversity_project - h2h3_categories.csv") %>%
@@ -779,8 +778,7 @@ all_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>%
   filter(category == "south_america" | category == "africa" | category == "asia" | 
          category == "north_america" | category == "europe")
 # creating detection string patterns for all the categories
-general_pop_terms <- paste(c("\\b(?i)(zxz", 
-                     general_pop_terms$term, "zxz)\\b"), collapse = "|")
+
 us_specific_terms <- paste(c("\\b(?i)(zxz", 
                      us_specific_terms$term, "zxz)\\b"), collapse = "|")
 continental_terms <- paste(c("\\b(?i)(zxz", 
@@ -804,10 +802,10 @@ all_ethnic_groups <- paste(c("\\b(?i)(zxz",
 # graphing the population terms into various categories 
 pop_terms_bycats <- abstract_data %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
-                       pattern = general_pop_terms), 
-                       yes = "general population terms", no = word)) %>%
+                       pattern = race_ethnicity), 
+                       yes = "race/ethncity", no = word)) %>%
   mutate(general_terms = ifelse(test = str_detect(string = term, 
-                       pattern = "general population terms"), yes = 1, no = 0)) %>% 
+                       pattern = "race/ethncity"), yes = 1, no = 0)) %>% 
   mutate(term = ifelse(test = str_detect(string = abstract_data$word, 
                        pattern = us_specific_terms), 
                        yes = "us-specific terms", no = term)) %>%
@@ -832,12 +830,12 @@ pop_terms_bycats <- abstract_data %>%
                        pattern = "\\b(?i)(population|populations)\\b"), 
                        yes = "population", no = term)) %>% 
   mutate(population = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b((?<!general )population)\\b"), yes = 1, no = 0))  
+                       pattern = "\\b((?<!all )population)\\b"), yes = 1, no = 0))  
   
 figure_3A <- pop_terms_bycats %>%   
   group_by(year) %>% count(term, sort = TRUE) %>% ungroup() %>% 
   filter(term == "diversity" | term == "population" | 
-         term == "general population terms" | term == "us-specific terms" |
+         term == "race/ethncity" | term == "us-specific terms" |
          term == "continental terms" | term == "national terms" | term == "all ethnic terms") %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.5, stat="identity") + 
   theme_bw() +
