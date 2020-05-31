@@ -1,5 +1,5 @@
 ---
-title: "Hypothesis 2"
+title: "Hypothesis 2 (Diversity Sample)"
 description: "The use of population terminology has increased in biomedical abstracts since 1990."
 output: html_document
 ---
@@ -172,11 +172,12 @@ When taken as a whole, population terminology has grown dramatically from 1990-2
 
 ### Appendix 
 
-Here is a list of the 2,200+ terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. 
+Here is a list of the 2,200+ terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. If you have suggestions about what to add and/or reclassify, please send an email to the authors using the email link in the top-right corner.
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/Documents/Diversity/Data")
 all_pop_terms_table <- read_csv("diversity_project - h2h3_categories.csv")
+all_pop_terms_table <- all_pop_terms_table #%>% select(term, category)
 all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
 DT::datatable(all_pop_terms_table)
 ```

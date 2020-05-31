@@ -20,29 +20,56 @@
     </item>
     
     <item>
-      <title>Hypothesis 2</title>
-      <link>/analyses/hypothesis2/</link>
+      <title>Hypothesis 2 (Biomedical Sample)</title>
+      <link>/analyses/biomedical-h2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/analyses/hypothesis2/</guid>
+      <guid>/analyses/biomedical-h2/</guid>
       <description>Next, we return to the diversity corpus to test Hypothesis 2. Here, we examine whether the use of population terminology has grown in biomedical abstracts over the past three decades. To do this, we build on Panofsky and Bliss’s (2017) exploration of how research scientists enact population differences using a polyvocality of terms, including geographic classifications like continents, countries, and cardinal directions (i.</description>
     </item>
     
     <item>
-      <title>Hypothesis 3</title>
-      <link>/analyses/hypothesis3/</link>
+      <title>Hypothesis 2 (Diversity Sample)</title>
+      <link>/analyses/diversity-h2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/analyses/hypothesis3/</guid>
+      <guid>/analyses/diversity-h2/</guid>
+      <description>Next, we return to the diversity corpus to test Hypothesis 2. Here, we examine whether the use of population terminology has grown in biomedical abstracts over the past three decades. To do this, we build on Panofsky and Bliss’s (2017) exploration of how research scientists enact population differences using a polyvocality of terms, including geographic classifications like continents, countries, and cardinal directions (i.</description>
+    </item>
+    
+    <item>
+      <title>Hypothesis 3 (Biomedical Sample)</title>
+      <link>/analyses/biomedical-h3/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/analyses/biomedical-h3/</guid>
       <description>To test Hypothesis 3, we parsed our dictionary of 2,200+ population terms into a set of more nuanced analytic categories. Our main objective is to test Fujimura and Rajagopalan’s (2011) assertion that researchers now use biogeographic terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent, country, and directional terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.</description>
     </item>
     
     <item>
-      <title>Hypothesis 4</title>
-      <link>/analyses/hypothesis4/</link>
+      <title>Hypothesis 3 (Diversity Sample)</title>
+      <link>/analyses/diversity-h3/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/analyses/hypothesis4/</guid>
+      <guid>/analyses/diversity-h3/</guid>
+      <description>To test Hypothesis 3, we parsed our dictionary of 2,200+ population terms into a set of more nuanced analytic categories. Our main objective is to test Fujimura and Rajagopalan’s (2011) assertion that researchers now use biogeographic terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent, country, and directional terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.</description>
+    </item>
+    
+    <item>
+      <title>Hypothesis 4 (Biomedical Sample)</title>
+      <link>/analyses/biomedical-h4/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/analyses/biomedical-h4/</guid>
+      <description>Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.</description>
+    </item>
+    
+    <item>
+      <title>Hypothesis 4 (Diversity Sample)</title>
+      <link>/analyses/diversity-h4/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/analyses/diversity-h4/</guid>
       <description>Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.</description>
     </item>
     

@@ -19,15 +19,27 @@
   </url>
   
   <url>
-    <loc>/analyses/hypothesis2/</loc>
+    <loc>/analyses/biomedical-h2/</loc>
   </url>
   
   <url>
-    <loc>/analyses/hypothesis3/</loc>
+    <loc>/analyses/diversity-h2/</loc>
   </url>
   
   <url>
-    <loc>/analyses/hypothesis4/</loc>
+    <loc>/analyses/biomedical-h3/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/diversity-h3/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/biomedical-h4/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/diversity-h4/</loc>
   </url>
   
   <url>

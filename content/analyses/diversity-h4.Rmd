@@ -1,10 +1,10 @@
 ---
-title: "Hypothesis 4"
+title: "Hypothesis 4 (Diversity Sample)"
 description: "We hypothesize that (a) US-based researchers are most likely to use population terms and (b) that US-specific racial and ethnic categories have grown in use in biomedical abstracts over the past three decadess."
 output: html_document
 ---
 
-Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. our dictionary of 2,100 terms) were used from researchers in each country. 
+Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. our dictionary of 2,200+ terms) were used from researchers in each country. 
 
 ```{r prereqs_4ab, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
 rm(list = ls())
@@ -1149,14 +1149,14 @@ Overall, Figures 4A-4C support our hypothesis that *(a)* US-based researchers te
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/Documents/Diversity/Data")
 terms_table <- read_csv("diversity_project - h4_categories.csv")
-terms_table <- terms_table %>% select(black, native_american,	pacific_islander,	hispanic_latinx)
+terms_table <- terms_table %>% select(asian, black,	ethnicity, hispanic_latinx)
 terms_table[is.na(terms_table)] <- ""
 DT::datatable(terms_table)
 ```
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/Documents/Diversity/Data")
 terms_table <- read_csv("diversity_project - h4_categories.csv")
-terms_table <- terms_table %>% select(asian,	white,	race,	ethnicity)
+terms_table <- terms_table %>% select(native_american,	pacific_islander,	race, white)
 terms_table[is.na(terms_table)] <- ""
 DT::datatable(terms_table)
 ```

@@ -1,5 +1,5 @@
 ---
-title: "Hypothesis 3"
+title: "Hypothesis 3 (Biomedical Sample)"
 description: "The use of terms like genetic ancestry as well as national and continental terms have outpaced racial and ethnic terms in biomedical literature."
 output: html_document
 ---
@@ -15,9 +15,13 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT",
 
 setwd("~/Documents/Diversity/Data")
 # loading the .csv file 
-text_data <- read_csv("diversity_corpus.csv") %>% 
+text_data <- read_csv("biomedical_corpus.csv") %>% 
+  rowid_to_column(var = "id") %>% 
+  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
+         abstract = AB, references = CR, year = PY, times_cited = TC, pubmed_id = UT) %>% 
+  select(id, authors, title, year, publication, abstract, references, year, times_cited, pubmed_id) %>% 
 # filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018") 
+  filter(year != "2018")
 # tokenizing the abstract data into words 
 abstract_data <- text_data %>% 
   unnest_tokens(word, abstract) %>% 
@@ -45,20 +49,19 @@ ling_religious_terms <- read_csv("diversity_project - h2h3_categories.csv") %>%
 national_terms <- read_csv("diversity_project - h2h3_categories.csv") %>%
   filter(category == "national")
 directional_terms <- read_csv("diversity_project - h2h3_categories.csv") %>% 
-  filter(sub_category == "directional")
+  filter(classification == "directional")
 south_american_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
-  filter(category == "south_america")
+  filter(classification == "south_america")
 african_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
-  filter(category == "africa")
+  filter(classification == "africa")
 north_american_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>%
-  filter(category == "north_america")
+  filter(classification == "north_america")
 european_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>%
-  filter(category == "europe")
+  filter(classification == "europe")
 asian_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
-  filter(category == "asia")
+  filter(classification == "asia")
 all_ethnic_groups <- read_csv("diversity_project - h2h3_categories.csv") %>% 
-  filter(category == "south_america" | category == "africa" | category == "asia" | 
-         category == "north_america" | category == "europe")
+  filter(category == "ethnic")
 # creating detection string patterns for all the categories
 general_pop_terms <- paste(c("\\b(?i)(zxz", 
                      general_pop_terms$term, "zxz)\\b"), collapse = "|")
@@ -210,7 +213,7 @@ figure_3A <- figure_3A_counts %>%
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly() # pop green, race yellow 
 ```
 
-In support of Fujimura and Rajagopalan (2011), Figures 3A & 3B reveal that continental and country terms outgrew the use of racial, ethnic and US-Specific terminology over the past three decades. More specifically, Figure 3A shows that country terms have exhibited a 35-fold increase followed closely by the use of continental terms. Directional terms, which are both included in the broader continental classification (as they are typically used to refer to specific areas within continents) and broken apart into their own independent line, have also grown notably, but pale in comparison with the rise in continent and country terms. There has also been a noticable uptick in general population terms, which is a bit of catch-all category. We can see that the term population, which is included both in the general population classification in addition to being plotted independently, accounts for more than half of this growth while race and ethnicity makes up considerably less of that category's ascent. Ethnic terms, in contrast, have only increased marginally, growing at roughly the same rate as US-specific terminology since 1990. 
+Text will be here. 
 
 ```{r figure 3b, echo=FALSE}
 pop_terms_bycats <- pop_terms_bycats %>% 
@@ -312,19 +315,20 @@ figure_3B <- bycats_prc_counts %>% ggplot() +
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
 ```
 
-Figure 3B displays the proportional changes in the use of population terminology. Again, country terms have grown the most; surging from 12% of abstracts to now being mentioned in 35% of abstracts. Continental terms have also risen by about 15% over that time period. General population terms, the term population, and directional terms follow analogous patterns, rising 10%, 8% and 6% respectively since 1990. In contrast, there has been almost no variation in the use of racial, ethnic or US-specific terminology over the past three decades. While ethnic terms has stayed consistently low across our analysis period, race/ethnicity and US-specific terminology followed a parabolic curve that increases up until the mid-2000s before declining back to its baseline in 2017.  
+Text will be here.
 
 ### Main Takeaway 
 
-Together, these analyses reveal that national and continental terms outgrew the use of racial, ethnic and US-Specific - a trend that holds for both the raw counts and proportions in Figures 3A & 3B. These findings strongly support Fujimura and Rajagopalan’s (2011) thesis that national and continental terms are now more commonly used than racial and ethnic terms in the scientific literature, suggesting that scholars of diversity must be attentive to the emerging strategies that biomedical researchers use to enact population differences in their research. Focusing solely on discourses related to race and ethnicity likely fails to capture the more subtle ways that biomedical scholars implemented new and potentially dangerous forms of population difference in their research.  
+Text will be here.
 
 ### Appendix 
 
-Here is a list of the 2,200+ terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in.
+Here is a list of the 2,200+ terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. If you have suggestions about what to add and/or reclassify, please send an email to the authors using the email link in the top-right corner.
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/Documents/Diversity/Data")
 all_pop_terms_table <- read_csv("diversity_project - h2h3_categories.csv")
+all_pop_terms_table <- all_pop_terms_table #%>% select(term, category)
 all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
-datatable(all_pop_terms_table)
+DT::datatable(all_pop_terms_table)
 ```
