@@ -1,0 +1,79 @@
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | \
+efetch -format xml | \
+
+
+efetch -db pubmed -id 24102982,21171099,17150207 -format xml | \
+xtract –pattern PubmedArticle –tab "|" –sep ";" \
+–element LastName Initials  
+
+
+efetch -db pubmed -id 24102982,21171099,17150207 -format xml | xtract –pattern PubmedArticle
+ 
+efetch –db pubmed –id 24102982,21171099,17150207 -format xml > testfile.csv
+
+efetch –db pubmed –id 24102982,21171099,17150207 -format xml > "testfile.txt"
+
+works 
+efetch -db pubmed -id 24102982 -format xml | xtract -pattern PubmedArticle -tab "\t" -sep ";" -element LastName > Documents/Diversity/Data/testfile.csv
+
+efetch -db pubmed -id 24102982,21171099 -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID LastName Initials Year Title ArticleTitle > Documents/Diversity/Data/diversity_pubmed_data.csv
+
+efetch -db pubmed -id 24102982,21171099 -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year Title AbstractText AbstractTitle Title LastName Initials Affiliation Language GrantID Agency Acronym Country PublicationType > Documents/Diversity/Data/div_pubmed_data.csv
+
+esearch -db pubmed -query "black tilapia" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year Title AbstractText AbstractTitle Title LastName Initials Affiliation Language GrantID Agency Acronym Country PublicationType > Documents/Diversity/Data/fish_data.csv
+
+
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year Title AbstractText Title LastName Initials Affiliation Language GrantID Agency Acronym Country PublicationType > Documents/Diversity/Data/diversity_pubmed_data.csv
+
+On Rivanna 
+
+esearch -db pubmed -query "black tilapia" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country > fish_data.txt
+
+esearch -db pubmed -query "black tilapia" | efetch -format xml | xtract -pattern PubmedArticle -element MedlineCitation/PMID -block PubDate/Year -element AbstractText Title Author –sep ";" –element LastName,Initials Affiliation Language GrantID Agency Acronym Country PublicationType > fish_data.txt
+
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year AbstractText Title LastName,Initials Affiliation Language GrantID Agency Acronym Country PublicationType > diversity_pubmed_data.csv
+
+https://stackoverflow.com/questions/23568981/how-to-read-data-with-different-separators
+
+setwd("~/Documents/Diversity/Data")
+data <- read.csv(file = "diversity_pubmed_data.csv", head = TRUE, sep="|")
+
+
+####
+
+library(data.table)
+setwd("/sfs/qumulo/qhome/kb7hp")
+data <- fread("fish_data.txt", sep = "|", header=TRUE, fill=TRUE)
+
+PMID|Year|AbstractText|Journal|Affiliation|LastName|Initials|PublicationType|Language|GrantID|Agency|Acronym|Country
+
+MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country
+
+
+esearch -db pubmed -query "black tilapia" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country > fish_data.txt
+
+
+
+
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country > diversity_pubmed_data.txt
+
+
+library(data.table)
+setwd("/sfs/qumulo/qhome/kb7hp")
+data <- fread("fish_data.txt", sep = "|", header=TRUE, fill=TRUE)
+data <- fread("diversity_pubmed_data.txt", sep = "|", header=FALSE, fill=TRUE)
+
+PMID|Year|AbstractText|Journal|Affiliation|LastName|Initials|PublicationType|Language|GrantID|Agency|Acronym|Country
+
+MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country
+
+
+esearch -db pubmed -query "black tilapia" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country > fish_data.txt
+
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID PubDate/Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country > diversity_pubmed_data.txt
+
+
+echo -e "\n" > diversity_pubmed_data.txt
+sed -i -e '$a\' diversity_pubmed_data.txt
+
+

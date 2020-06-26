@@ -1,0 +1,69 @@
+---
+title: "Untitled"
+author: "Brandon"
+date: "6/13/2020"
+output: html_document
+---
+
+```{r}
+library(easyPubMed)
+my_query <- '"biol*" OR "biom*" OR "medic*" OR "gene*" OR "pharma*" AND (humans[Filter]) AND 1990[EDAT] : 2019[EDAT]'
+my_entrez_id <- get_pubmed_ids(my_query)
+my_abstracts_txt <- fetch_pubmed_data(my_entrez_id, format = "abstract")
+```
+
+```{r}
+head(my_abstracts_txt)
+```
+```{r}
+my_abstracts_xml <- fetch_pubmed_data(pubmed_id_list = my_entrez_id)
+class(my_abstracts_xml)
+```
+
+```{r}
+new_query <- 'molecularization[TIAB] AND "2018"[PDAT]' 
+out.B <- batch_pubmed_download(pubmed_query_string = new_query, 
+                               dest_file_prefix = "NUBL_18_", 
+                               encoding = "ASCII")
+```
+```{r}
+# Retrieve the full name of the XML file downloaded in the previous step
+new_PM_file <- out.B[[1]]
+new_PM_df <- table_articles_byAuth(pubmed_data = new_PM_file, 
+                                   included_authors = "first", 
+                                   max_chars = 0, 
+                                   encoding = "ASCII")
+
+# Printing a sample of the resulting data frame
+new_PM_df$address <- substr(new_PM_df$address, 1, 28)
+#new_PM_df$abstract <- substr(new_PM_df$abstract, 1, 500)
+new_PM_df$jabbrv <- substr(new_PM_df$jabbrv, 1, 9)
+sid <- seq(5, nrow(new_PM_df), by = 10)
+
+new_PM_df[sid, c("pmid", "year", "jabbrv", "lastname", "abstract", "address")]
+
+new_PM_df 
+```
+
+```{r}
+## Funding
+
+
+records@
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
