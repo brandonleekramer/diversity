@@ -1,0 +1,139 @@
+---
+title: "Dictionaries"
+description: "An outline of the dictionaries used for natural language processing in this paper."
+output: html_document
+weight: 4
+---
+
+```{r setup, include=FALSE}
+rm(list = ls())
+for (pkg in c("tidyverse", "collapsibleTree", "DT")) {library(pkg, character.only = TRUE)}
+setwd("~/Documents/Diversity/Data")
+h1_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1")
+h2_dictionary <- read.csv("diversity_project - h2_dictionary.csv", colClasses=c("regional"="character")) 
+h3_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis3")
+```
+
+To conduct our analyses on the growth of diversity in biomedical research, we used natural language processing to examine the rise and fall of terms from 1990-2017. This strategy allows for multiple terms to be collapsed into a general category set. For each hypothsis, we created a unique dictionary of term sets and, in the hope of being fully transparent, we have outlined the process through which we created these dictionaries below. 
+
+### Hypothesis 1 Dictionary
+
+For Hypothesis 1, our main goal was to examine the growth of the term diversity as well as its related concepts, including aging, ancestry, cultural, genetic, minority, population, sex/gender, sexualities, and social class. In each category set, we manually compiled multiple terms related to each concept. In the case of sex/gender and sexualties terms, we also refereneced the [Oxford Dictionary of Gender Studies](https://www.oxfordreference.com/view/10.1093/acref/9780191834837.001.0001/acref-9780191834837?btog=chap&hide=true&pageSize=20&skipEditions=true&sort=titlesort&source=%2F10.1093%2Facref%2F9780191834837.001.0001%2Facref-9780191834837). The terms embedded within each category set can be visualized by clicking on the [collapsibleTree](https://adeelk93.github.io/collapsibleTree/) or by searching the [interactive table](https://rstudio.github.io/DT/) below. 
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE, fig.height=7}
+h1_dictionary %>% 
+  group_by(category, term) %>% 
+  summarize(`number of terms` = n()) %>% 
+collapsibleTreeSummary(
+    hierarchy = c("category", "term"),
+    root = "category",
+    width = 800,
+    attribute = "number of terms",
+    zoomable = TRUE,
+    fontSize = 16, 
+    nodeSize = "leafCount",
+    maxPercent = 50
+  )
+```
+```{r, warning = FALSE, message = FALSE, echo = FALSE}
+setwd("~/Documents/Diversity/Data")
+divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+first_table <- divictionary %>% select(aging, ancestry, cultural, diversity, genetic)
+first_table[is.na(first_table)] <- ""
+datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
+```
+```{r, echo = FALSE}
+second_table <- divictionary %>% select(minority, population, race_ethnicity, sex_gender, sexuality)
+second_table[is.na(second_table)] <- ""
+datatable(second_table, rownames = FALSE)
+```
+
+### Hypothesis 2 Dictionary
+
+In Hypothesis 2, we dramatically expanded the scope of our research project by examining the rise of population terms used in biomedical research. In their inductive analysis of population terms used in *Nature Genetics*, Panofsky and Bliss (2017) offer us a number of important insights about how to approach the task of collecting a census on these terms. First, these scholars note that researchers use population terms in ambiguous ways - using a polyvocality of terms to enact population differences in genetic research. These scholars also note that continental, national, and directional terms are used increasingly more than racial and ethnic terms. Still, we are interested in getting an accurate count of each category and in order to do this we need a dictionary of terms to search on for each category. Although we did spend time searching for a comprehensive dictionary to serve our purposes, we were unable to find such a datasource, especially of subnational and/or ethnic terms. 
+
+We ultimately decided to engage in an abductive data collection approach using [Wikipedia](https://www.wikipedia.org/) as our primary source [(Tavory and Timmermans 2012)](https://journals.sagepub.com/doi/abs/10.1177/0735275112457914?casa_token=_jj65xe6UYoAAAAA:IHFFAMfdji00ZATLU824NOfKPlZRCQo59WlhF-pIHXwsluEyRTp6WYLB3O4E38tOrxgTOFn8qYghTw). Although the use of Wikipedia is not without its criticisms 
+[(Black 2008;](https://www.emerald.com/insight/content/doi/10.1108/14684520810865994/full/html?casa_token=u1beY859p2wAAAAA:P36z4aoC-iRw-T6odh_xtUObCsNXjYmWU35SwDNAA783rUtKJgrgJ6H8irMh-VQBW0-iXamyutUIxYyluSKVSDdcCeXqH1qgYyI6RfWdXp_83pwVmsL9) [Collier and Bear 2012;](https://dl.acm.org/doi/pdf/10.1145/2145204.2145265?casa_token=SxOYBgDnrFgAAAAA:HYu4VgoXGxCjk2A3GJPU-YE3wRbRhI2bFzWdNm4ue7hTHcZu1vv_wdyorr5cAxOeO1dLT-eU9t7gVQ) [Kostakis 2010)](https://journals.uic.edu/ojs/index.php/fm/article/download/2613/2479), the site is also among the top-15 websites used on the web [(Alexa 2020)](https://www.alexa.com/topsites), is subject to continuous peer review and editing, and is an active historical document that is crowdsourced by millions of online users [(Wikipedia 2020)](https://www.wikipedia.org/). Thus, while the site is certainly subject to malicious and/or unqualified editing, it is also likely to be more comprehensive than any one single national governing apparatus that is subject to scrutiny by other political actors. Pertinent to the topic at hand, our purpose in constructing a dictionary is not to aggregate (mis-)information about populations nor to classify them into strata. We largely circumvent such activities, noting how these terms have been used throughout the long history of scientific racism and other violent racialized activities (sources). Instead, our goal is to aggregate a dictionary of the terms that scientists could use to enact population differences and create a census of how often these terms are used. 
+
+To compile this list, we first collected all of the relevant [continental](https://en.wikipedia.org/wiki/List_of_adjectival_and_demonymic_forms_of_place_names), [subcontinental](https://en.wikipedia.org/wiki/List_of_adjectivals_and_demonyms_for_subcontinental_regions), and [national](https://en.wikipedia.org/wiki/List_of_sovereign_states) terms. Generating these lists was straight-forward and relatively uncontroversial. Next, following Panofsky and Bliss, we also collected terminology related to [cardinal directions](https://en.wikipedia.org/wiki/Cardinal_direction), terms from the [Center of Disease Control Office of Management and Budget (OMB) Directive No. 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html) and [United States Census categories](https://www.census.gov/topics/population/race/about.html) as well as terms related to (genetic) ancestry, race, and ethnicity. As a point of clarification, racial and ethnic terms refer simply to variations of "race" and "ethnicity" and not terms like Black, White, Asian, etc. When applicable, those terms fall under the OMB/US Census category sets. 
+
+```{r , echo=FALSE, fig.height=7}
+categories <- h2_dictionary %>% 
+  filter(category != "subnational") %>% 
+  select(category, continental, regional, subregional, term)
+
+collapsibleTreeSummary(categories, 
+                c("category", "continental", "regional", "subregional", "term"), 
+                collapsed = T,
+                fontSize = 16, 
+                nodeSize = "leafCount",
+                maxPercent = 50
+)
+```
+
+In what proved to be the most complicated aspect of our list of category sets, we decided to collect all of the ethnic, tribal, and caste terms we could find from around the world and classify them under the umbrella "subnational" set. This process began with a catalog of [all indiginous peoples from around the world](https://en.wikipedia.org/wiki/List_of_indigenous_peoples) - a directory that was broken apart by continent. Next, we collected terms from pages that list populations from each continent: 
+
+* [Africa](https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa), [Asia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Asia), [Europe](https://en.wikipedia.org/wiki/Ethnic_groups_in_Europe), [North America](https://en.wikipedia.org/wiki/Classification_of_indigenous_peoples_of_the_Americas), [South America](https://en.wikipedia.org/wiki/Indigenous_peoples_of_South_America), [Oceania](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Oceania) as well as their [adjectival and demonymic forms](https://en.wikipedia.org/wiki/List_of_adjectival_and_demonymic_forms_of_place_names)
+
+Moreover, we drilled down to collect additional terms from the pages of smaller geographical units or large populations within each continent:
+
+* Africa: [Northern Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_North_Africa), [Eastern Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_East_Africa), [Northeastern Africa](https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa#North_east_Africa), [Southeastern Africa](https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa#Southeast_Africa), [Western Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_West_Africa), [Southern Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_Southern_Africa), [Central Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_Central_Africa), the  [Bantu](https://en.wikipedia.org/wiki/Category:Bantu_peoples) and [Fula](https://en.wikipedia.org/wiki/Category:Fula_people), [African Pygmies](https://en.wikipedia.org/wiki/Category:African_Pygmies) peoples
+* Asia: [Middle East](https://en.wikipedia.org/wiki/Ethnic_groups_in_the_Middle_East), [Caucasus](https://en.wikipedia.org/wiki/Demographics_of_Central_Asia#Ethnic_groups_in_Central_Asia), [Siberia](https://en.wikipedia.org/wiki/Indigenous_peoples_of_Siberia), [Eurasia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Eurasia), [East Asia](https://en.wikipedia.org/wiki/East_Asian_people), [Southeast Asia](https://en.wikipedia.org/wiki/Ethnic_groups_of_Southeast_Asia), [South Asia](https://en.wikipedia.org/wiki/South_Asian_ethnic_groups), [Indian Caste](https://en.wikipedia.org/wiki/Caste_system_in_India), and [Jewish ethnic](https://en.wikipedia.org/wiki/Jewish_ethnic_divisions) terms 
+* Europe: [All Terms Listed by Country](https://en.wikipedia.org/wiki/Ethnic_groups_in_Europe)
+* North America: [Arctic](https://en.wikipedia.org/wiki/List_of_indigenous_peoples), [Subarctic](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Subarctic), [First Nations](https://en.wikipedia.org/wiki/List_of_First_Nations_peoples), [Pacific Northwest](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Pacific_Northwest_Coast), [Northwest Plateau](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Northwest_Plateau), [Great Plains](https://en.wikipedia.org/wiki/Plains_Indians), [East Woodlands](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Eastern_Woodlands), [Northeast Woodlands](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Northeastern_Woodlands), [Southeast Woodlands](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Southeastern_Woodlands), [Great Basin](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Great_Basin), [California](https://en.wikipedia.org/wiki/Indigenous_peoples_of_California), [American Southwest](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_North_American_Southwest), [Aridoamerica](https://en.wikipedia.org/wiki/Aridoamerica), [Mesoamerica](https://en.wikipedia.org/wiki/Classification_of_indigenous_peoples_of_the_Americas), [Carribean](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Americas), [Central America](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Americas), and [Mexico](https://en.wikipedia.org/wiki/Indigenous_peoples_of_Mexico) 
+* South America: 
+* Oceania: [Australia](https://en.wikipedia.org/wiki/Aboriginal_Australians), [Austronesia](https://en.wikipedia.org/wiki/Austronesian_peoples), [Micronesia](https://en.wikipedia.org/wiki/Micronesia#Demographics), [Melanesia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Oceania), and [Polynesia](https://en.wikipedia.org/wiki/Polynesians)
+
+The point of this exercise was not to classify populations into any geographical location or category. In fact, we explictly chose to create the umbrella term "subnational" to circumvent further contributing to the violent history of hierachical classification into races, classes, or castes. Instead, this process was meant to compile the largest, most inclusive list of population terms we could logically manage - knowing that this list will never be exhaustive. In total, our list includes more than 8,200 terms. In addition to visualizing these terms in the collapsibleTrees below, you can also search through the interactive table.
+
+```{r , echo=FALSE, fig.height=7}
+subnational <- h2_dictionary %>% 
+  filter(category == "subnational") %>% 
+  select(category, continental, regional, subregional, term)
+
+collapsibleTreeSummary(subnational, 
+                c("continental", "regional", "subregional", "term"), 
+                collapsed = T,
+                fontSize = 16, 
+                nodeSize = "leafCount",
+                maxPercent = 50
+)
+```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/Documents/Diversity/Data")
+all_pop_terms_table <- read_csv("diversity_project - h2_dictionary.csv")
+all_pop_terms_table <- all_pop_terms_table %>% select(-source, -date, -subregional)
+all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
+DT::datatable(all_pop_terms_table, rownames = FALSE)
+```
+
+### Hypothesis 3 Dictionary
+
+In the final set of analyses, we evaluate the [OMB Directive 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html) and [US Census](https://www.census.gov/topics/population/race/about.html) categories:
+
+```{r , echo=FALSE}
+h3_dictionary %>% 
+  group_by(category, term) %>% 
+  summarize(`number of terms` = n()) %>% 
+collapsibleTreeSummary(
+    hierarchy = c("category", "term"),
+    root = "category",
+    width = 800,
+    attribute = "number of terms",
+    zoomable = TRUE,
+    fontSize = 16, 
+    nodeSize = "leafCount",
+    maxPercent = 50
+  )
+```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/Documents/Diversity/Data")
+terms_table <- read_csv("diversity_project - h3_dictionary.csv") 
+terms_table <- terms_table %>% select(asian, black, hispanic_latinx, 
+                                      native_american,	pacific_islander,white)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table, rownames = FALSE)
+```
+

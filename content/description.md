@@ -1,6 +1,5 @@
----
-Title: Project Description 
----
+## Project Description {style=text-align:center}
+##
 
 While existing research on race and affirmative action have documented the growth of diversity projects in education and employment, the field of science & technology studies have documented the persistence of scientists to molecularize race in biomedical research. In our paper, we employ computational text analysis to examine quantitative patterns in the use of diversity and population-specific terminology in biomedical research over the course of the past three decades. Drawing from two large samples of scientific abstracts, we document trends in both the raw and proportional usage of diversity and population-specific terminology over the past three decades. 
 

@@ -3,6 +3,31 @@
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   
   <url>
+    <loc>/analyses/hypothesis1/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/hypothesis2/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/hypothesis3/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/dictionaries/</loc>
+  </url>
+  
+  <url>
+    <loc>/analyses/supplementary/</loc>
+  </url>
+  
+  <url>
+    <loc>/description/</loc>
+    <priority>0</priority>
+  </url>
+  
+  <url>
     <loc>/analyses/</loc>
   </url>
   
@@ -12,42 +37,6 @@
   
   <url>
     <loc>/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/hypothesis1/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/biomedical-h2/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/diversity-h2/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/biomedical-h3/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/diversity-h3/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/biomedical-h4/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/diversity-h4/</loc>
-  </url>
-  
-  <url>
-    <loc>/description/</loc>
-  </url>
-  
-  <url>
-    <loc>/analyses/supplementary/</loc>
   </url>
   
   <url>

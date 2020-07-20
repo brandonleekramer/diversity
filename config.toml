@@ -33,7 +33,7 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     
 [[menu.main]]
     url = "/analyses/"
-    name = "ASR Analyses"
+    name = "Analyses"
     weight = 3
 
 # Social icons to be shown on the right-hand side of the navigation bar

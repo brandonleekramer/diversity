@@ -1,0 +1,49 @@
+---
+title: "Race vs Diversity"
+author: "Brandon"
+date: "7/4/2020"
+output: html_document
+---
+
+One particularly important observation is that diversity began to outpace race/ethnicity after 2012. Berrey (2015) suggests that the lens of diversity might actually provide a mechanism to mask explicit focus on racial/ethnic inequities. To test this, we compared how often 
+
+```{r}
+div_race_comp <- general_pop_terms %>% 
+  group_by(id) %>% 
+  summarise(sum_diversity = sum(di_diversity),
+            sum_racial = sum(di_racial),
+            sum_sexgender = sum(di_sexgender)) %>% 
+  left_join(biomed_text_data, by = "id") %>% 
+  filter(sum_diversity != 0 | sum_racial != 0) %>% 
+  select(id, sum_diversity, sum_racial, abstract)
+
+# 3500 abstract that use diversity or racial/ethnic
+div_race_comp %>%  
+  filter(sum_diversity != 0 & sum_racial != 0) %>% 
+  # 202 where they are used together
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words) %>% 
+  anti_join(my_stopwords) %>% 
+  count(word) %>% arrange(-n)
+  
+div_race_comp %>% 
+  filter(sum_racial == 0) %>%  
+  # 2,317 where diversity is used but not race 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words) %>% 
+  anti_join(my_stopwords) %>% 
+  count(word) %>% arrange(-n)
+
+div_race_comp %>%  
+  filter(sum_diversity == 0) %>% 
+  # 981 where race is used but not diversity
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words) %>% 
+  anti_join(my_stopwords) %>% 
+  count(word) %>% arrange(-n)
+
+# set a seed so that the output of the model is predictable
+ap_lda <- LDA(AssociatedPress, k = 2, control = list(seed = 1234))
+ap_lda
+
+```

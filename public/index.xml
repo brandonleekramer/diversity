@@ -16,70 +16,35 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/analyses/hypothesis1/</guid>
-      <description>To test Hypothesis 1, we conducted word frequency analyses that quantify (1) variation in raw word counts over time and (2) the proportion of publications that the term is used in each year. These terms included various diversity-related terms, including aging, ancestry, cultural, diversity, genetic, minority, population, race/ethnicity, sex/gender and sexuality. Although we did not include religious and linguistic terms in our final visualizations, we did analyze these terms, finding little change in their use over time.</description>
+      <description>Over the past several years, social scientists have noted that the discourse of “diversity” is expanding in use across various social contexts (Berrey 2015). In this project, we are interested in measuring how often diversity and its various metonyms are mentioned in biomedical research over the three decades (1990-2017). Our first working hypothesis is that:
+ The use of the term ‘diversity’ and its related terminology has increased in biomedical abstracts since 1990.</description>
     </item>
     
     <item>
-      <title>Hypothesis 2 (Biomedical Sample)</title>
-      <link>/analyses/biomedical-h2/</link>
+      <title>Hypothesis 2</title>
+      <link>/analyses/hypothesis2/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/analyses/biomedical-h2/</guid>
-      <description>Next, we return to the diversity corpus to test Hypothesis 2. Here, we examine whether the use of population terminology has grown in biomedical abstracts over the past three decades. To do this, we build on Panofsky and Bliss’s (2017) exploration of how research scientists enact population differences using a polyvocality of terms, including geographic classifications like continents, countries, and cardinal directions (i.</description>
+      <guid>/analyses/hypothesis2/</guid>
+      <description>While our first set of analyses established that “diversity” is increasing modestly in the biomedical literature, we also wanted to account for how terminology related to population testing has changed over time. Fujimura and Rajagopalan’s (2011) have suggested that researchers now use biogeographic and genetic ancestry terms more often than race and ethnicity in their studies. Relatedly, Panofsky and Bliss (2017) have found that racial and ethnic terms (including those within the US Census and OMB Directive 15 labeling schema) have been replaced by more general biogeographic terms such continental, national, and directional terminology.</description>
     </item>
     
     <item>
-      <title>Hypothesis 2 (Diversity Sample)</title>
-      <link>/analyses/diversity-h2/</link>
+      <title>Hypothesis 3</title>
+      <link>/analyses/hypothesis3/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/analyses/diversity-h2/</guid>
-      <description>Next, we return to the diversity corpus to test Hypothesis 2. Here, we examine whether the use of population terminology has grown in biomedical abstracts over the past three decades. To do this, we build on Panofsky and Bliss’s (2017) exploration of how research scientists enact population differences using a polyvocality of terms, including geographic classifications like continents, countries, and cardinal directions (i.</description>
+      <guid>/analyses/hypothesis3/</guid>
+      <description>To test Hypothesis 3, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. the dictionary of 8,200+ terms) were used from researchers in each country across both the biomedical and diversity samples.</description>
     </item>
     
     <item>
-      <title>Hypothesis 3 (Biomedical Sample)</title>
-      <link>/analyses/biomedical-h3/</link>
+      <title>Dictionaries</title>
+      <link>/analyses/dictionaries/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
-      <guid>/analyses/biomedical-h3/</guid>
-      <description>To test Hypothesis 3, we parsed our dictionary of 2,200+ population terms into a set of more nuanced analytic categories. Our main objective is to test Fujimura and Rajagopalan’s (2011) assertion that researchers now use biogeographic terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent, country, and directional terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.</description>
-    </item>
-    
-    <item>
-      <title>Hypothesis 3 (Diversity Sample)</title>
-      <link>/analyses/diversity-h3/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/analyses/diversity-h3/</guid>
-      <description>To test Hypothesis 3, we parsed our dictionary of 2,200+ population terms into a set of more nuanced analytic categories. Our main objective is to test Fujimura and Rajagopalan’s (2011) assertion that researchers now use biogeographic terms more often than race and ethnicity in their studies. Once again, following Panofsky and Bliss (2017), we looked at the use of continent, country, and directional terminology, US-specific terms (corresponding to the US Census and OMB Directive 15 labeling schema), a category of general population terms (i.</description>
-    </item>
-    
-    <item>
-      <title>Hypothesis 4 (Biomedical Sample)</title>
-      <link>/analyses/biomedical-h4/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/analyses/biomedical-h4/</guid>
-      <description>Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.</description>
-    </item>
-    
-    <item>
-      <title>Hypothesis 4 (Diversity Sample)</title>
-      <link>/analyses/diversity-h4/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/analyses/diversity-h4/</guid>
-      <description>Finally, to test Hypothesis 4, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. We did in two steps. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.</description>
-    </item>
-    
-    <item>
-      <title>Project Description</title>
-      <link>/description/</link>
-      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-      
-      <guid>/description/</guid>
-      <description>While existing research on race and affirmative action have documented the growth of diversity projects in education and employment, the field of science &amp;amp; technology studies have documented the persistence of scientists to molecularize race in biomedical research. In our paper, we employ computational text analysis to examine quantitative patterns in the use of diversity and population-specific terminology in biomedical research over the course of the past three decades. Drawing from two large samples of scientific abstracts, we document trends in both the raw and proportional usage of diversity and population-specific terminology over the past three decades.</description>
+      <guid>/analyses/dictionaries/</guid>
+      <description>To conduct our analyses on the growth of diversity in biomedical research, we used natural language processing to examine the rise and fall of terms from 1990-2017. This strategy allows for multiple terms to be collapsed into a general category set. For each hypothsis, we created a unique dictionary of term sets and, in the hope of being fully transparent, we have outlined the process through which we created these dictionaries below.</description>
     </item>
     
     <item>
@@ -88,31 +53,40 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/analyses/supplementary/</guid>
-      <description>{&#34;x&#34;:{&#34;data&#34;:[{&#34;x&#34;:[1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017],&#34;y&#34;:[504,521,725,735,852,1000,1116,1267,1272,1401,1589,1731,1905,2125,2291,2401,2596,2722,2775,3112,3417,3523,3898,4197,4297,4847,5016,5098],&#34;text&#34;:[&#34;year: 1990
-diversity: 504
+      <description>{&#34;x&#34;:{&#34;data&#34;:[{&#34;x&#34;:[1990,1991,1992,1993,1994,1995,1996,1997,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017],&#34;y&#34;:[442,451,608,619,690,787,896,1063,1067,1168,1396,1516,1712,1873,2050,2185,2390,2529,2585,2957,3262,3392,3754,4054,4131,4681,4882,4988],&#34;text&#34;:[&#34;year: 1990
+diversity: 442
 colour: #5D8C5D&#34;,&#34;year: 1991
-diversity: 521
+diversity: 451
 colour: #5D8C5D&#34;,&#34;year: 1992
-diversity: 725
+diversity: 608
 colour: #5D8C5D&#34;,&#34;year: 1993
-diversity: 735
+diversity: 619
 colour: #5D8C5D&#34;,&#34;year: 1994
-diversity: 852
+diversity: 690
 colour: #5D8C5D&#34;,&#34;year: 1995
-diversity: 1000
+diversity: 787
 colour: #5D8C5D&#34;,&#34;year: 1996
-diversity: 1116
+diversity: 896
 colour: #5D8C5D&#34;,&#34;year: 1997
-diversity: 1267
+diversity: 1063
 colour: #5D8C5D&#34;,&#34;year: 1998
-diversity: 1272
+diversity: 1067
 colour: #5D8C5D&#34;,&#34;year: 1999
-diversity: 1401
+diversity: 1168
 colour: #5D8C5D&#34;,&#34;year: 2000
-diversity: 1589
+diversity: 1396
 colour: #5D8C5D&#34;,&#34;year: 2001
-diversity: 1731
+diversity: 1516
 colour: #5D8C5D&#34;,&#34;year: 2002</description>
+    </item>
+    
+    <item>
+      <title></title>
+      <link>/description/</link>
+      <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
+      
+      <guid>/description/</guid>
+      <description>Project Description  While existing research on race and affirmative action have documented the growth of diversity projects in education and employment, the field of science &amp;amp; technology studies have documented the persistence of scientists to molecularize race in biomedical research. In our paper, we employ computational text analysis to examine quantitative patterns in the use of diversity and population-specific terminology in biomedical research over the course of the past three decades.</description>
     </item>
     
   </channel>

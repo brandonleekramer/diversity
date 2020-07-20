@@ -48,7 +48,7 @@ main {
 /*apply accent colour to links*/
 
 a:link, a:visited {
-    color: #555555;
+    color: #FFFFFF;
 }
 
 #bigbody main a {
@@ -56,12 +56,12 @@ a:link, a:visited {
 }
 
 #bigfooter a:link, a:visited {
-    color: #cccccc;
+    color: #FFFFFF;
 }
 
 #bigfooter a:hover {
     text-decoration: underline;
-    color: #FFF;
+    color: #FFFFFF;
 }
 
 
@@ -82,7 +82,7 @@ a:link, a:visited {
 }
 
 .item-cat {
-    background-color: #757575;
+    background-color: #FFFFFF;
     margin:1px;
 }
 
@@ -112,19 +112,19 @@ a:link, a:visited {
     color: #FFF !important;
 }
 .navbar-default .navbar-nav li a {
-    color: #cccccc;
+    color: #FFFFFF;
 }
 
 .navbar-default .navbar-nav li a:hover {
-    color: #FFF;
+    color: #FFFFFF;
 }
 
 .navbar-default .navbar-nav.-nightmode li a:hover {
-    color: #cccccc;
+    color: #FFFFFF;
 }
 
 .navbar-default .navbar-brand {
-    color: #cccccc !important;
+    color: #FFFFFF !important;
 }
 
 /* custome footer */
@@ -136,10 +136,10 @@ footer {
     /* border-bottom: var(--border-width) solid #f8f8f8; */
 }
 footer a {
-    color: #cccccc;
+    color: #FFFFFF;
 }
 footer p {
-    color: #cccccc;
+    color: #FFFFFF;
 }
 
 img {

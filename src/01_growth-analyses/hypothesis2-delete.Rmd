@@ -1,0 +1,147 @@
+
+
+```{r figure 2a, echo=FALSE}
+figure_2A_prep <- abstract_data %>% 
+  mutate(pop_term = ifelse(test = str_detect(string = word, 
+                       pattern = "\\b(?i)(population|populations)\\b"), 
+                       yes = "population", no = word)) %>% 
+  mutate(allpop_term = ifelse(test = str_detect(string = word, 
+                       pattern = all_pop_terms), 
+                       yes = "all population terms", no = word)) %>% 
+  mutate(re_term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$race_ethnicity), "zqx)\\b"), collapse = "|")), 
+         yes = "race/ethnicity", no = word)) %>% 
+  mutate(div_term = ifelse(test = str_detect(string = word, 
+         pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$diversity), "zqx)\\b"), collapse = "|")), 
+         yes = "diversity", no = word)) 
+# these extra columns are needed because there is overap in the categories 
+# (e.g. race, ethnicity and population are all all_pop_terms)
+
+figure_2A_step2 <- figure_2A_prep %>% 
+  group_by(year) %>% 
+  count(pop_term, sort = TRUE) %>% 
+  filter(pop_term == "population") %>% 
+  rename(term = pop_term)
+
+figure_2A_step3 <- figure_2A_prep %>% 
+  group_by(year) %>% 
+  count(allpop_term, sort = TRUE) %>% 
+  filter(allpop_term == "all population terms") %>% 
+  rename(term = allpop_term)
+
+figure_2A_step4 <- figure_2A_prep %>% 
+  group_by(year) %>% 
+  count(re_term, sort = TRUE) %>% 
+  filter(re_term == "race/ethnicity") %>% 
+  rename(term = re_term)
+
+figure_2A_step5 <- figure_2A_prep %>% 
+  group_by(year) %>% 
+  count(div_term, sort = TRUE) %>% 
+  filter(div_term == "diversity") %>% 
+  rename(term = div_term)
+
+figure_2A_data <- rbind(figure_2A_step2, figure_2A_step3, figure_2A_step4, figure_2A_step5)
+rm(figure_2A_step2, figure_2A_step3, figure_2A_step4, figure_2A_step5)
+   
+figure_2A <- figure_2A_data %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "     Figure 2A. Total Growth of \n Collapsed Diversity Terms (1990-2017)",
+       color =  "Term") + 
+  #scale_linetype_manual( values=linetype) +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E21F00", "#E2B306", "#00468b")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+Text will be here.
+
+```{r figure 2b, echo=FALSE}
+# proportional graph 
+
+all_pop_terms_trends <- figure_2A_prep %>%   
+  mutate(population = ifelse(test = str_detect(string = pop_term, 
+                       pattern = "population"), yes = 1, no = 0)) %>% 
+  mutate(all_pop_terms = ifelse(test = str_detect(string = allpop_term, 
+                       pattern = "all population terms"), yes = 1, no = 0)) %>% 
+  mutate(diversity = ifelse(test = str_detect(string = div_term, 
+                       pattern = "diversity"), yes = 1, no = 0)) %>% 
+  mutate(race_ethnicity = ifelse(test = str_detect(string = re_term, 
+                       pattern = "race/ethnicity"), yes = 1, no = 0)) 
+# total articles each year 
+all_pop_prc_counts <- text_data %>% 
+  group_by(year) %>% 
+  count(year) %>% 
+  rename(total = n) 
+# articles with term mentioned each year 
+all_pop_prc_counts <- all_pop_terms_trends %>% 
+  filter(population == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_population = n_distinct(pubmed_id)) %>% 
+  right_join(all_pop_prc_counts, by = "year") %>% 
+  mutate(prc_population = round(cnt_population / total * 100, digits = 2))
+all_pop_prc_counts <- all_pop_terms_trends %>% 
+  filter(all_pop_terms == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_all_pop = n_distinct(pubmed_id)) %>% 
+  right_join(all_pop_prc_counts, by = "year") %>% 
+  mutate(prc_all_pop = round(cnt_all_pop / total * 100, digits = 2))
+all_pop_prc_counts <- all_pop_terms_trends %>% 
+  filter(diversity == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_diversity = n_distinct(pubmed_id)) %>% 
+  right_join(all_pop_prc_counts, by = "year") %>% 
+  mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
+all_pop_prc_counts <- all_pop_terms_trends %>% 
+  filter(race_ethnicity == 1) %>% 
+  group_by(year) %>% 
+  summarise(cnt_race_ethnicity = n_distinct(pubmed_id)) %>% 
+  right_join(all_pop_prc_counts, by = "year") %>% 
+  mutate(prc_race_ethnicity = round(cnt_race_ethnicity / total * 100, digits = 2))
+
+# graphing the patterns over time
+figure_2B <- all_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_all_pop, x = year, colour = "all population terms"), size = 1.3, stat="identity") + 
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") + 
+  geom_line(aes(y = prc_race_ethnicity, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") + 
+  labs(title = "    Figure 2B. Proportional Growth of \n Collapsed Diversity Terms (1990-2017)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E21F00", "#E2B306", "#00468b")) +
+  scale_x_continuous(limits = c(1990, 2017),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+```
+
+Text will be here. 
+
+### Main Takeaway 
+
+Text will be here.
+
+### Appendix 
+
+Here is a list of the 2,200+ terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. If you have suggestions about what to add and/or reclassify, please send an email to the authors using the email link in the top-right corner.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/Documents/Diversity/Data")
+all_pop_terms_table <- read_csv("diversity_project - h2h3_categories.csv")
+all_pop_terms_table <- all_pop_terms_table #%>% select(term, category)
+all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
+DT::datatable(all_pop_terms_table)
+```
