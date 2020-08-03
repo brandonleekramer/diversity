@@ -210,7 +210,7 @@ figure_1A <- general_pop_terms %>%
   scale_color_manual(labels=c("aging",  "ancestry", "cultural", "diversity","genetic", "minority",
                               "population","race/ethnicity","sex/gender","sexuality","socio-economic"),
                      values=c("#f2be00", "#000000",  "#61B329", "#3B9AB2", "#E86F00", "#d23ccc", 
-                              "#1b7524", "#00468b", "#CC0000", "#ff8396", "#800080")) +
+                              "#1b7524", "#005BB7", "#CC0000", "#ff8396", "#800080")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
 ```
@@ -250,7 +250,7 @@ figure_1B <- gen_pop_prc_counts %>% ggplot() +
   scale_color_manual(labels=c("aging",  "ancestry", "cultural", "diversity","genetic", "minority",
                               "population","race/ethnicity","sex/gender","sexuality","socio-economic"),
                      values=c("#f2be00", "#000000",  "#61B329", "#3B9AB2", "#E86F00", "#d23ccc", 
-                              "#1b7524", "#00468b", "#CC0000", "#ff8396", "#800080")) +
+                              "#1b7524", "#005BB7", "#CC0000", "#ff8396", "#800080")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
 ```
@@ -432,7 +432,7 @@ figure_1C <- gen_pop_prc_counts_div %>%
   scale_color_manual(labels=c("aging",  "ancestry", "cultural", "diversity","genetic", "minority",
                               "population","race/ethnicity","sex/gender","sexuality","socio-economic"),
                      values=c("#f2be00", "#000000",  "#61B329", "#3B9AB2", "#E86F00", "#d23ccc", 
-                              "#1b7524", "#00468b", "#CC0000", "#ff8396", "#800080")) +
+                              "#1b7524", "#005BB7", "#CC0000", "#ff8396", "#800080")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
 ```
@@ -478,7 +478,7 @@ figure_1D <- gen_pop_prc_counts_div %>% ggplot() +
   scale_color_manual(labels=c("aging",  "ancestry", "cultural", "diversity","genetic", "minority",
                               "population","race/ethnicity","sex/gender","sexuality","socio-economic"),
                      values=c("#f2be00", "#000000",  "#61B329", "#3B9AB2", "#E86F00", "#d23ccc", 
-                              "#1b7524", "#00468b", "#CC0000", "#ff8396", "#800080")) +
+                              "#1b7524", "#005BB7", "#CC0000", "#ff8396", "#800080")) +
   scale_x_continuous(limits = c(1990, 2017),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
 ```

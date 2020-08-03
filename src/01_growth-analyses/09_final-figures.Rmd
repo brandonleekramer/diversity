@@ -286,7 +286,8 @@ figure_1B <- gen_pop_prc_counts %>% ggplot() +
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015)) 
   #scale_color_manual( values=c( "black", "#666666", "grey","black", "#666666", "grey"))
 
-custom_variables <- c("prc_ancestry", "prc_cultural", "prc_diversity", "prc_genetic", "prc_population", "prc_racial", "prc_sexgender", "prc_sexuality")
+custom_variables <- c("prc_ancestry", "prc_cultural", "prc_diversity", 
+                      "prc_genetic", "prc_population", "prc_racial", "prc_sexgender", "prc_sexuality")
 custom_linetype <- c("solid", "solid",  "solid", "twodash", "dotted", "dashed")
 
 legend <- gen_pop_prc_counts %>% ggplot() + 
