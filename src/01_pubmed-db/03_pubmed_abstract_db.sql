@@ -27,6 +27,7 @@ WITH abs_tbl AS (
 	LIMIT 1000 
 )
 
+--CREATE MATERIALIZED VIEW pubmed_2021.abstract_data AS (
 SELECT jrnl_tbl.fk_pmid, year, abstract, title, publication, language, 
 	   inv_affiliation, pub_affiliation, grant_agency, grant_country
 FROM jrnl_tbl
@@ -38,4 +39,5 @@ FULL JOIN grant_tbl ON jrnl_tbl.fk_pmid = grant_tbl.fk_pmid
 WHERE abstract IS NOT NULL AND language = 'eng' -- AND pub_date_year > 1989
 ORDER BY jrnl_tbl.fk_pmid ASC 
 LIMIT 1000; 
+--); 
 

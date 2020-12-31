@@ -22,34 +22,46 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT",
               "grid", "gridExtra", "reshape2", "extrafont", "data.table", "maditr",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 
-setwd("~/Documents/Diversity/Data")
-# loading the .csv file 
-biomed_text_data <- read_csv("biomedical_corpus.csv") %>% 
-  rowid_to_column(var = "id") %>% 
-  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
-         abstract = AB, references = CR, year = PY, times_cited = TC) %>% 
-  select(id, authors, title, year, publication, abstract, references, year, times_cited) %>% 
-  drop_na(abstract) %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018") 
+# connect to postgresql to get our data
 
-# tokenizing the abstract data into words 
-biomed_abstract_data <- biomed_text_data %>% 
-  unnest_tokens(word, abstract) #%>% anti_join(stop_words)
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
+
+# query the users_gh data (table of all github users) 
+pubmed_data <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.abstract_data LIMIT 10000;")
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
+```
+
+```{r}
+
+### BEFORE RUNNING I WOULD HAVE TO UPDATE THIS TO REFLECT THE NEW CODING OF DIVERSITY IN CONTEXT 
+
 
 # adding custom set of stopwords 
 my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", "women.recommendations",
                                 "rights", "reserved", "copyright", "elsevier",  
                                 "cs.man.ac.uk", "sexes.please", "movements.baby"))
 
-biomed_abstract_data <- biomed_abstract_data %>% 
+# tokenizing the abstract data into words 
+biomed_abstract_data <- pubmed_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  anti_join(stop_words) %>% # run this since the dataset is so huge now 
   anti_join(my_stopwords)
+
 # most frequent word count in abstracts 
 #biomed_abstract_data %>%
 #  count(word, sort = TRUE)
 
 # lets draw all of our strings from the diversity_dictionary (divictionary)
-setwd("~/Documents/Diversity/Data")
+# setwd("~/Documents/Diversity/Data")
+setwd("~/git/diversity/data/")
 divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
 
 general_pop_terms <- biomed_abstract_data %>% 
@@ -184,6 +196,10 @@ gen_pop_prc_counts <- general_pop_terms %>%
   summarise(cnt_minority = n_distinct(id)) %>%  
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_minority = round(cnt_minority / total * 100, digits = 2))
+
+setwd("~/git/diversity/data/")
+write_rds(general_pop_terms, "h1_counts.rds")
+write_rds(gen_pop_prc_counts, "h1_percentages.rds")
 ```
 
 ```{r figure 1a, echo=FALSE}

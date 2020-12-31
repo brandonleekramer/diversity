@@ -8,4 +8,31 @@ https://brandonleekramer.github.io/diversity/text-analysis.html
 **Historical Text Analysis - Part 2: Text Networks**
 https://brandonleekramer.github.io/diversity/text-networks.html
 
+## TODO 
+
+#### Analysis files 
+
+- Update data sources 
+  - Post data dictionaries as `.rds` 
+- Update H1 to reflect `.rds` output files to `data` folder 
+- Update H1 diversity in context totals 
+  - Should just be a minor change in the percentages df 
+- Streamline H1-H3 to only include one phase (for full db)
+- Convert analysis process to `.R` files and run `slurms`
+  
+#### Website 
+
+- Update website files to input `.rds` and plot to make website construction faster 
+- Update URL 
+- Update project description to reflect MEDLINE data   
+  
+#### Update README.md 
+
+- Add all the constributions 
+  - New dictionaries 
+  - Uses full MEDLINE database to study diversity 
+  - Interactive website as novel contribution to sociology/STS 
+
+
+
 
