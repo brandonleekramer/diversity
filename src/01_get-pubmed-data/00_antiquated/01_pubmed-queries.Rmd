@@ -1,0 +1,125 @@
+---
+title: "PubMed Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+#rm(list = ls())
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+We decided to make our sample larger with the hopes of making more robust claims about the biological, biomedical, genetic and pharmaceuticals sciences. To do this, we abandoned MEDLINE in Web of Science and decided to use PubMed. First, I used the [E-utilities API using UNIX via the terminal](https://dataguide.nlm.nih.gov/classes.html). We developed the following commands to generate a query for a potential sample before realizing that this task was going to take too long (i.e. ~23 hours just to get the 250,000 records from the pharmaceutical query alone). 
+
+```{terminal}
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | efetch -format xml | xtract -pattern PubmedArticle -tab "|" -sep ";" -element MedlineCitation/PMID Year AbstractText Title Affiliation LastName Initials PublicationType Language GrantID Agency Acronym Country > diversity_pubmed_data.txt
+```
+
+Instead, we decided to use the [E-utilities efetch API via URL](https://dataguide.nlm.nih.gov/eutilities/utilities.html), which involves first making a query through the URL line to get the WebEnv and query_key and then running the efetch command to get the actual data. Instead of running our full query all at once, we decided to five separate queries based on our original search, extract the records, deduplicate the entries across the datasets, and then run analyses on the full dataset. Note that to replicate these searches these parameters will have to altered in addition to adding your own api_key. 
+
+Search Results for Each of the Five Queries 
+- "biologic* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" = 744,062 results 
+- "biomedic* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" = 403,997 results 
+- "medic* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" = 3,438,679 results 
+- "gene* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" = 1,109,388 results 
+- "pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" = 257,518 results 
+
+It is also worth noting that at the time we ran these results the API (regardless of use through the terminal or URL) and online PubMed page did not align. After consulting with the National Library of Medicine, they confirmed that the API was searching an older database infrastructure and would have fewer overall results compared to the online page. 
+
+```{url}
+# Step 1
+https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi?db=pubmed&term=pharma*+AND+(humans[Filter])+AND+1990[pdat]:2019[PDAT]
+# Step 2 
+https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=pubmed&term=pharma*+AND+(humans[Filter])+AND+1990[pdat]:2019[PDAT]&WebEnv=WebEnv&query_key=query_key&api_key=api_key&retmode=xml
+```
+
+The end result of these queries should be an .xml file that can be downloaded and, in turn, parsed using the following code that I poached from [Steven Howe](https://rstudio-pubs-static.s3.amazonaws.com/499292_d6edbb19b08f456097333fbf9443f9b7.html). 
+
+```{r}
+library(XML)
+setwd("/sfs/qumulo/qhome/kb7hp/data/diversity-data/")
+data <- xmlParse('tilapia.xml')
+#create a list of main article PMIDs
+pmid_list <- as.numeric(xpathSApply(data, "//PubmedArticle/MedlineCitation/PMID", xmlValue))
+
+#function to extract PMID and Authors
+pubmed_df <- function(pmid_value){
+  PMID <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/PMID'), xmlValue)
+  # Year
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Journal/JournalIssue/PubDate/Year'), xmlValue)) > 0){
+    year <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Journal/JournalIssue/PubDate/Year'), xmlValue)}
+  else{year <- 'NA'}
+  # Abstract Text 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Abstract/AbstractText'), xmlValue)) > 0){
+    abstract <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Abstract/AbstractText'), xmlValue)}
+  else{abstract <- 'NA'}
+  # ArticleTitle 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/ArticleTitle'), xmlValue)) > 0){
+    title <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/ArticleTitle'), xmlValue)}
+  else{title <- 'NA'}
+  # Title 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Journal/Title'), xmlValue)) > 0){
+    journal <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Journal/Title'), xmlValue)}
+  else{journal <- 'NA'}
+  # Affiliation 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/AuthorList/Author/AffiliationInfo'), xmlValue)) > 0){
+    affiliations <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/AuthorList/Author/AffiliationInfo'), xmlValue)}
+  else{affiliations <- 'NA'}
+  # Authors 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/AuthorList/Author'), xmlValue)) > 0){
+    authors <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/AuthorList/Author'), xmlValue)}
+  else{authors <- 'NA'}
+  # Language 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Language'), xmlValue)) > 0){
+    language <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/Language'), xmlValue)}
+  else{language <- 'NA'}
+  # PublicationType 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/PublicationTypeList/PublicationType'), xmlValue)) > 0){
+    pub_type <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/PublicationTypeList/PublicationType'), xmlValue)}
+  else{pub_type <- 'NA'}
+  
+  # Funding GrantID 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/GrantID'), xmlValue)) > 0){
+    funding_id <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/GrantID'), xmlValue)}
+  else{funding_id <- 'NA'}
+  # Funding Agency 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/Agency'), xmlValue)) > 0){
+    funding_agency <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/Agency'), xmlValue)}
+  else{funding_agency <- 'NA'}
+  # Funding Country 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/Country'), xmlValue)) > 0){
+    funding_country <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/Country'), xmlValue)}
+  else{funding_country <- 'NA'}
+  # Funding Acronym 
+  if(length(xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/Acronym'), xmlValue)) > 0){
+    funding_acronym <- xpathSApply(data, paste('//PubmedArticle/MedlineCitation[PMID=',pmid_value,']/Article/GrantList/Acronym'), xmlValue)}
+  else{funding_acronym <- 'NA'}
+
+  # Data Frame
+  as.data.frame(cbind(PMID=PMID, abstract=abstract, year=year, journal=journal, title=title, affiliations=affiliations, authors=authors, language=language,
+                funding_id=funding_id, funding_agency=funding_agency, funding_country=funding_country, funding_acronym=funding_acronym, pub_type=pub_type, doi=doi))
+} 
+
+#loop through this function with a list of PMIDs
+data_list <- lapply(pmid_list, pubmed_df)
+abstracts_df <- as.data.frame(do.call("rbind", data_list), stringsAsFactors = FALSE)
+abstracts_df <- abstracts_df %>% 
+  group_by(PMID, year, title, journal, language, doi) %>% 
+  summarize(abstract = str_c(abstract, collapse = " "),
+            affiliations = str_c(affiliations, collapse = ";"),
+            authors = str_c(authors, collapse = ";"),
+            pub_type = str_c(pub_type, collapse = ";"),
+            #language = str_c(language, collapse = ";"),
+            funding_id = str_c(funding_id, collapse = ";"),
+            funding_agency = str_c(funding_agency, collapse = ";"),
+            funding_country = str_c(funding_country, collapse = ";"),
+            funding_acronym = str_c(funding_acronym, collapse = ";")) %>% 
+  ungroup() %>% 
+  select(PMID, year, abstract, title, journal, affiliations, authors, funding_id, funding_agency, funding_country, language, funding_acronym, pub_type, doi) 
+
+```
+
+
+
+
+
+

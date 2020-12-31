@@ -1,0 +1,46 @@
+---
+title: "Untitled"
+author: "Brandon"
+date: "6/13/2020"
+output: html_document
+---
+
+"biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]"
+
+esearch -db pubmed -query "biologic* OR biomedic* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]" | efetch -format uid
+
+```{r }
+library("RISmed")
+library("tidyverse")
+
+search_topic <- "biolog* OR biomed* OR medic* OR gene* OR pharma* AND (humans[Filter]) AND 1990[PDAT] : 2019[PDAT]"
+search_query <- EUtilsSummary(search_topic, retmax=6000000, db="pubmed")
+summary(search_query)
+QueryId(search_query)
+
+```
+```{r}
+records<- EUtilsGet(search_query)
+str(records)
+```
+```{r}
+pubmed_data <- data.frame('title'=ArticleTitle(records),
+                          'abstract'=AbstractText(records),
+                          'year'=YearPubmed(records),
+                          'language'=Language(records),
+                          'pubmed_id'=PMID(records),
+                          'funding_grant'=GrantID(records),
+                          'funding_agency'=Agency(records),
+                          'funding_acronym'=Acronym(records),
+                          'funding_country'=Country(records)
+                          )
+pubmed_data #%>% select(last_col())
+```
+
+```{r}
+
+
+data.frame(Reduce(rbind, records@Affiliation))
+
+records@
+```
