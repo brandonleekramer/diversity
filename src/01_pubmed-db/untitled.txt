@@ -1,0 +1,8 @@
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n1042.xml.gz
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n1030.xml.gz
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n1020.xml.gz
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n1011.xml.gz
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n{0916..0918}.xml.gz
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/

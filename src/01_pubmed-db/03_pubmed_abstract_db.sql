@@ -1,4 +1,4 @@
---- after the medline data was parsed i joined all of the tables i wanted 
+CREATE MATERIALIZED VIEW pubmed_2021.abstract_data AS (
 
 WITH abs_tbl AS (
 	SELECT fk_pmid, abstract_text AS abstract
@@ -27,7 +27,6 @@ WITH abs_tbl AS (
 	LIMIT 1000 
 )
 
---CREATE MATERIALIZED VIEW pubmed_2021.abstract_data AS (
 SELECT jrnl_tbl.fk_pmid, year, abstract, title, publication, language, 
 	   inv_affiliation, pub_affiliation, grant_agency, grant_country
 FROM jrnl_tbl
@@ -38,6 +37,5 @@ FULL JOIN inv_tbl ON jrnl_tbl.fk_pmid = inv_tbl.fk_pmid
 FULL JOIN grant_tbl ON jrnl_tbl.fk_pmid = grant_tbl.fk_pmid
 WHERE abstract IS NOT NULL AND language = 'eng' -- AND pub_date_year > 1989
 ORDER BY jrnl_tbl.fk_pmid ASC 
-LIMIT 1000; 
---); 
-
+LIMIT 1000 
+); 
