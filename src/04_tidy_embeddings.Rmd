@@ -7,6 +7,7 @@ output: html_document
 
 https://cbail.github.io/textasdata/word2vec/rmarkdown/word2vec.html 
 https://juliasilge.com/blog/tidy-word-vectors/ 
+https://www.pnas.org/content/115/16/E3635 
 
 ```{r prereqs_part1, message = FALSE, results = FALSE, echo=FALSE, warning=FALSE}
 rm(list = ls())
@@ -59,6 +60,7 @@ normalized_prob <- skipgram_probs %>%
 
 normalized_prob[2005:2010,]
 ```
+
 ```{r}
 normalized_prob %>% 
     filter(word1 == "ethnicity") %>%
@@ -76,6 +78,12 @@ pmi_svd <- irlba(pmi_matrix, 256, maxit = 500)
 #next we output the word vectors:
 word_vectors <- pmi_svd$u
 rownames(word_vectors) <- rownames(pmi_matrix)
+
+#setwd("~/git/diversity/data/word_embeddings/")
+setwd("~/Documents/Diversity/diversity/data/word_embeddings/")
+write_rds(pmi_matrix, "biomed_pmi_matrix.rds", "gz", compression = 9L)
+write_rds(pmi_svd, "biomed_pmi_svd.rds", "gz", compression = 9L)
+write_rds(word_vectors, "biomed_word_vectors.rds", "gz", compression = 9L)
 ```
 
 ```{r}
@@ -94,6 +102,7 @@ search_synonyms <- function(word_vectors, selected_vector) {
 }
 
 ```
+
 ```{r}
 ethnicity_synonym <- search_synonyms(word_vectors, word_vectors["ethnicity",])
 ethnicity_synonym
@@ -101,14 +110,16 @@ ethnicity_synonym
 gender_synonym <- search_synonyms(word_vectors, word_vectors["gender",])
 gender_synonym
 
-eth_df <- ethnicity_synonym %>% mutate(selected = "ethnicity") %>% top_n(15, similarity) 
-gen_df <- gender_synonym %>% mutate(selected = "gender") %>% top_n(15, similarity) 
+eth_df <- ethnicity_synonym %>% mutate(selected = "ethnicity") %>% 
+  top_n(15, similarity) 
+gen_df <- gender_synonym %>% mutate(selected = "gender") %>% 
+  top_n(15, similarity) 
 combined_df <- eth_df %>% bind_rows(gen_df)
 combined_df
 ```
 
 ```{r}
-combined_df <- rownames(combined_df)
+#combined_df_ <- rowid_to_column(combined_df)
 
 combined_df %>% 
     group_by(selected) %>%
@@ -125,20 +136,20 @@ combined_df %>%
 
 ```{r}
 mystery_product <- word_vectors["minority",] - word_vectors["black",] + 
-                   word_vectors["white",]
+                   word_vectors["asian",]
 search_synonyms(word_vectors, mystery_product)
 ```
 
 ```{r}
-pmi_svd <- irlba(pmi_matrix, 5, maxit = 500)
+pmi_svd_again <- irlba(pmi_matrix, 5, maxit = 500)
 
 #next we output the word vectors:
-word_vectors <- pmi_svd$u
+word_vectors <- pmi_svd_again$u
 rownames(word_vectors) <- rownames(pmi_matrix)
 
 #grab 100 words
-forplot<-as.data.frame(word_vectors[200:300,])
-forplot$word<-rownames(forplot)
+forplot <- as.data.frame(word_vectors[200:300,])
+forplot$word <- rownames(forplot)
 
 #now plot
 library(ggplot2)
