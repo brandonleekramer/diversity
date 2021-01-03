@@ -59,10 +59,7 @@ SELECT * FROM pmids_to_delete LIMIT 1000
 
 ); 
 
---- https://dba.stackexchange.com/questions/134221/delete-rows-which-are-not-referenced-in-other-table
---- https://stackoverflow.com/questions/6898520/postgresql-insert-from-another-table
-
-
+--- https://stackoverflow.com/questions/11391085/getting-date-list-in-a-range-in-postgresql
 
 
 
