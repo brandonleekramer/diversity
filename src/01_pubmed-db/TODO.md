@@ -1,10 +1,7 @@
 
 # still to post 
-339-347 X || still need 339-340
-349-360 X || still need 353, 357-358
-364-373 X || still need 364, 370
-870     X 
-895-897 X 
+353
+896
 948
 953
 956
@@ -19,3 +16,5 @@
 1050
 1053
 1061
+
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n1061.xml.gz
