@@ -1,4 +1,6 @@
 
+######################################################################################################## ingestion/cleaning 
+
 #rm(list = ls())
 
 for (pkg in c("tidyverse", "tidytext", "RPostgreSQL", "data.table", "maditr")) {library(pkg, character.only = TRUE)}
@@ -34,17 +36,26 @@ pubmed_abstract_data <- pubmed_data %>%
   unnest_tokens(word, abstract) %>% 
   # run this since the dataset is so huge now 
   anti_join(stop_words) %>% 
-  anti_join(my_stopwords)
+  anti_join(my_stopwords) 
 
-# most frequent word count in abstracts 
-pubmed_abstract_data %>%
-  count(word, sort = TRUE) %>% 
-  top_n(word, n = 500)
+######################################################################################################## filter to diversity terms
 
 # lets draw all of our strings from the diversity_dictionary (divictionary)
 # setwd("~/Documents/Diversity/Data")
 setwd("~/git/diversity/data/dictionaries/")
 divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+
+divictionary_string <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
+                         na.omit(divictionary$cultural), na.omit(divictionary$diversity),
+                         na.omit(divictionary$genetic), na.omit(divictionary$social_class),
+                         na.omit(divictionary$minority), na.omit(divictionary$population),
+                         na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
+                         na.omit(divictionary$sexuality))
+
+pubmed_abstract_data <- pubmed_abstract_data %>% 
+  filter(word %in% divictionary_string)
+
+######################################################################################################## convert to sets 
 
 general_pop_terms <- pubmed_abstract_data %>% 
   as.data.table() %>%
@@ -92,6 +103,68 @@ general_pop_terms <- pubmed_abstract_data %>%
   dt_mutate(di_racial = ifelse(test = str_detect(string = term, pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(di_sexgender = ifelse(test = str_detect(string = term, pattern = "\\b(sex/gender)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(di_sexuality = ifelse(test = str_detect(string = term, pattern = "\\b(sexuality)\\b"), yes = 1, no = 0)) 
+
+######################################################################################################## get full counts 
+
+test <- general_pop_terms %>% 
+  group_by(id, year, word, term) %>% 
+  summarise(across(di_aging:di_sexuality, sum)) %>% 
+  mutate(di_total = di_aging + di_ancestry + di_cultural + di_class + di_diversity + di_genetic +  
+         di_minority + di_population + di_racial + di_sexgender + di_sexuality) %>% 
+  select(id, year, word, term, di_total, everything()) %>%
+  ungroup() %>% 
+  mutate(soc_diversity = if_else(di_diversity > 0 & (di_aging > 0 | di_cultural > 0 | di_class > 0 | 
+                         di_minority > 0 | di_racial > 0 | di_sexgender > 0 | di_sexuality > 0 ), 1, 0)) %>%
+  select(check, id, year, word, term, di_total, everything()) %>% 
+  arrange(-di_total) %>% 
+  filter(check == 1)
+
+# NEED TO CHECK THIS CREATE GROUP BY ARTICLE THAT CALCULATES TRUE DIVERSITY OUTCOMES 
+
+
+h1_set_counts_full <- general_pop_terms %>% 
+  group_by(term) %>% count(sort = TRUE)  
+
+h1_subset_counts_full <- general_pop_terms %>% 
+  group_by(word, term) %>% count(sort = TRUE)  
+
+h1_set_counts_trends <- general_pop_terms %>% 
+  group_by(term, year) %>% count(sort = TRUE) 
+
+h1_setset_counts_trends <- general_pop_terms %>% 
+  group_by(word, term, year) %>% count(sort = TRUE)  
+
+setwd("~/git/diversity/data/text_results/")
+write_rds(h1_set_counts_full, "h1_set_counts_full.rds")
+write_rds(h1_subset_counts_full, "h1_subset_counts_full.rds")
+write_rds(h1_set_counts_trends, "h1_set_counts_trends.rds")
+write_rds(h1_setset_counts_trends, "h1_setset_counts_trends.rds")
+
+######################################################################################################## convert to percentages
+
+test <- general_pop_terms %>%
+  replace(is.na(.), 0) %>% 
+  group_by(id) %>% 
+  summarise(across(di_aging:di_sexuality, sum)) %>% 
+  ungroup()
+
+  ungroup() %>%
+  dt_mutate(soc_di_diversity = if_else(di_diversity > 0 & (di_aging > 0 | di_cultural > 0 | di_class > 0 | 
+            di_minority > 0 | di_racial > 0 | di_sexgender > 0 | di_sexuality > 0 ), di_diversity, 0)) %>% 
+  dt_mutate(soc_prc_diversity = ifelse(soc_di_diversity > 0, prc_ancestry, 0)) %>% 
+  select(year, cnt_diversity, prc_diversity, soc_di_diversity, soc_prc_diversity, everything())
+
+
+#gen_pop_prc_counts <- gen_pop_prc_counts %>%
+replace(is.na(.), 0) %>% 
+  dt_mutate(tr_di_diversity = ifelse(cnt_diversity > 0 & (cnt_aging > 0 | cnt_cultural > 0 | cnt_class > 0 | 
+                                                            cnt_minority > 0 | cnt_racial > 0 | cnt_sexgender > 0 | cnt_sexuality > 0 ), cnt_diversity, 0)) %>% 
+  dt_mutate(tr_prc_diversity = ifelse(tr_di_diversity > 0, prc_ancestry, 0)) %>% 
+  select(year, cnt_diversity, prc_diversity, tr_di_diversity, tr_prc_diversity, everything())
+
+test %>% 
+  filter(di_diversity > 1)
+
 
 # total articles each year 
 gen_pop_prc_counts <- pubmed_data %>% 
@@ -167,12 +240,6 @@ gen_pop_prc_counts <- general_pop_terms %>%
   summarise(cnt_minority = n_distinct(id)) %>%  
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_minority = round(cnt_minority / total * 100, digits = 2))
-
-gen_pop_prc_counts <- gen_pop_prc_counts %>%
-  replace(is.na(.), 0) %>% 
-  dt_mutate(tr_di_diversity = ifelse(cnt_diversity > 0 & (cnt_aging > 0 | cnt_cultural > 0 | cnt_class > 0 | 
-            cnt_minority > 0 | cnt_racial > 0 | cnt_sexgender > 0 | cnt_sexuality > 0 ), cnt_diversity, 0)) %>% 
-  dt_mutate(tr_prc_diversity = ifelse(tr_di_diversity > 0, prc_ancestry, 0))
 
 setwd("~/git/diversity/data/text_results/")
 write_rds(general_pop_terms, "h1_counts.rds")

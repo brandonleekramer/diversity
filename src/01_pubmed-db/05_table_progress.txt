@@ -1,0 +1,49 @@
+# still to post 
+
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n0352.xml.gz
+
+wget ftp://ftp.ncbi.nlm.nih.gov/pubmed/baseline/pubmed21n{1003..1062}.xml.gz
+
+-- testing now 
+0346
+0349
+0353
+0356
+0357
+0363
+0431
+0432
+
+-- testing up to 0500 in other_set
+--0958 problem file 
+--- 30540375 assession error 
+--- 30107787 assession error 
+
+
+
+https://careerkarma.com/blog/python-typeerror-object-of-type-nonetype-has-no-len/#:~:text=The%20%E2%80%9CTypeError%3A%20object%20of%20type,sort()%20%2C%20to%20a%20variable.
+
+error -- 0346 -- error 
+"""
+Traceback (most recent call last):
+  File "/apps/software/standard/compiler/gcc/9.2.0/jupyter_conda/2019.10-py3.7/lib/python3.7/multiprocessing/pool.py", line 121, in worker
+    result = (True, func(*args, **kwds))
+  File "/apps/software/standard/compiler/gcc/9.2.0/jupyter_conda/2019.10-py3.7/lib/python3.7/multiprocessing/pool.py", line 44, in mapstar
+    return list(map(*args))
+  File "PubMedParser.py", line 664, in _start_parser
+    s = p._parse()
+  File "PubMedParser.py", line 259, in _parse
+    if len(temp_initials) < 10:
+TypeError: object of type 'NoneType' has no len()
+"""
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "PubMedParser.py", line 730, in <module>
+    run(options.medline_path, options.clean, int(options.start), options.end, int(options.PROCESSES))
+  File "PubMedParser.py", line 693, in run
+    res = result.get()
+  File "/apps/software/standard/compiler/gcc/9.2.0/jupyter_conda/2019.10-py3.7/lib/python3.7/multiprocessing/pool.py", line 657, in get
+    raise self._value
+TypeError: object of type 'NoneType' has no len()
