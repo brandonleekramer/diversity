@@ -16,7 +16,7 @@ To test Hypothesis 1, we concatenated sets of diversity-related terms into 11 ca
 The first two plots show how these sets of terms have changed in a sample of ~59,000 biomedical abstracts. 
 
 ```{r figure 1a, echo=FALSE}
-general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_counts.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_set_prc_trends_all.rds")
 
 figure_1A <- general_pop_terms %>% 
   # grouping by year and filter relevant population terms 
