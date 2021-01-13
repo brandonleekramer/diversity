@@ -54,7 +54,7 @@ conn <- dbConnect(drv = PostgreSQL(),
 # query the users_gh data (table of all github users) 
 pubmed_data <- dbGetQuery(conn, str_c(
                           "SELECT DISTINCT(fk_pmid), year, abstract  
-                          FROM pubmed_2021.abstract_data 
+                          FROM pubmed_2021.biomedical_abstracts 
                           WHERE year =", analysis_timeframe, ";"))
 
 # disconnect from postgresql database 
