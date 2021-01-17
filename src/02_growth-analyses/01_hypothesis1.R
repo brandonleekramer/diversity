@@ -330,7 +330,12 @@ setwd("~/git/diversity/data/text_results/")
 write_rds(h1_set_cor_matrix, str_c("h1_set_cor_matrix_",analysis_timeframe,".rds"))
 write_rds(h1_subset_cor_matrix, str_c("h1_subset_cor_matrix_",analysis_timeframe,".rds"))
 
-str_c("Finished all processes at: ", Sys.time())
+str_c("Finished all processes for ",analysis_timeframe, " at: ", Sys.time())
 
 }
 
+##################################################################################### for loop of all years 
+
+for (year in 1990:2020) {
+  pubmed_analysis(year)
+}

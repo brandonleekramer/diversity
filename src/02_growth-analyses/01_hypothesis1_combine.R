@@ -5,7 +5,7 @@ library("tidyverse")
 setwd("~/git/diversity/data/text_results/")
 
 # percentages for all sets 
-h1_set_prc_trends <- list.files(pattern="h1_set_prc*") %>% 
+h1_set_prc_trends <- list.files(pattern="h1_set_prc_trends_*") %>% 
   map_df(~read_rds(.)) %>% 
   select(year, total, everything())
 
