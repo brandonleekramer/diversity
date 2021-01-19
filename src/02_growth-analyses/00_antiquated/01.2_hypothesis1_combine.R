@@ -40,11 +40,11 @@ h1_subset_counts_trends <- list.files(pattern="h1_subset_counts_trends*") %>%
 # need to do the matrix aggregation next 
 
 setwd("~/git/diversity/data/text_results/")
-write_rds(h1_set_prc_trends, "h1_set_prc_trends_all.rds")
-write_rds(h1_set_counts_full, "h1_set_counts_full_all.rds")
-write_rds(h1_set_counts_trends, "h1_set_counts_trends_all.rds")
-write_rds(h1_subset_counts_full, "h1_subset_counts_full_all.rds")
-write_rds(h1_subset_counts_trends, "h1_subset_counts_trends_all.rds")
+write_rds(h1_set_prc_trends, "h1_all_set_prc_trends.rds")
+write_rds(h1_set_counts_full, "h1_all_set_counts_full.rds")
+write_rds(h1_set_counts_trends, "h1_all_set_counts_trends.rds")
+write_rds(h1_subset_counts_full, "h1_all_subset_counts_full.rds")
+write_rds(h1_subset_counts_trends, "h1_all_subset_counts_trends.rds")
 
 
 

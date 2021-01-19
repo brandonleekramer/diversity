@@ -2,19 +2,6 @@
 #### this has been converted to a function that is run iteratively through the _by_year.R file 
 #### can just run this for one year by changing the analysis_timeframe parameter
 
-pubmed_analysis <- function(analysis_timeframe){
-
-######################################################################################################## testing h1 
-
-# this file produces 6 outputs 
-# 1. counts for all term sets for all years (after recoding) 
-# 2. counts for all term subsets for all years (before and after recoding)
-# 3. counts for all term sets by year (after recoding) 
-# 4. counts for all term subsets by year (before and after recoding)
-# 5. percentages for all terms by year (after coding)
-# 6. a matrix that provides all the counts of terms within each publication 
-# note: dataframe #6 can be written to PostgreSQL later to do additional analyses 
-
 ####################################################################################### install.packages (for slurm) 
 
 #rm(list = ls())
@@ -28,6 +15,21 @@ pubmed_analysis <- function(analysis_timeframe){
 #install.packages("RPostgreSQL", repos = "http://cran.us.r-project.org")
 #install.packages("data.table", repos = "http://cran.us.r-project.org")
 #install.packages("maditr", repos = "http://cran.us.r-project.org")
+#install.packages("purrr", repos = "http://cran.us.r-project.org")
+#install.packages("tm", repos = "http://cran.us.r-project.org")
+
+######################################################################################################## testing h1 
+
+# this file produces 6 outputs 
+# 1. counts for all term sets for all years (after recoding) 
+# 2. counts for all term subsets for all years (before and after recoding)
+# 3. counts for all term sets by year (after recoding) 
+# 4. counts for all term subsets by year (before and after recoding)
+# 5. percentages for all terms by year (after coding)
+# 6. a matrix that provides all the counts of terms within each publication 
+# note: dataframe #6 can be written to PostgreSQL later to do additional analyses 
+
+test_h1 <- function(analysis_timeframe){
 
 library("readr")
 library("dplyr") 
@@ -37,6 +39,7 @@ library("widyr")
 library("RPostgreSQL")
 library("data.table")
 library("maditr")
+library("purrr")
 data(stop_words)
 
 ################################################################################################# ingestion/cleaning 
@@ -230,7 +233,7 @@ h1_subset_counts_trends <- general_pop_terms %>%
   bind_rows(h1_subset_counts_trends) %>% 
   arrange(-n)
 
-setwd("~/git/diversity/data/text_results/")
+setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(h1_set_counts_full, str_c("h1_set_counts_full_",analysis_timeframe,".rds"))
 write_rds(h1_subset_counts_full, str_c("h1_subset_counts_full_",analysis_timeframe,".rds"))
 write_rds(h1_set_counts_trends, str_c("h1_set_counts_trends_",analysis_timeframe,".rds"))
@@ -313,7 +316,7 @@ gen_pop_prc_counts <- general_pop_terms %>%
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_sexuality = round(cnt_sexuality / total * 100, digits = 2))
 
-setwd("~/git/diversity/data/text_results/")
+setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(gen_pop_prc_counts, str_c("h1_set_prc_trends_",analysis_timeframe,".rds"))
 
 ##################################################################################### correlation matrices 
@@ -326,7 +329,7 @@ h1_subset_cor_matrix <- general_pop_terms %>%
   select(id, word) %>% 
   pairwise_cor(word, id, sort = TRUE)
 
-setwd("~/git/diversity/data/text_results/")
+setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(h1_set_cor_matrix, str_c("h1_set_cor_matrix_",analysis_timeframe,".rds"))
 write_rds(h1_subset_cor_matrix, str_c("h1_subset_cor_matrix_",analysis_timeframe,".rds"))
 
@@ -337,5 +340,56 @@ str_c("Finished all processes for ",analysis_timeframe, " at: ", Sys.time())
 ##################################################################################### for loop of all years 
 
 for (year in 1990:2020) {
-  pubmed_analysis(year)
+  test_h1(year)
 }
+
+str_c("Finished all processes for all years at: ", Sys.time())
+
+####################################################################################### aggregate all years 
+
+library("tidyverse")
+setwd("~/git/diversity/data/text_results/")
+
+# percentages for all sets 
+h1_set_prc_trends <- list.files(pattern="h1_set_prc_trends_*") %>% 
+  map_df(~read_rds(.)) %>% 
+  select(year, total, everything())
+
+# overall set counts 
+h1_set_counts_full <- list.files(pattern="h1_set_counts_full*") %>% 
+  map_df(~read_rds(.)) %>% 
+  group_by(term) %>% 
+  summarize(count = sum(n)) %>% 
+  arrange(-count)
+
+# overall set counts by year 
+h1_set_counts_trends <- list.files(pattern="h1_set_counts_trends*") %>% 
+  map_df(~read_rds(.)) %>% 
+  group_by(term, year) %>% 
+  summarize(count = sum(n)) %>% 
+  arrange(-count)
+
+# overall subset counts 
+h1_subset_counts_full <- list.files(pattern="h1_subset_counts_full*") %>% 
+  map_df(~read_rds(.)) %>% 
+  group_by(word, term) %>% 
+  summarize(count = sum(n)) %>% 
+  arrange(-count)
+
+# overall subset counts by year 
+h1_subset_counts_trends <- list.files(pattern="h1_subset_counts_trends*") %>% 
+  map_df(~read_rds(.)) %>% 
+  group_by(word, term, year) %>% 
+  summarize(count = sum(n)) %>% 
+  arrange(-count)
+
+# need to do the matrix aggregation next 
+
+setwd("~/git/diversity/data/text_results/")
+write_rds(h1_set_prc_trends, "h1_all_set_prc_trends.rds")
+write_rds(h1_set_counts_full, "h1_all_set_counts_full.rds")
+write_rds(h1_set_counts_trends, "h1_all_set_counts_trends.rds")
+write_rds(h1_subset_counts_full, "h1_all_subset_counts_full.rds")
+write_rds(h1_subset_counts_trends, "h1_all_subset_counts_trends.rds")
+
+str_c("Aggregated data for all years at: ", Sys.time())
