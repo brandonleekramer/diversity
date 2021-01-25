@@ -1,0 +1,542 @@
+---
+title: "Publication Figures"
+author: "Brandon L. Kramer"
+date: "1/18/2020"
+output: html_document
+---
+
+```{r, include=FALSE}
+
+rm(list = ls())
+
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr", "RPostgreSQL",
+              "grid", "gridExtra", "reshape2", "extrafont", "data.table",
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+
+```
+
+```{r supp fig 1, fig.width=7, fig.height=4}
+
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
+
+# query the users_gh data (table of all github users) 
+by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.annual_counts")
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
+ggplot(data = by_year, aes(x = year, y = count)) + 
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Supp. Figure 1. Number of Publication Abstracts in Datasets (1990-2020)",
+       caption = "Data Source: ISI Web of Science") + 
+  theme(axis.title.x = element_blank(),
+        plot.title = element_text(size=11, hjust = 0.2),
+        legend.title = element_text(size = 10, hjust = 0.5),
+        panel.background = element_rect(fill = "white")) +
+  ylab("Number of Abstracts") +
+  #scale_fill_manual(values=c('black','darkgray')) +
+  scale_x_discrete(labels = c("1990" = "1990", "1991" = "", "1992" = "", "1993" = "", "1994" = "",
+                              "1996" = "", "1997" = "", "1998" = "", "1999" = "",
+                              "2001" = "", "2002" = "", "2003" = "", "2004" = "",
+                              "2006" = "", "2007" = "", "2008" = "", "2009" = "", "2010" = "2010",
+                              "2011" = "", "2012" = "", "2013" = "", "2014" = "",
+                              "2016" = "", "2017" = "", "2018" = "", "2019" = "", "2020" = "2020"))
+```
+
+```{r figure 1ab, fig.height=4, fig.width=11.5, echo=FALSE}
+
+h1_all_set_counts_full <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_full.rds")
+h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
+
+`%notin%` <- Negate(`%in%`)
+
+figure_1A <- general_pop_terms %>% 
+  # recode terms 
+  select(-starts_with("prc_")) %>% 
+  pivot_longer(!year, names_to = "term", values_to = "n") %>%
+  mutate(term = str_replace(term, "cnt_", ""),
+         term = str_replace(term, "sexgender", "sex/gender"),
+         term = str_replace(term, "racial", "race/ethnicity"),
+         term = str_replace(term, "\\b(?i)(diversity)\\b", "diversity (all)"),
+         term = str_replace(term, "class", "socio-economic"),
+         term = str_replace(term, "soc_diversity", "diversity (social)")) %>% 
+  # graphing terms over time 
+  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
+  ggplot() + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "        Figure 1A. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2019)",
+       color =  "Term") + 
+  #scale_linetype_manual( values=linetype) +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("aging", "cultural","diversity (all)","diversity (social)", 
+                              "minority","race/ethnicity","sex/gender", "sexuality","socio-economic"),
+                     values=c("#E86F00", # orange 
+                              "#61B329", # light green
+                              "#f2be00", # mustard
+                              "#9a009a", # purple
+                              "#000000", # dark green 
+                              "#005BB7", # dark blue 
+                              "#CC0000", # red 
+                              "#ff8396", # pinkish 
+                              "#3B9AB2" # light blue  
+                              #"#000000", # black
+                              #"#d23ccc", # pink 
+                              # 1b7524 dark green
+                              )) + 
+  scale_y_log10() +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+
+# graphing terms over time 
+figure_1B <- general_pop_terms %>% 
+  select(-starts_with("cnt_")) %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_aging, x = year, colour = "aging"), size = 1.3, stat="identity") +
+  #geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_class, x = year, colour = "socio-economic"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1.3, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity", linetype = "solid") +
+  #geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1.3, stat="identity") +
+  #geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
+  labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Abstracts") +
+  theme(axis.title.x = element_blank(), 
+        legend.position = "none",
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("aging", "cultural",  "diversity (all)", "diversity (social)", 
+                              "minority",  "race/ethnicity",  "sex/gender", "sexuality",  "socio-economic"),
+                     values=c("#E86F00", # orange 
+                              "#61B329", # light green
+                              "#f2be00", # mustard
+                              "#9a009a", # purple
+                              "#000000", # dark green 
+                              "#005BB7", # dark blue 
+                              "#CC0000", # red 
+                              "#ff8396", # pinkish 
+                              "#3B9AB2" # light blue  
+                              #"#000000", # black
+                              #"#d23ccc", # pink 
+                              # 1b7524 dark green
+                              )) + 
+  scale_y_log10() +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+custom_variables <- c("prc_ancestry", "prc_cultural", "prc_diversity", 
+                      "prc_genetic", "prc_population", "prc_racial", "prc_sexgender", "prc_sexuality")
+custom_linetype <- c("solid", "solid",  "solid", "twodash", "dotted", "dashed")
+
+
+
+legend <- general_pop_terms %>% 
+  select(-starts_with("cnt_")) %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_aging, x = year, colour = "aging"), size = 1.3, stat="identity") +
+  #geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_class, x = year, colour = "socio-economic"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1.3, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity", linetype = "solid") +
+  #geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1.3, stat="identity") +
+  #geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
+  labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Abstracts") +
+  theme(axis.title.x = element_blank(), 
+        legend.position = "bottom",
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("aging", "cultural",  "diversity (all)", "diversity (social)", 
+                              "minority",  "race/ethnicity",  "sex/gender", "sexuality",  "socio-economic"),
+                     values=c("#E86F00", # orange 
+                              "#61B329", # light green
+                              "#f2be00", # mustard
+                              "#9a009a", # purple
+                              "#000000", # dark green 
+                              "#005BB7", # dark blue 
+                              "#CC0000", # red 
+                              "#ff8396", # pinkish 
+                              "#3B9AB2" # light blue  
+                              #"#000000", # black
+                              #"#d23ccc", # pink 
+                              # 1b7524 dark green
+                              )) + 
+  scale_y_log10() +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+legend <- cowplot::get_legend(legend)
+
+grid.arrange(figure_1A, figure_1B, 
+             legend, 
+             nrow = 2, ncol=2,
+             layout_matrix = rbind(c(1,2), c(3,3)),
+             #widths = c(2.7, 2.7), 
+             heights = c(2.5, 0.4)
+             )
+
+```
+
+```{r epa figure 1ab, eval=FALSE, echo=FALSE}
+ggplotly(figure_1A)
+ggplotly(figure_1B)
+
+# raw count growth 
+# diversity
+4574/380
+# population 
+1832/145
+# genetic
+1191/77
+# sex/gender
+729/33
+# aging
+593/28
+# cultural
+478/38
+# race/ethnicity 
+342/16
+```
+
+```{r figures_2AB, fig.height=4, fig.width=11.5, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
+
+h2_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_counts.rds")
+all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_prcs.rds")
+
+figure_2A <- h2_counts %>%   
+  filter(term != "ancestry") %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "     Figure 2A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Term") + 
+  #scale_linetype_manual( values=linetype) +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("all population terms", "continental", 
+                              "directional", "national", "omb/us-census", 
+                              "race/ethnicity", "subcontinental", "subnational"),
+                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
+                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
+  #scale_y_log10() +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+figure_2B <- all_pop_prc_counts %>% 
+  filter(term != "ancestry") %>%
+  ggplot() + 
+  geom_line(aes(y = percentage, x = year, colour = term), size = 1.3, stat="identity") +
+  labs(title = "    Figure 2B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("all population terms", "continental", 
+                              "directional", "national", "omb/us-census", 
+                              "race/ethnicity", "subcontinental", "subnational"),
+                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
+                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+legend_2AB <- all_pop_prc_counts %>% 
+  filter(term != "ancestry") %>%
+  ggplot() + 
+  geom_line(aes(y = percentage, x = year, colour = term), size = 1.3, stat="identity") +
+  labs(title = "    Figure 2B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        legend.box = "vertical", 
+        legend.position = "bottom",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("all population terms", "continental", 
+                              "directional", "national", "omb/us-census", 
+                              "race/ethnicity", "subcontinental", "subnational"),
+                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
+                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+legend_2AB <- cowplot::get_legend(legend_2AB)
+
+#grid.arrange(general_pop_graph, gen_pop_prc_counts_graph, nrow = 1, ncol = 2)
+
+grid.arrange(figure_2A, figure_2B, 
+             legend_2AB, 
+             nrow = 2, ncol=2,
+             layout_matrix = rbind(c(1,2), c(3,3)),
+             #widths = c(2.7, 2.7), 
+             heights = c(2.5, 0.4)
+             )
+```
+
+```{r figures 3ab, fig.height=4, fig.width=11.5, echo=FALSE}
+
+us_pop_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_counts.rds")
+us_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_prcs.rds") 
+bycountry_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_prcs_by_country.rds")
+pop_terms_bycountry <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_terms_by_country.rds")
+
+figure_3A <- pop_terms_bycountry %>%   
+  drop_na(country) %>%
+  group_by(year) %>% 
+  count(term, country, sort = TRUE) %>% 
+  ungroup() %>% 
+  filter(term == "all population terms" ) %>% 
+  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
+           country == "Germany" | country == "Australia" ) %>%  
+  ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1.3, stat="identity") +
+  labs(title = "    Figure 3A. Total Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)") + 
+  theme_minimal() +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+figure_3B <- bycountry_prc_counts %>% 
+  drop_na(country) %>% 
+  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
+           country == "Germany" | country == "Australia"  ) %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.3, stat="identity") +
+  labs(title = "      Figure 3B. Proportional Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Country") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+legend_3AB <- bycountry_prc_counts %>% 
+  drop_na(country) %>% 
+  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
+           country == "Germany" | country == "Australia"  ) %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.3, stat="identity") +
+  labs(title = "      Figure 3B. Proportional Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Country") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        legend.position = "bottom",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+legend_3AB <- cowplot::get_legend(legend_3AB)
+
+grid.arrange(figure_3A, figure_3B, 
+             legend_3AB, 
+             nrow = 2, ncol=2,
+             layout_matrix = rbind(c(1,2), c(3,3)),
+             heights = c(2.5, 0.4)
+             )
+```
+```{r figures 3cd, fig.height=4, fig.width=11.5, echo=FALSE}
+
+setwd("~/git/diversity/data/dictionaries/")
+h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
+h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv")
+omb_black <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$black), "z3x)\\b"), collapse = "|")
+omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$native_american), "z3x)\\b"), collapse = "|")
+omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
+omb_hispanic_latinx <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$hispanic_latinx), "z3x)\\b"), collapse = "|")
+omb_asian <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$asian), "z3x)\\b"), collapse = "|")
+omb_white <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$white), "z3x)\\b"), collapse = "|")
+omb_racial <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$race), "z3x)\\b"), collapse = "|")
+omb_ethnicity <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$ethnicity), "z3x)\\b"), collapse = "|")
+omb_diversity <- paste(c("\\b(?i)(z3x",na.omit(h1_dictionary$diversity), "z3x)\\b"), collapse = "|")
+
+# graphing us-specific terms over time using census categories 
+# https://www.census.gov/topics/population/race/about.html
+figure_3C <- us_pop_counts %>% 
+  mutate(term = ifelse(test = str_detect(string = word,
+                       pattern = omb_black), yes = "black", no = word)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_white), yes = "white", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_asian), yes = "asian", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                      pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_racial), yes = "race", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_native_american), yes = "native-american", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>%
+  mutate(term = ifelse(test = str_detect(string = word, 
+                       pattern = omb_diversity), yes = "diversity", no = term)) %>%
+  filter(term == "black" | term == "white" | term == "asian" |
+         term == "hispanic/latinx" | term == "race" | term == "ethnicity" |
+         term == "native-american" | term == "pacific-islander" | term == "diversity" ) %>%  
+  group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
+  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "     Figure 3C. Total Growth of OMB/US Census Terms \n in Biomedical Sample (1990-2017)",
+       color =  "Term") + 
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("asian","black",
+                              "diversity","ethnicity",
+                              "hispanic/latinx","native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", 
+                              "#f2be00", "#3B9AB2", 
+                              "#9a009a", "#ff8396", 
+                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+
+# graphing terms over time 
+figure_3D <- us_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") +
+  labs(title = "    Figure 3D. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2020)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        legend.box = "vertical", 
+        legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("asian","black",
+                              "diversity","ethnicity",
+                              "hispanic/latinx","native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", 
+                              "#f2be00", "#3B9AB2", 
+                              "#9a009a", "#ff8396", 
+                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
+
+
+# graphing terms over time 
+legend_3CD <- us_pop_prc_counts %>% ggplot() + 
+  geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") +
+  labs(title = "    Figure 3D. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2020)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        legend.box = "vertical", 
+        legend.position = "bottom",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("asian","black",
+                              "diversity","ethnicity",
+                              "hispanic/latinx","native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", 
+                              "#f2be00", "#3B9AB2", 
+                              "#9a009a", "#ff8396", 
+                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
+
+legend_3CD <- cowplot::get_legend(legend_3CD)
+
+grid.arrange(figure_3C, figure_3D, 
+             legend_3CD, 
+             nrow = 2, ncol=2,
+             layout_matrix = rbind(c(1,2), c(3,3)),
+             heights = c(2.5, 0.4)
+             )
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

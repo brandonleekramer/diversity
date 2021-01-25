@@ -103,8 +103,22 @@ divictionary_string <- c(na.omit(divictionary$aging), na.omit(divictionary$ances
                          na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
                          na.omit(divictionary$sexuality))
 
+diversity_only <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
+                         na.omit(divictionary$cultural), na.omit(divictionary$diversity),
+                         na.omit(divictionary$social_class),
+                         na.omit(divictionary$minority), na.omit(divictionary$population),
+                         na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
+                         na.omit(divictionary$sexuality))
+
 pubmed_abstract_data <- pubmed_abstract_data %>% 
   filter(word %in% divictionary_string)
+
+# this saves all of the unique ids that mention h1 diversity sets 
+# basically, this table of uniques ids can go back to postgresql 
+setwd("~/git/diversity/data/text_results/h1_results/")
+write_rds(pubmed_abstract_data %>% 
+            filter(word %in% diversity_only) %>% distinct(id), 
+          str_c("h1_diversity_ids_",analysis_timeframe,".rds"))
 
 ################################################################################################## convert to sets 
 
@@ -323,11 +337,15 @@ write_rds(gen_pop_prc_counts, str_c("h1_set_prc_trends_",analysis_timeframe,".rd
 
 h1_set_cor_matrix <- general_pop_terms %>% 
   select(id, term) %>% 
-  pairwise_cor(term, id, sort = TRUE)
+  pairwise_cor(term, id, sort = TRUE) %>% 
+  arrange(item1, item2) %>% 
+  mutate(year = analysis_timeframe)
 
 h1_subset_cor_matrix <- general_pop_terms %>% 
   select(id, word) %>% 
-  pairwise_cor(word, id, sort = TRUE)
+  pairwise_cor(word, id, sort = TRUE) %>% 
+  arrange(item1, item2) %>% 
+  mutate(year = analysis_timeframe)
 
 setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(h1_set_cor_matrix, str_c("h1_set_cor_matrix_",analysis_timeframe,".rds"))
@@ -348,7 +366,7 @@ str_c("Finished all processes for all years at: ", Sys.time())
 ####################################################################################### aggregate all years 
 
 library("tidyverse")
-setwd("~/git/diversity/data/text_results/")
+setwd("~/git/diversity/data/text_results/h1_results/")
 
 # percentages for all sets 
 h1_set_prc_trends <- list.files(pattern="h1_set_prc_trends_*") %>% 
@@ -383,6 +401,10 @@ h1_subset_counts_trends <- list.files(pattern="h1_subset_counts_trends*") %>%
   summarize(count = sum(n)) %>% 
   arrange(-count)
 
+# overall subset counts by year 
+h1_all_diversity_ids <- list.files(pattern="h1_diversity_ids_*") %>% 
+  map_df(~read_rds(.)) 
+
 # need to do the matrix aggregation next 
 
 setwd("~/git/diversity/data/text_results/")
@@ -391,5 +413,6 @@ write_rds(h1_set_counts_full, "h1_all_set_counts_full.rds")
 write_rds(h1_set_counts_trends, "h1_all_set_counts_trends.rds")
 write_rds(h1_subset_counts_full, "h1_all_subset_counts_full.rds")
 write_rds(h1_subset_counts_trends, "h1_all_subset_counts_trends.rds")
+write_rds(h1_all_diversity_ids, "h1_all_diversity_ids.rds")
 
 str_c("Aggregated data for all years at: ", Sys.time())

@@ -3,4 +3,4 @@
 
 /home/kb7hp/git/diversity/src/02_growth-analyses/
 01_hypothesis1.slurm
-
+04_run_all_hypotheses.slurm

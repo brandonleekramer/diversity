@@ -7,9 +7,17 @@ weight: 3
 
 To test Hypothesis 3, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. the dictionary of 8,200+ terms) were used from researchers in each country across both the biomedical and diversity samples. 
 
-```{r prereqs_4ab, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
+```{r, include=FALSE}
+rm(list = ls())
 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr",
+              "grid", "gridExtra", "reshape2", "extrafont", "data.table",
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 
+us_pop_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_counts.rds")
+us_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_prcs.rds") 
+bycountry_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_prcs_by_country.rds")
+pop_terms_bycountry <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_terms_by_country.rds")
 
 ```
 
@@ -26,7 +34,7 @@ figure_3A <- pop_terms_bycountry %>%
   #         | country == "Australia" | country == "Spain"   
            ) %>%  
   ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1.3, stat="identity") +
-  labs(title = "    Figure 3A. Total Growth of All Population Terms \n by Country in the Biomedical Sample (1990-2017)") + 
+  labs(title = "    Figure 3A. Total Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)") + 
   theme_minimal() +
   ylab("Term Count") +
   theme(axis.title.x = element_blank(), 
@@ -37,26 +45,13 @@ figure_3A <- pop_terms_bycountry %>%
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
-  scale_x_continuous(limits = c(1990, 2017),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
 ```
 
 Figure 3A shows that US-based researchers are using population terms more than all other countries with those based in China, the UK, Australia, and Germany as the next closest countries. While the US totals steadily increase throughout the decade, it seems that all countries, especially those based in the US, have shared a sharp increase in the usage of population terms since until 2013. This spike, however, largely seems to disappear after controlling for the total number of abstracts available after this year. 
 
 ```{r figure 3b, echo=FALSE}
-# total articles each year 
-bycountry_prc_counts <- text_data %>% 
-  drop_na(country) %>% 
-  group_by(year) %>% 
-  count(year) %>% ungroup() %>% rename(total = n) 
-
-bycountry_prc_counts <- pop_terms_bycountry %>% 
-  filter(all_pop_terms == 1) %>% 
-  group_by(country, year) %>% 
-  summarise(cnt_pop_terms = n_distinct(pubmed_id)) %>% 
-  right_join(bycountry_prc_counts, by = "year") %>% 
-  mutate(prc_pop_terms = round(cnt_pop_terms / total * 100, digits = 2))
-# graphing 
 figure_3B <- bycountry_prc_counts %>% 
   drop_na(country) %>% 
   filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
@@ -66,7 +61,7 @@ figure_3B <- bycountry_prc_counts %>%
            ) %>% 
   ggplot() + 
   geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.3, stat="identity") +
-  labs(title = "      Figure 3B. Proportional Growth of All Population Terms \n by Country in the Biomedical Sample (1990-2017)",
+  labs(title = "      Figure 3B. Proportional Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Country") + 
   theme_minimal() +
   ylab("Proportion of Articles") +
@@ -78,75 +73,16 @@ figure_3B <- bycountry_prc_counts %>%
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
-  scale_x_continuous(limits = c(1990, 2017),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
 
 Figure 3B shows that US-based researchers use population terms in around 10-12% of all abstracts. On the other hand, no other country uses population terms in more than 5% of abstracts in a given year. While the use of population terms seems to be growing slighltly in most other countries, the proportion is declining slighltly in US-based work.
 
 Now that we know US-based researchers are most likely to use population terms (a result we fully expected), we want to further examine how OMB/US Census terms are used in our two corpora. To ensure that we are capturing US-centric terminology, we [compiled a dictionary](https://growthofdiversity.netlify.app/analyses/dictionaries) used to catch to the main OMB/US Census terms, including Asian, White, Black, Native American, Pacific Islander, Hispanic/Latinx as well as more general terms like race and ethnicity. Given that these terms can also refer to populations outside of the US, we created bigrams of US-centric terms to ensure they were specific to the American context (i.e. we constructed bigrams of all adjacent uses of African and American). 
 
-```{r prereqs_3c, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
-setwd("~/Documents/Diversity/Data")
-bm_text_data <- read_csv("biomedical_corpus.csv") %>% 
-  rowid_to_column(var = "id") %>% 
-  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
-         abstract = AB, references = CR, year = PY, times_cited = TC, 
-         department = C1, pubmed_id = UT) %>% 
-  drop_na(abstract) %>%
-  select(id, authors, title, year, publication, abstract, 
-         references, year, times_cited, pubmed_id, department) %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018")
-
-
-
-# recoding frequently occuring population-related bigrams 
-us_pop_bigrams <- bm_text_data %>% 
-  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = black_bigrams), yes = "african-american", no = bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = native_american_bigrams), yes = "native-american", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = pacific_islander_bigrams), yes = "pacific-islander", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = hispanic_american_bigrams), yes = "hispanic-american", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = asian_american_bigrams), yes = "asian-american", no = rc_bigram)) %>%
-  select(-bigram) %>% 
-  filter(rc_bigram == "african-american" | 
-         rc_bigram == "native-american" | 
-         rc_bigram == "hispanic-american" |
-         rc_bigram == "asian-american" |
-         rc_bigram == "pacific-islander") %>% 
-  count(rc_bigram, year, sort = TRUE) %>% 
-  rename(word = rc_bigram)
-
-# tokenizing the abstract data into words 
-bm_abstract_data <- bm_text_data %>% 
-  unnest_tokens(word, abstract) #%>% anti_join(stop_words)
-# adding custom set of stopwords 
-my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
-                                "rights", "reserved", "copyright", "elsevier", 
-                                "women.recommendations", 
-                                "cs.man.ac.uk", "sexes.please", "movements.baby"))
-bm_abstract_data <- bm_abstract_data %>% 
-  anti_join(stop_words) %>% 
-  anti_join(my_stopwords); rm(my_stopwords)
-
-# combining the hyphenated words to our full dataset 
-us_pop_counts <- bm_abstract_data %>% 
-  group_by(year) %>% 
-  count(word, sort = TRUE) %>% 
-  ungroup() %>% 
-  select(word, year, n) %>% 
-  bind_rows(us_pop_bigrams) %>% 
-  arrange(-n)
-```
-
 ```{r figure 3c, message = FALSE, warning = FALSE, echo=FALSE}
-setwd("~/Documents/Diversity/Data")
+setwd("~/git/diversity/data/dictionaries/")
 h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
 h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv")
 omb_black <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$black), "z3x)\\b"), collapse = "|")
@@ -186,7 +122,7 @@ figure_3C <- us_pop_counts %>%
   group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
   theme_minimal() +
-  labs(title = "     Figure 3C. Total Growth of OMB/US Census Terms \n in Biomedical Sample (1990-2017)",
+  labs(title = "     Figure 3C. Total Growth of OMB/US Census Terms \n in Biomedical Sample (1990-2020)",
        color =  "Term") + 
   ylab("Term Count") +
   theme(axis.title.x = element_blank(), 
@@ -194,146 +130,30 @@ figure_3C <- us_pop_counts %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black","diversity","ethnicity","hispanic/latinx",
-                              "native-american","pacific-islander","race","white"),
-                     values=c("#E86F00", "#3B9AB2", "#000000", "#E21F00", "#00468b", 
-                              "#6b0f6b", "#d23ccc",  "#61B329", "#E2B306")) +
-  scale_x_continuous(limits = c(1990, 2017),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly() 
+  scale_color_manual(labels=c("asian","black",
+                              "diversity","ethnicity",
+                              "hispanic/latinx","native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", 
+                              "#f2be00", "#3B9AB2", 
+                              "#9a009a", "#ff8396", 
+                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
+
+#                              "#E86F00", # orange 
+#                              "#61B329", # light green
+#                              "#f2be00", # mustard
+#                              "#800080", # purple
+#                              "#000000", # dark green 
+#                              "#005BB7", # dark blue 
+#                              "#CC0000", # red 
+#                              "#ff8396", # pinkish 
+#                              "#3B9AB2" # light blue 
 ```
 
 Figure 3C shows the OMB US Census terms are growing over time, but this growth is quite subdued compared to our previous results. For example, no term set exceeds more than 400 uses in a given year. Of these category sets, ethnicity grows the most followed by Asian, White, race, and Black. 
 
-```{r prereqs_figure_3D, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
-
-setwd("~/Documents/Diversity/Data")
-# loading the .csv file 
-text_data_3d <- read_csv("biomedical_corpus.csv") %>% 
-  rowid_to_column(var = "id") %>% 
-  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
-         abstract = AB, references = CR, year = PY, times_cited = TC, 
-         department = C1, pubmed_id = UT) %>% 
-  #drop_na(abstract) %>%
-  select(id, authors, title, year, publication, abstract, 
-         references, year, times_cited, pubmed_id, department) %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018")
-
-abstract_data_3d <- text_data_3d %>% 
-  unnest_tokens(word, abstract) %>% 
-  anti_join(stop_words)
-
-# adding custom set of stopwords 
-my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
-                                "rights", "reserved", "copyright", "elsevier"))
-abstract_data_3d <- abstract_data_3d %>% 
-  anti_join(my_stopwords); rm(my_stopwords)
-
-# graphing us-specific terms over time 
-us_pop_counts_3d <- abstract_data_3d %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = omb_black), yes = "black", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_white), yes = "white", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_asian), yes = "asian", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                      pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_racial), yes = "race", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_native_american), yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>% 
-  mutate(black = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(black)\\b"), yes = 1, no = 0)) %>% 
-  mutate(white = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(white)\\b"), yes = 1, no = 0)) %>%
-  mutate(asian = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
-  mutate(hispanic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(hispanic/latinx)\\b"), yes = 1, no = 0)) %>% 
-  mutate(native_american = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(native-american)\\b"), yes = 1, no = 0)) %>% 
-  mutate(pacific_islander = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(pacific-islander)\\b"), yes = 1, no = 0)) %>% 
-  mutate(racial = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(race)\\b"), yes = 1, no = 0)) %>% 
-  mutate(ethnic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) %>% 
-  mutate(diversity = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(diversity)\\b"), yes = 1, no = 0))
-
-# total articles each year 
-us_pop_prc_counts <- text_data_3d %>% 
-  #drop_na(abstract) %>% 
-  group_by(year) %>% 
-  count(year) %>% 
-  ungroup() %>% 
-  rename(total = n)  
-
-# articles with term mentioned each year 
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(black == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_black = n_distinct(pubmed_id)) %>% 
-  left_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_black = round(cnt_black / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(white == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_white = n_distinct(pubmed_id)) %>% 
-  left_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_white = round(cnt_white / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(asian == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_asian = n_distinct(pubmed_id)) %>% 
-  left_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_asian = round(cnt_asian / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(hispanic == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_hispanic = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_hispanic = round(cnt_hispanic / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(native_american == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_native_american = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_native_american = round(cnt_native_american / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(pacific_islander == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_pacific_islander = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_pacific_islander = round(cnt_pacific_islander / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(racial == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_racial = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(ethnic == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_ethnic = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
-us_pop_prc_counts <- us_pop_counts_3d %>% 
-  filter(diversity == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_diversity = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts, by = "year") %>% 
-  mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
-
-### THIS IS BROKEN HERE AND I HAVE NO IDEA WHYYYYYY
-
-
-```
 
 ```{r figure_3D, message = FALSE, warning=FALSE, echo=FALSE}
 # graphing terms over time 
@@ -347,7 +167,7 @@ figure_3D <- us_pop_prc_counts %>% ggplot() +
   geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
   geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") +
-  labs(title = "    Figure 3D. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2017)",
+  labs(title = "    Figure 3D. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Articles") +
@@ -358,283 +178,19 @@ figure_3D <- us_pop_prc_counts %>% ggplot() +
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black","diversity","ethnicity","hispanic/latinx",
-                              "native-american","pacific-islander","race","white"),
-                     values=c("#E86F00", "#3B9AB2", "#000000", "#E21F00", "#00468b", 
-                              "#6b0f6b", "#d23ccc",  "#61B329", "#E2B306")) +
-  scale_x_continuous(limits = c(1990, 2017),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
+  scale_color_manual(labels=c("asian","black",
+                              "diversity","ethnicity",
+                              "hispanic/latinx","native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", 
+                              "#f2be00", "#3B9AB2", 
+                              "#9a009a", "#ff8396", 
+                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
 
 Similarly, Figure 3D shows that the OMB/US Census terms vary little over time. While there are some brief spikes in usage, most totals never surpass 1% of abstracts in any given year. This plot further corroborates for the notion that researchers are moving away from the use of racial and ethnic terms to describe populations in their work.
-
-```{r prereqs_3e, message = FALSE, results = FALSE, warning = FALSE, echo=FALSE}
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT",
-              "grid", "gridExtra", "reshape2", "extrafont",
-               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
-
-setwd("~/Documents/Diversity/Data")
-# loading the .csv file 
-text_data_div <- read_csv("diversity_corpus.csv") %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018") 
-
-black_bigrams <- "\\b(?i)(african american|african americans|afro american|afro americans|african-american|african-americans|afro-american|afro-americans)\\b"
-native_american_bigrams <- "\\b(?i)(native american|native americans|american indian|american indians|alaskan native|alaskan natives|alaska nativez|alaska natives|native-american|native-americans|american-indian|american-indians|alaskan-native|alaskan-natives|alaska-native|alaska-natives)\\b"
-pacific_islander_bigrams <- "\\b(?i)(pacific islander|pacific islanders|native hawaiian|native hawaiians|pacific-islander|pacific-islanders|native-hawaiian|native-hawaiians)\\b"
-hispanic_american_bigrams <- "\\b(?i)(hispanic-american|hispanic american|hispanic-americans|hispanic americans)\\b"
-asian_american_bigrams <- "\\b(?i)(asian-american|asian american)\\b"
-asian_american_bigrams <- "\\b(?i)(caucasian-american|caucasian american)\\b"
-
-# recoding frequently occuring population-related bigrams 
-us_pop_bigrams_div <- text_data_div %>% 
-  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = black_bigrams), yes = "african-american", no = bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = native_american_bigrams), yes = "native-american", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = pacific_islander_bigrams), yes = "pacific-islander", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = hispanic_american_bigrams), yes = "hispanic-american", no = rc_bigram)) %>%
-  mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-         pattern = asian_american_bigrams), yes = "asian-american", no = rc_bigram)) %>%
-  select(-bigram) %>% 
-  filter(rc_bigram == "african-american" | 
-         rc_bigram == "native-american" | 
-         rc_bigram == "hispanic-american" |
-         rc_bigram == "asian-american" |
-         rc_bigram == "pacific-islander") %>% 
-  count(rc_bigram, year, sort = TRUE) %>% 
-  rename(word = rc_bigram)
-
-# tokenizing the abstract data into words 
-abstract_data_div <- text_data_div %>% 
-  unnest_tokens(word, abstract) #%>% anti_join(stop_words)
-# adding custom set of stopwords 
-my_stopwords <- tibble(word = c(as.character(1:14), "[0-9]", 
-                                "rights", "reserved", "copyright", "elsevier", 
-                                "women.recommendations", 
-                                "cs.man.ac.uk", "sexes.please", "movements.baby"))
-abstract_data_div <- abstract_data_div %>% 
-  anti_join(stop_words) %>% 
-  anti_join(my_stopwords); rm(my_stopwords)
-
-# combining the hyphenated words to our full dataset 
-us_pop_counts_div <- abstract_data_div %>% 
-  group_by(year) %>% 
-  count(word, sort = TRUE) %>% 
-  ungroup() %>% 
-  select(word, year, n) %>% 
-  bind_rows(us_pop_bigrams_div) %>% 
-  arrange(-n)
-```
-
-```{r figure 3e, echo=FALSE}
-setwd("~/Documents/Diversity/Data")
-h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv") 
-omb_black <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$black), "z3x)\\b"), collapse = "|")
-omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$native_american), "z3x)\\b"), collapse = "|")
-omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
-omb_hispanic_latinx <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$hispanic_latinx), "z3x)\\b"), collapse = "|")
-omb_asian <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$asian), "z3x)\\b"), collapse = "|")
-omb_white <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$white), "z3x)\\b"), collapse = "|")
-omb_racial <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$race), "z3x)\\b"), collapse = "|")
-omb_ethnicity <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$ethnicity), "z3x)\\b"), collapse = "|")
-omb_diversity <- paste(c("\\b(?i)(z3x",na.omit(h1_dictionary$diversity), 
-                         "z3x)\\b"), collapse = "|")
-
-# graphing us-specific terms over time using census categories 
-# https://www.census.gov/topics/population/race/about.html
-figure_3E <- us_pop_counts_div %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = omb_black), yes = "black", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_white), yes = "white", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_asian), yes = "asian", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                      pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_racial), yes = "race", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_native_american), yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_diversity), yes = "diversity", no = term)) %>%
-  filter(term == "black" | term == "white" | term == "asian" |
-         term == "hispanic/latinx" | term == "race" | term == "ethnicity" |
-         term == "native-american" | term == "pacific-islander" | term == "diversity") %>%  
-  group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
-  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
-  theme_minimal() +
-  labs(title = "     Figure 3E. Total Growth of OMB/US Census \n Terms in Diversity Sample (1990-2017)",
-       color =  "Term") + 
-  ylab("Term Count") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black","diversity","ethnicity","hispanic/latinx",
-                              "native-american","pacific-islander","race","white"),
-                     values=c("#E86F00", "#3B9AB2", "#000000", "#E21F00", "#00468b", 
-                              "#6b0f6b", "#d23ccc",  "#61B329", "#E2B306")) +
-  scale_x_continuous(limits = c(1990, 2017),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly() 
-```
-
-Like we saw in Hypothesis 2, Figure 3E shows that the trends for all ategories in the diversity sample are inflated compared to the biomedical sample. In addition to having counts nearly twice the biomedical sample, ethnicity and race are the top two category sets used in this sample with Black, White, Asian and Hispanic/Latinx all trailing closely behind.  
-
-```{r prereqs_figure_3F, message = FALSE, results = FALSE, echo=FALSE}
-# combining the hyphenated words to our full dataset 
-us_pop_counts_3f <- abstract_data_div %>% 
-  group_by(year) %>% 
-  count(word, pubmed_id, sort = TRUE) %>% 
-  ungroup() %>% 
-  select(word, pubmed_id, year, n) %>% 
-  bind_rows(us_pop_bigrams_div) 
-
-# graphing us-specific terms over time 
-us_pop_counts_3f <- us_pop_counts_3f %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = omb_black), yes = "black", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_white), yes = "white", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_asian), yes = "asian", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                      pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_racial), yes = "race", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_native_american), yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>% 
-  mutate(black = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(black)\\b"), yes = 1, no = 0)) %>% 
-  mutate(white = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(white)\\b"), yes = 1, no = 0)) %>%
-  mutate(asian = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
-  mutate(hispanic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(hispanic/latinx)\\b"), yes = 1, no = 0)) %>% 
-  mutate(native_american = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(native-american)\\b"), yes = 1, no = 0)) %>% 
-  mutate(pacific_islander = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(pacific-islander)\\b"), yes = 1, no = 0)) %>% 
-  mutate(racial = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(race)\\b"), yes = 1, no = 0)) %>% 
-  mutate(ethnic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) %>% 
-  mutate(ethnic = ifelse(test = str_detect(string = term, 
-                       pattern = "\\b(diversity)\\b"), yes = 1, no = 0))
-
-# total articles each year 
-us_pop_prc_counts_div <- text_data_div %>% 
-  group_by(year) %>% 
-  count(year) %>% 
-  ungroup() %>% 
-  rename(total = n)  
-
-# articles with term mentioned each year 
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(black == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_black = n_distinct(pubmed_id)) %>% 
-  left_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_black = round(cnt_black / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(white == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_white = n_distinct(pubmed_id)) %>% 
-  left_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_white = round(cnt_white / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(asian == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_asian = n_distinct(pubmed_id)) %>% 
-  left_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_asian = round(cnt_asian / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(hispanic == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_hispanic = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_hispanic = round(cnt_hispanic / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(native_american == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_native_american = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_native_american = round(cnt_native_american / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(pacific_islander == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_pacific_islander = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_pacific_islander = round(cnt_pacific_islander / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(racial == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_racial = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_racial = round(cnt_racial / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(ethnic == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_ethnic = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
-us_pop_prc_counts_div <- us_pop_counts_3f %>% 
-  filter(diversity == 1) %>% 
-  group_by(year) %>% 
-  summarise(cnt_diversity = n_distinct(pubmed_id)) %>% 
-  right_join(us_pop_prc_counts_div, by = "year") %>% 
-  mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
-```
-
-```{r figure_3F, echo=FALSE}
-# graphing terms over time 
-figure_3F <- us_pop_prc_counts_div %>% ggplot() + 
-  geom_line(aes(y = prc_black, x = year, colour = "black"), 
-            size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_white, x = year, colour = "white"),
-            size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_asian, x = year, colour = "asian"), 
-            size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"),
-            size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") +
-  labs(title = "    Figure 3F. Proportional Growth of OMB/US Census \n Terms in Diversity Sample (1990-2017)",
-       color =  "Term") + 
-  theme_minimal() +
-  ylab("Proportion of Articles") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
-        legend.box = "vertical", 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black","diversity","ethnicity","hispanic/latinx",
-                              "native-american","pacific-islander","race","white"),
-                     values=c("#E86F00", "#3B9AB2", "#000000", "#E21F00", "#00468b", 
-                              "#6b0f6b", "#d23ccc",  "#61B329", "#E2B306")) +
-  scale_x_continuous(limits = c(1990, 2017),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015)); ggplotly()
-```
-
-Finally, Figure 3F exhibits a non-linear trend analogous to the one identified in Hypothesis 1. Most prominently, the term ethnicity rises sharply from 1993 to 2006 before dropping back to about 5% of all published abstracts in the sample. Most of the other terms in this plot (i.e. Asian, White, Hispanic/Latinx, and race) follow the same parabolic curve while others (like Black, Pacific-Islander and Native-American) show almost no variance at all over the course of the sampling period. 
 
 ### Main Takeaway 
 

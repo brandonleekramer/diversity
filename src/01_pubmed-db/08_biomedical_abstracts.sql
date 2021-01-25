@@ -5,7 +5,7 @@ CREATE MATERIALIZED VIEW pubmed_2021.biomedical_abstracts AS (
 SELECT A.fk_pmid, A.year, A.abstract, A.publication, A.article_title, 
 	   A.inv_affiliation, A.pub_affiliation, A.grant_agency, A.grant_country, A.language
 FROM pubmed_2021.abstract_data A 
-INNER JOIN pubmed_2021.filtered_publications
-ON A.publication = filtered_publications.publication 
+INNER JOIN pubmed_2021.filtered_publications B
+ON A.publication = B.publication 
 WHERE year > 1989 AND year < 2021 
 ); 

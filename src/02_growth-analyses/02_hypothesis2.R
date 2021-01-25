@@ -115,6 +115,13 @@ filtered_diversity_terms <- h2_dictionary$term
 pubmed_abstract_data <- pubmed_abstract_data %>% 
   filter(word %in% filtered_diversity_terms)
 
+# this saves all of the unique ids that mention h1 diversity sets 
+# basically, this table of uniques ids can go back to postgresql 
+setwd("~/git/diversity/data/text_results/h2_results/")
+write_rds(pubmed_abstract_data %>% 
+            filter(word %in% diversity_only) %>% distinct(id), 
+          str_c("h2_diversity_ids_",analysis_timeframe,".rds"))
+
 ############################################################################################## counting terms over time
 
 str_c("Started counting tokens at: ", Sys.time())
@@ -213,6 +220,10 @@ h2_counts <- pop_terms_bycats %>%
 
 h2_counts <- h2_counts %>% 
   arrange(year, -n)
+
+h2_diversity_abstracts <- pop_terms_bycats %>% 
+  distinct(id) %>% 
+  select(id, word, term)
 
 setwd("~/git/diversity/data/text_results/h2_results/")
 write_rds(h2_counts, str_c("h2_set_counts_",analysis_timeframe,".rds"))

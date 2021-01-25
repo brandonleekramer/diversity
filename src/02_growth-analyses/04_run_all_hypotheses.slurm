@@ -2,7 +2,7 @@
 
 #SBATCH -p bii
 #SBATCH -A biocomplexity
-#SBATCH --job-name = diversity_h3_date
+#SBATCH --job-name=diversity_h1_h3
 #SBATCH --time=1-24:00:00
 #SBATCH -c 2
 #SBATCH --mem=250G

@@ -5,52 +5,44 @@ output: html_document
 weight: 5
 ---
 
-```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
-# loading packages 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "tm",
-               "data.table", "countrycode",
+```{r supp fig 1, fig.width=7, fig.height=4}
+
+
+rm(list = ls())
+
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr", "RPostgreSQL",
+              "grid", "gridExtra", "reshape2", "extrafont", "data.table",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
-setwd("~/Documents/Diversity/Data")
-# loading the .csv file 
-diversity_data <- read_csv("diversity_corpus.csv") %>% 
-  drop_na(abstract) %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018") 
 
-biomed_data <- read_csv("biomedical_corpus.csv") %>% 
-  rowid_to_column(var = "id") %>% 
-  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
-         abstract = AB, references = CR, year = PY, times_cited = TC) %>% 
-  select(id, authors, title, year, publication, abstract, references, year, times_cited) %>% 
-  drop_na(abstract) %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018") 
-```
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
 
-```{r growth in diversity corpus, echo=FALSE}
-# checking to see how the overall data looks 
-pubs_by_year <- diversity_data %>% 
-  group_by(year) %>% 
-  count(year, sort = TRUE) %>% 
-  rename(diversity = n)
+# query the users_gh data (table of all github users) 
+by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.articles_per_year")
 
-pubs_by_year <- biomed_data %>% 
-  group_by(year) %>% 
-  count(year, sort = TRUE) %>% 
-  rename(biomedical = n) %>% 
-  full_join(pubs_by_year, by = "year")
+# disconnect from postgresql database 
+dbDisconnect(conn)
 
-supp_graph <- pubs_by_year %>% ggplot() + 
-  geom_line(aes(y = diversity, x = year, colour="#5D8C5D"), stat="identity", size = 1.3) + 
-  geom_line(aes(y = biomedical, x = year, colour="#3787D7"), stat="identity", size = 1.3) + 
-  labs(title = "        Supplementary Figure 1. Growth of Publications in \n Biomedical and Diversity Corpora (1990-2017)", 
-       caption = "Data Source: Web of Science") + 
-  theme_minimal() +
-  scale_color_manual(labels=c("biomedical","diversity"),
-                     values=c("#61B329", "#3B9AB2")) +
-  theme(axis.title.x = element_blank(), 
-        axis.title.y = element_blank(),
-        plot.title = element_text(hjust = 0.46),
-        legend.position = "none"); ggplotly()
+ggplot(data = by_year, aes(x = year, y = count)) + 
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Supp. Figure 1. Number of Publication Abstracts in Datasets (1990-2020)",
+       caption = "Data Source: ISI Web of Science") + 
+  theme(axis.title.x = element_blank(),
+        plot.title = element_text(size=11, hjust = 0.2),
+        legend.title = element_text(size = 10, hjust = 0.5),
+        panel.background = element_rect(fill = "white")) +
+  ylab("Number of Abstracts") +
+  #scale_fill_manual(values=c('black','darkgray')) +
+  scale_x_discrete(labels = c("1990" = "1990", "1991" = "", "1992" = "", "1993" = "", "1994" = "",
+                              "1996" = "", "1997" = "", "1998" = "", "1999" = "",
+                              "2001" = "", "2002" = "", "2003" = "", "2004" = "",
+                              "2006" = "", "2007" = "", "2008" = "", "2009" = "", "2010" = "2010",
+                              "2011" = "", "2012" = "", "2013" = "", "2014" = "",
+                              "2016" = "", "2017" = "", "2018" = "", "2019" = "", "2020" = "2020"))
 ```
 

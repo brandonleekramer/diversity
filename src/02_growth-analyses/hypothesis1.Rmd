@@ -55,19 +55,12 @@ figure_1A <- general_pop_terms %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("aging",
-                              "cultural", 
-                              "diversity (all)",
-                              "diversity (social)", 
-                              "minority",
-                              "race/ethnicity",
-                              "sex/gender",
-                              "sexuality",
-                              "socio-economic"),
+  scale_color_manual(labels=c("aging", "cultural","diversity (all)","diversity (social)", 
+                              "minority","race/ethnicity","sex/gender", "sexuality","socio-economic"),
                      values=c("#E86F00", # orange 
                               "#61B329", # light green
                               "#f2be00", # mustard
-                              "#800080", # purple
+                              "#9a009a", # purple
                               "#000000", # dark green 
                               "#005BB7", # dark blue 
                               "#CC0000", # red 
@@ -77,7 +70,7 @@ figure_1A <- general_pop_terms %>%
                               #"#d23ccc", # pink 
                               # 1b7524 dark green
                               )) + 
-  scale_y_log10() +
+  #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
@@ -105,7 +98,7 @@ figure_1B <- general_pop_terms %>%
   geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") +
   geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
   geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
-  labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2019)", color =  "Term") + 
+  labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Abstracts") +
   theme(axis.title.x = element_blank(), 
@@ -116,7 +109,7 @@ figure_1B <- general_pop_terms %>%
                      values=c("#E86F00", # orange 
                               "#61B329", # light green
                               "#f2be00", # mustard
-                              "#800080", # purple
+                              "#9a009a", # purple
                               "#000000", # dark green 
                               "#005BB7", # dark blue 
                               "#CC0000", # red 
@@ -126,7 +119,7 @@ figure_1B <- general_pop_terms %>%
                               #"#d23ccc", # pink 
                               # 1b7524 dark green
                               )) + 
-  scale_y_log10() +
+  #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
@@ -141,72 +134,24 @@ Overall, our results provide support for the notion that the use of the term "di
 
 Here is a list of the terms in each category analyzed above. You can scroll through each category or use the search tool to see if a term of interest was used in the analyses.
 
+```{r, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries/")
+divictionary <- read_csv("diversity_project - h1_dictionary.csv")
+first_table <- divictionary %>% select(aging, sex_gender, sexuality, social_class)
+first_table[is.na(first_table)] <- ""
+datatable(first_table, caption = 'Supplementary Table 1A: Term Sets Used for Hypothesis 1 Testing', rownames = FALSE)
+```
+```{r, echo = FALSE}
+second_table <- divictionary %>% select(cultural, diversity, minority, race_ethnicity)
+second_table[is.na(second_table)] <- ""
+datatable(second_table, rownames = FALSE)
+```
+
 ```{r biomedical_wordfreqs, echo = FALSE}
-aging_terms <- general_pop_terms %>% 
-  filter(di_aging == 1 & year == 2017) %>% 
-  #group_by(year) %>% 
-  count(word) %>% 
-  arrange(-n) %>% 
-  rename(aging_term = word, aging_n = n) %>% 
-  rowid_to_column(var = "rowname") 
-sexgender_terms <- general_pop_terms %>% 
-  filter(di_sexgender == 1 & year == 2017) %>% 
-  #group_by(year) %>% 
-  count(word) %>% 
-  arrange(-n) %>% 
-  rename(sexgender_term = word, sexgender_n = n) %>% 
-  rowid_to_column(var = "rowname") 
-sexualities_terms <- general_pop_terms %>% 
-  filter(di_sexuality == 1 & year == 2017) %>% 
-  count(word) %>% 
-  arrange(-n) %>% 
-  rename(sexualities_term = word, sexualities_n = n) %>% 
-  rowid_to_column(var = "rowname")  
-class_terms <- general_pop_terms %>% 
-  filter(di_class == 1 & year == 2017) %>% 
-  count(word) %>% 
-  arrange(-n) %>% 
-  rename(class_term = word, class_n = n) %>% 
-  rowid_to_column(var = "rowname")
-joined_tables <- full_join(aging_terms, class_terms, by = "rowname")
-joined_tables <- full_join(joined_tables, sexgender_terms, by = "rowname")
-joined_tables <- full_join(joined_tables, sexualities_terms, by = "rowname") %>% select(-rowname)
-joined_tables[is.na(joined_tables)] <- ""
-datatable(joined_tables, 
-          colnames = c('Aging', 'Total', 'Class', 'Total','Sex/Gender', 'Total', 'Sexualities', 'Total'),
-          caption = 'Supplementary Table 1B: 2017 Totals for Aging, Class, Sex/Gender, and Sexualities Category (Biomedical Sample)', rownames = FALSE)
+subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_full.rds") %>% 
+  filter(!term %in% c("genetic", "population", "ancestry")) %>% 
+  rename(`term set` = term, `words in term set` = word) %>% select(`term set`, `words in term set`, count)
+datatable(subset_counts, caption = 'Supplementary Table 1B: Frequency of Words Used in Each Term Set (1990-2020)', rownames = FALSE)
 ```
 
-### Sensitivity Checks 
-
-Should provide a few examples of false positive diversity results 
-And examples of what "true positives" of diversity are 
-Best case would be to provide a confusion matrix here and then go into detail with the false/true positive overview 
-
-
-While most of our terms are specific to each category in which they are listed. However, the term "minority" is one term that we were concerned about producing false positive results. As a sensitivity check, we found that in the large majority of cases minority was being used alongside diversity, racial, sex/gender, or sexuality terms in our dataset. However, it should be noted that there remains a 2-9% false positive rate in any given year when the term minority does not clearly relate to diversity research. While we considered removing these instances from our dataset, we decided to maintain consistency across our datasets noting that there is likely some noise in almost all categories and altering one category is likely to create problems for accurate comparison across the categories in the plot. The abstracts listed in the following table are examples of the false-positives included in the minority category.
-
-```{r h1_sensitivity_minority, echo=FALSE, eval=FALSE}
-minority_abstracts <- general_pop_terms %>% 
-  group_by(id) %>% 
-  summarise(sum_minority = sum(di_minority), 
-            sum_diversity = sum(di_diversity),
-            sum_racial = sum(di_racial),
-            sum_sexgender = sum(di_sexgender),
-            sum_sexuality = sum(di_sexuality),) %>% 
-  filter(sum_minority >= 1) %>% 
-  inner_join(biomed_text_data, by = "id") %>% 
-  mutate(abstract = tolower(abstract)) %>% 
-  select(id, sum_minority, sum_diversity, sum_racial, sum_sexgender, sum_sexuality, abstract, year) %>% 
-  filter(sum_diversity == 0 & sum_racial == 0 & sum_sexgender == 0 & sum_sexuality == 0) %>% 
-  filter(!grepl("marginalized|minorities|under-represented|underrepresented|african-american|african|caucasian|white|asian|asian-american|native|hispanic|latino", 
-                abstract))
-minority_table <- minority_abstracts %>% select(year, abstract)
-#sum(general_pop_terms$di_minority)
-#sum(minority_abstracts$sum_minority)
-#minority_abstracts %>% group_by(year) %>% count(year)
-#write_csv(minority_abstracts, "minority_abstracts.csv")
-datatable(minority_table, colnames = c('Year', 'Abstract'),
-          caption = 'Supplementary Table 1C: Examples of False-Positive Uses of Minority in Biomedical Sample', options = list(pageLength = 5, dom = 'tip'), rownames = FALSE)
-```
 
