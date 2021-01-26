@@ -24,7 +24,7 @@ test_h3a <- function(analysis_timeframe){
   ################################################################################################# ingestion/cleaning 
   
   #rm(list = ls())
-  #analysis_timeframe <- "2018"
+  #analysis_timeframe <- "2000"
   
   str_c("Starting data pull at: ", Sys.time())
   
@@ -628,13 +628,15 @@ test_h3a <- function(analysis_timeframe){
 
 ##################################################################################### for loop of all years 
 
-for (year in 1990:1993) {
+for (year in 1990:2020) {
   test_h3a(year)
 }
 
 str_c("Finished all processes for all years at: ", Sys.time())
 
 ####################################################################################### aggregate all years 
+
+rm(list = ls())
 
 setwd("~/git/diversity/data/text_results/h3_results/")
 

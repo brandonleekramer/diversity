@@ -11,11 +11,12 @@ rm(list = ls())
 library("tidyverse")
 library("tidytext")
 library("plotly")
+library("DT")
 
 h1_all_set_counts_full <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_full.rds")
 h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
 general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
-
+divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
 ```
 
 Over the past several years, social scientists have noted that the discourse of "diversity" is expanding in use across various social contexts ([Berrey 2015](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)). In this project, we are interested in measuring how often diversity and its various metonyms are mentioned in biomedical research over the three decades (1990-2019). Our first working hypothesis is that: 
@@ -57,19 +58,11 @@ figure_1A <- general_pop_terms %>%
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(labels=c("aging", "cultural","diversity (all)","diversity (social)", 
                               "minority","race/ethnicity","sex/gender", "sexuality","socio-economic"),
-                     values=c("#E86F00", # orange 
-                              "#61B329", # light green
-                              "#f2be00", # mustard
-                              "#9a009a", # purple
-                              "#000000", # dark green 
-                              "#005BB7", # dark blue 
-                              "#CC0000", # red 
-                              "#ff8396", # pinkish 
-                              "#3B9AB2" # light blue  
-                              #"#000000", # black
-                              #"#d23ccc", # pink 
-                              # 1b7524 dark green
-                              )) + 
+                     values=c("#E86F00", "#61B329", "#f2be00", "#9a009a", "#000000",
+                              # orange   # l.green  # mustard  # purple   # d.green
+                              "#3B9AB2", "#CC0000", "#ff8396", "#005BB7" )) + 
+                              # l. blue   # red     # pinkish  # dark blue
+                              #"#000000", # black | #"#d23ccc", # pink | # 1b7524 dark green
   #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
@@ -104,21 +97,13 @@ figure_1B <- general_pop_terms %>%
   theme(axis.title.x = element_blank(), 
         legend.position = "none",
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("aging", "cultural",  "diversity (all)", "diversity (social)", 
-                              "minority",  "race/ethnicity",  "sex/gender", "sexuality",  "socio-economic"),
-                     values=c("#E86F00", # orange 
-                              "#61B329", # light green
-                              "#f2be00", # mustard
-                              "#9a009a", # purple
-                              "#000000", # dark green 
-                              "#005BB7", # dark blue 
-                              "#CC0000", # red 
-                              "#ff8396", # pinkish 
-                              "#3B9AB2" # light blue  
-                              #"#000000", # black
-                              #"#d23ccc", # pink 
-                              # 1b7524 dark green
-                              )) + 
+  scale_color_manual(labels=c("aging", "cultural","diversity (all)","diversity (social)", 
+                              "minority","race/ethnicity","sex/gender", "sexuality","socio-economic"),
+                     values=c("#E86F00", "#61B329", "#f2be00", "#9a009a", "#000000",
+                              # orange   # l.green  # mustard  # purple   # d.green
+                              "#3B9AB2", "#CC0000", "#ff8396", "#005BB7" )) + 
+                              # l. blue   # red     # pinkish  # dark blue
+                              #"#000000", # black | #"#d23ccc", # pink | # 1b7524 dark green
   #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
@@ -135,8 +120,6 @@ Overall, our results provide support for the notion that the use of the term "di
 Here is a list of the terms in each category analyzed above. You can scroll through each category or use the search tool to see if a term of interest was used in the analyses.
 
 ```{r, echo = FALSE}
-setwd("~/git/diversity/data/dictionaries/")
-divictionary <- read_csv("diversity_project - h1_dictionary.csv")
 first_table <- divictionary %>% select(aging, sex_gender, sexuality, social_class)
 first_table[is.na(first_table)] <- ""
 datatable(first_table, caption = 'Supplementary Table 1A: Term Sets Used for Hypothesis 1 Testing', rownames = FALSE)
@@ -150,7 +133,8 @@ datatable(second_table, rownames = FALSE)
 ```{r biomedical_wordfreqs, echo = FALSE}
 subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_full.rds") %>% 
   filter(!term %in% c("genetic", "population", "ancestry")) %>% 
-  rename(`term set` = term, `words in term set` = word) %>% select(`term set`, `words in term set`, count)
+  rename(`term set` = term, `words in term set` = word, `count for all years` = count) %>% 
+  select(`term set`, `words in term set`, `count for all years`)
 datatable(subset_counts, caption = 'Supplementary Table 1B: Frequency of Words Used in Each Term Set (1990-2020)', rownames = FALSE)
 ```
 

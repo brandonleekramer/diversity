@@ -407,7 +407,7 @@ h1_all_diversity_ids <- list.files(pattern="h1_diversity_ids_*") %>%
 
 # need to do the matrix aggregation next 
 
-setwd("~/git/diversity/data/text_results/")
+setwd("~/git/diversity/data/text_results/h1_results")
 write_rds(h1_set_prc_trends, "h1_all_set_prc_trends.rds")
 write_rds(h1_set_counts_full, "h1_all_set_counts_full.rds")
 write_rds(h1_set_counts_trends, "h1_all_set_counts_trends.rds")

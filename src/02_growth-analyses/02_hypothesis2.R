@@ -2,7 +2,7 @@
 ####################################################################################### install.packages (for slurm) 
 
 #rm(list = ls())
-
+#analysis_timeframe <- "1990"
 #install.packages("readr", repos = "http://cran.us.r-project.org")
 #install.packages("stringi", repos = "http://cran.us.r-project.org", dependencies=TRUE, INSTALL_opts = c('--no-lock'))
 #install.packages("stringr", repos = "http://cran.us.r-project.org", dependencies=TRUE, INSTALL_opts = c('--no-lock'))
@@ -115,6 +115,13 @@ filtered_diversity_terms <- h2_dictionary$term
 pubmed_abstract_data <- pubmed_abstract_data %>% 
   filter(word %in% filtered_diversity_terms)
 
+diversity_only <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
+                    na.omit(divictionary$cultural), na.omit(divictionary$diversity),
+                    na.omit(divictionary$social_class),
+                    na.omit(divictionary$minority), na.omit(divictionary$population),
+                    na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
+                    na.omit(divictionary$sexuality))
+
 # this saves all of the unique ids that mention h1 diversity sets 
 # basically, this table of uniques ids can go back to postgresql 
 setwd("~/git/diversity/data/text_results/h2_results/")
@@ -220,10 +227,6 @@ h2_counts <- pop_terms_bycats %>%
 
 h2_counts <- h2_counts %>% 
   arrange(year, -n)
-
-h2_diversity_abstracts <- pop_terms_bycats %>% 
-  distinct(id) %>% 
-  select(id, word, term)
 
 setwd("~/git/diversity/data/text_results/h2_results/")
 write_rds(h2_counts, str_c("h2_set_counts_",analysis_timeframe,".rds"))
