@@ -2,6 +2,7 @@
 /home/kb7hp/git/diversity/content/analyses/hypothesis1.Rmd="857ACDAE"
 /home/kb7hp/git/diversity/content/analyses/supplementary.Rmd="68F2ABD3"
 /home/kb7hp/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv="7335F911"
+/home/kb7hp/git/diversity/functions/standardizing_compounds.R="B2C54550"
 /home/kb7hp/git/diversity/src/01_pubmed-db/01_download_medline.sh="36450ED9"
 /home/kb7hp/git/diversity/src/01_pubmed-db/02_pubmed_parser.ipynb="29C9325F"
 /home/kb7hp/git/diversity/src/01_pubmed-db/03_clean_db.sql="27AED8F6"
@@ -31,3 +32,4 @@
 /sfs/qumulo/qhome/kb7hp/git/diversity/src/02_growth-analyses/01_hypothesis1.slurm="BAAE976"
 /sfs/qumulo/qhome/kb7hp/git/diversity/src/02_growth-analyses/05_term-correlation-change.Rmd="D2D56E2E"
 /sfs/qumulo/qhome/kb7hp/git/diversity/src/02_growth-analyses/99_slurm_notes.txt="CA35E21"
+/sfs/qumulo/qhome/kb7hp/git/diversity/src/02_growth-analyses/julia_check.Rmd="D239C112"

@@ -104,7 +104,7 @@ figure_1B <- general_pop_terms %>%
                               "#3B9AB2", "#CC0000", "#ff8396", "#005BB7" )) + 
                               # l. blue   # red     # pinkish  # dark blue
                               #"#000000", # black | #"#d23ccc", # pink | # 1b7524 dark green
-  #scale_y_log10() +
+  scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```

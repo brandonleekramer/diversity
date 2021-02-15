@@ -5,6 +5,7 @@
 ####################################################################################### install.packages (for slurm) 
 
 #rm(list = ls())
+#analysis_timeframe <- "1990"
 
 #install.packages("readr", repos = "http://cran.us.r-project.org")
 #install.packages("stringi", repos = "http://cran.us.r-project.org", dependencies=TRUE, INSTALL_opts = c('--no-lock'))
@@ -42,7 +43,30 @@ library("maditr")
 library("purrr")
 data(stop_words)
 
-################################################################################################# ingestion/cleaning 
+######################################################################################## load diversity dictionaries
+
+# lets draw all of our strings from the diversity_dictionary (divictionary)
+# setwd("~/Documents/Diversity/Data")
+setwd("~/git/diversity/data/dictionaries/")
+divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+
+divictionary_string <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
+                         na.omit(divictionary$social_class), na.omit(divictionary$cultural), 
+                         na.omit(divictionary$disability), na.omit(divictionary$diversity), 
+                         na.omit(divictionary$equity), na.omit(divictionary$migration),
+                         na.omit(divictionary$minority), na.omit(divictionary$population),
+                         na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
+                         na.omit(divictionary$sexuality))
+
+diversity_only <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
+                    na.omit(divictionary$social_class), na.omit(divictionary$cultural), 
+                    na.omit(divictionary$disability), na.omit(divictionary$diversity), # this right? 
+                    na.omit(divictionary$equity), na.omit(divictionary$migration),
+                    na.omit(divictionary$minority), na.omit(divictionary$population),
+                    na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
+                    na.omit(divictionary$sexuality))
+
+################################################################################################# data ingestion/cleaning 
 
 str_c("Starting data pull at: ", Sys.time())
 
@@ -65,14 +89,44 @@ dbDisconnect(conn)
 
 str_c("Finishing data pull at: ", Sys.time())
 
+
+######################################################################################## pre-processing steps 
+
 # total articles each year 
-# banking this df now to optimize our memory for later 
+# we are banking this df of the total abstract counts for each year now 
+# so that we can optimize our memory for later (removing raw pubmed_data soon)
 gen_pop_prc_counts <- pubmed_data %>% 
   distinct(fk_pmid, year, abstract) %>% 
   group_by(year) %>% 
   count(year) %>% 
   ungroup() %>% 
   rename(total = n) 
+
+# pulls in the preprocessing dictionary 
+preprocessing_terms <- read_csv("diversity_project - preprocessing.csv") %>%
+  select(original_string, new_string) %>% tibble::deframe()
+
+# animal exclusion clause
+animal_exclusion_clause <- read_csv("diversity_project - animals.csv")
+animal_exclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(animal_exclusion_clause$animals), "zqx)\\b"), collapse = "|")
+
+# convert text to lowercase 
+pubmed_data <- pubmed_data %>% mutate(abstract = tolower(abstract))
+
+# replaces all the hyphenated and compound words 
+# helps to reduce false positives (e.g. double_blind)
+pubmed_data$abstract <- pubmed_data$abstract %>% 
+  str_replace_all(preprocessing_terms)
+
+# remove abstracts with animals to reduce false positive animal studies 
+pubmed_data <- pubmed_data %>% 
+  dt_mutate(human_study = ifelse(test = str_detect(string = abstract, 
+            pattern = "\\b(human|humans|person|persons|people)\\b"), yes = 1, no = 0)) %>% 
+  dt_mutate(animal_study = ifelse(test = str_detect(string = abstract, 
+            pattern = animal_exclusion_clause), yes = 1, no = 0)) %>% 
+  filter(human_study == 1 | animal_study == 0)
+
+######################################################################################## unnesting phase 
 
 str_c("Starting to unnest tokens at: ", Sys.time())
 
@@ -82,42 +136,22 @@ pubmed_abstract_data <- pubmed_data %>%
   rename(id = fk_pmid) %>% 
   unnest_tokens(word, abstract) %>% 
   # run this since the dataset is so huge now 
-  anti_join(stop_words) 
+  anti_join(stop_words) %>% 
+  # filter down to only include diversity terms 
+  filter(word %in% divictionary_string)
 
 # clean up memory 
 rm(pubmed_data)
 
 str_c("Finished unnesting tokens at: ", Sys.time())
 
-######################################################################################## filter to diversity terms
-
-# lets draw all of our strings from the diversity_dictionary (divictionary)
-# setwd("~/Documents/Diversity/Data")
-setwd("~/git/diversity/data/dictionaries/")
-divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
-
-divictionary_string <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
-                         na.omit(divictionary$cultural), na.omit(divictionary$diversity),
-                         na.omit(divictionary$genetic), na.omit(divictionary$social_class),
-                         na.omit(divictionary$minority), na.omit(divictionary$population),
-                         na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
-                         na.omit(divictionary$sexuality))
-
-diversity_only <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
-                         na.omit(divictionary$cultural), na.omit(divictionary$diversity),
-                         na.omit(divictionary$social_class),
-                         na.omit(divictionary$minority), na.omit(divictionary$population),
-                         na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
-                         na.omit(divictionary$sexuality))
-
-pubmed_abstract_data <- pubmed_abstract_data %>% 
-  filter(word %in% divictionary_string)
+############################################################################### save all the diversity abstract ids 
 
 # this saves all of the unique ids that mention h1 diversity sets 
 # basically, this table of uniques ids can go back to postgresql 
 setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(pubmed_abstract_data %>% 
-            filter(word %in% diversity_only) %>% distinct(id), 
+          filter(word %in% diversity_only) %>% distinct(id), 
           str_c("h1_diversity_ids_",analysis_timeframe,".rds"))
 
 ################################################################################################## convert to sets 
@@ -136,14 +170,20 @@ general_pop_terms <- pubmed_abstract_data %>%
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$cultural), "zqx)\\b"), collapse = "|")), 
                           yes = "cultural", no = term)) %>% 
   dt_mutate(term = ifelse(test = str_detect(string = word, 
+                          pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$disability), "zqx)\\b"), collapse = "|")), 
+                          yes = "disability", no = term)) %>%
+  dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$diversity), "zqx)\\b"), collapse = "|")), 
                           yes = "diversity", no = term)) %>% 
   dt_mutate(term = ifelse(test = str_detect(string = word, 
-                          pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$genetic), "zqx)\\b"), collapse = "|")), 
-                          yes = "genetic", no = term)) %>% 
+                          pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$equity), "zqx)\\b"), collapse = "|")), 
+                          yes = "equity", no = term)) %>% 
   dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$social_class), "zqx)\\b"), collapse = "|")), 
                           yes = "socio-economic", no = term)) %>% 
+  dt_mutate(term = ifelse(test = str_detect(string = word, 
+                          pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$migration), "zqx)\\b"), collapse = "|")), 
+                          yes = "migration", no = term)) %>%
   dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$minority), "zqx)\\b"), collapse = "|")), 
                           yes = "minority", no = term)) %>%
@@ -164,8 +204,10 @@ general_pop_terms <- pubmed_abstract_data %>%
   dt_mutate(cultural_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(cultural)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(class_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(socio-economic)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(diversity_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(diversity)\\b"), yes = 1, no = 0)) %>%
-  dt_mutate(genetic_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(genetic)\\b"), yes = 1, no = 0)) %>%
+  dt_mutate(disability_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(disability)\\b"), yes = 1, no = 0)) %>%
+  dt_mutate(equity_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(equity)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(minority_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(minority)\\b"), yes = 1, no = 0)) %>%
+  dt_mutate(migration_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(migration)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(population_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(population)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(racial_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(race/ethnicity)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(sexgender_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(sex/gender)\\b"), yes = 1, no = 0)) %>%
@@ -180,16 +222,35 @@ str_c("Finished recoding tokens at: ", Sys.time())
 diversity_terms_matrix <- general_pop_terms %>% 
   group_by(id, year) %>% 
   summarise(across(aging_cnt:sexuality_cnt, sum)) %>% 
-  mutate(total_cnt = aging_cnt + ancestry_cnt + cultural_cnt + class_cnt + 
-           diversity_cnt + minority_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
-  select(id, year, total_cnt, everything()) %>%
-  arrange(-total_cnt) %>% ungroup() %>%
-  mutate(soc_diversity = if_else(diversity_cnt > 0 & total_cnt != diversity_cnt, diversity_cnt, 0)) 
+  # NOT including population 
+  mutate(total_cnt_v1 = aging_cnt + ancestry_cnt + cultural_cnt + class_cnt + disability_cnt + diversity_cnt + 
+           equity_cnt + minority_cnt + migration_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
+  # NOT including ancestry OR population
+  mutate(total_cnt_v2 = aging_cnt + cultural_cnt + class_cnt + disability_cnt + diversity_cnt + 
+           equity_cnt + minority_cnt + migration_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
+  # NOT including ancestry OR equity OR population
+  mutate(total_cnt_v3 = aging_cnt + cultural_cnt + class_cnt + disability_cnt + diversity_cnt + 
+           minority_cnt + migration_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
+  select(id, year, total_cnt_v1, total_cnt_v2, total_cnt_v3, everything()) %>%
+  arrange(-total_cnt_v1) %>% ungroup() %>%
+  mutate(soc_diversity_v1 = if_else(diversity_cnt > 0 & total_cnt_v1 != diversity_cnt, diversity_cnt, 0),
+         soc_diversity_v2 = if_else(diversity_cnt > 0 & total_cnt_v2 != diversity_cnt, diversity_cnt, 0),
+         soc_diversity_v3 = if_else(diversity_cnt > 0 & total_cnt_v3 != diversity_cnt, diversity_cnt, 0)) 
 
 general_pop_terms <- diversity_terms_matrix %>% 
-  select(id, soc_diversity) %>% 
+  select(id, soc_diversity_v1, soc_diversity_v2, soc_diversity_v3) %>% 
   left_join(general_pop_terms, by = "id") %>% 
-  select(-soc_diversity, soc_diversity)
+  select(-soc_diversity_v1, soc_diversity_v1, -soc_diversity_v2, soc_diversity_v2, -soc_diversity_v3, soc_diversity_v3)
+
+## tmp - this is to output all the TEST CSVs 
+
+#diversity_terms_matrix %>% filter(soc_diversity_v1 != soc_diversity_v2)
+chk <- general_pop_terms %>% filter(disability_cnt == 1)
+chk_abstracts <- pubmed_data %>% 
+  rename(id = fk_pmid) %>% 
+  inner_join(chk %>% select(id, word), by = "id") %>% 
+  distinct(id, year, word, abstract)
+write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/disability_checks.csv")
 
 ############################################################################################## get full counts 
 
@@ -200,8 +261,9 @@ h1_set_counts_full <- general_pop_terms %>%
   group_by(term) %>% 
   count(sort = TRUE) %>% 
   mutate(term = str_replace(term, "diversity", "diversity (all)")) 
+
 h1_set_counts_full <- general_pop_terms %>% 
-  filter(soc_diversity == 1 & term == "diversity") %>% 
+  filter(soc_diversity_v1 == 1 & term == "diversity") %>% 
   group_by(term) %>% 
   count(sort = TRUE) %>% 
   mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
@@ -213,32 +275,53 @@ h1_subset_counts_full <- general_pop_terms %>%
   group_by(word, term) %>% 
   count(sort = TRUE) %>% 
   mutate(term = str_replace(term, "diversity", "diversity (all)")) 
+
 h1_subset_counts_full <- general_pop_terms %>% 
-  filter(soc_diversity == 1 & term == "diversity") %>% 
+  filter(soc_diversity_v1 == 1 & term == "diversity") %>% 
   group_by(word, term) %>% 
   count(sort = TRUE) %>% 
   mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
   bind_rows(h1_subset_counts_full) %>% 
   arrange(-n)
 
-# counts of all terms by year 
+# counts of all terms by year                              I updated this subsection for the tests across three soc_div types
 h1_set_counts_trends <- general_pop_terms %>% 
   group_by(term, year) %>% 
   count(sort = TRUE) %>% 
   mutate(term = str_replace(term, "diversity", "diversity (all)")) 
+
 h1_set_counts_trends <- general_pop_terms %>% 
-  filter(soc_diversity == 1 & term == "diversity") %>% 
+  filter(soc_diversity_v1 == 1 & term == "diversity") %>% 
   group_by(term, year) %>% 
   count(sort = TRUE) %>% 
-  mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
+  mutate(term = str_replace(term, "diversity", "diversity (v1)")) %>% 
   bind_rows(h1_set_counts_trends) %>% 
   arrange(-n)
+
+h1_set_counts_trends <- general_pop_terms %>% 
+  filter(soc_diversity_v2 == 1 & term == "diversity") %>% 
+  group_by(term, year) %>% 
+  count(sort = TRUE) %>% 
+  mutate(term = str_replace(term, "diversity", "diversity (v2)")) %>% 
+  bind_rows(h1_set_counts_trends) %>% 
+  arrange(-n)
+
+h1_set_counts_trends <- general_pop_terms %>% 
+  filter(soc_diversity_v3 == 1 & term == "diversity") %>% 
+  group_by(term, year) %>% 
+  count(sort = TRUE) %>% 
+  mutate(term = str_replace(term, "diversity", "diversity (v3)")) %>% 
+  bind_rows(h1_set_counts_trends) %>% 
+  arrange(-n)
+
+chk_disability <- h1_subset_counts_trends %>% filter(term == "disability")
 
 # counts of term subsets by year
 h1_subset_counts_trends <- general_pop_terms %>% 
   group_by(word, term, year) %>% 
   count(sort = TRUE) %>% 
   mutate(term = str_replace(term, "diversity", "diversity (all)")) 
+
 h1_subset_counts_trends <- general_pop_terms %>% 
   filter(soc_diversity == 1 & term == "diversity") %>% 
   group_by(word, term, year) %>% 
