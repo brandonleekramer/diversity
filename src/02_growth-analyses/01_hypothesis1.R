@@ -41,7 +41,6 @@ library("RPostgreSQL")
 library("data.table")
 library("maditr")
 library("purrr")
-data(stop_words)
 
 ######################################################################################## load diversity dictionaries
 
@@ -65,6 +64,9 @@ diversity_only <- c(na.omit(divictionary$cultural), na.omit(divictionary$disabil
                     na.omit(divictionary$migration), na.omit(divictionary$minority), 
                     na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
                     na.omit(divictionary$sexuality), na.omit(divictionary$social_class))
+
+data(stop_words)
+stop_words <- stop_words %>% filter(!word %in% divictionary_string)
 
 ################################################################################################# data ingestion/cleaning 
 
@@ -236,12 +238,12 @@ general_pop_terms <- diversity_terms_matrix %>%
   select(-soc_diversity, soc_diversity)
 
 ## tmp - this is to output all the TEST CSVs 
-chk <- general_pop_terms %>% filter(lifecourse_cnt == 1)
+chk <- general_pop_terms %>% filter(sexgender_cnt == 1)
 chk_abstracts <- pubmed_data %>% 
   rename(id = fk_pmid) %>% 
   inner_join(chk %>% select(id, word), by = "id") %>% 
   distinct(id, year, word, abstract)
-write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/lifecourse_checks.csv")
+write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/sexgender_checks.csv")
 #write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/subset_counts.csv")
 
 ############################################################################################## get full counts 
