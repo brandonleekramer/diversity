@@ -50,21 +50,21 @@ data(stop_words)
 setwd("~/git/diversity/data/dictionaries/")
 divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
 
-divictionary_string <- c(na.omit(divictionary$aging), na.omit(divictionary$ancestry),
-                         na.omit(divictionary$social_class), na.omit(divictionary$cultural), 
+divictionary_string <- c(na.omit(divictionary$ancestry), na.omit(divictionary$cultural), 
                          na.omit(divictionary$disability), na.omit(divictionary$diversity), 
-                         na.omit(divictionary$equity), na.omit(divictionary$migration),
+                         na.omit(divictionary$equity), na.omit(divictionary$lifecourse), 
+                         na.omit(divictionary$migration),
                          na.omit(divictionary$minority), na.omit(divictionary$population),
                          na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
-                         na.omit(divictionary$sexuality))
+                         na.omit(divictionary$sexuality), na.omit(divictionary$social_class))
 
 # this removes the ancestry and population terms for when we output abstract ids 
-diversity_only <- c(na.omit(divictionary$aging), na.omit(divictionary$social_class), 
-                    na.omit(divictionary$cultural), na.omit(divictionary$disability), 
+diversity_only <- c(na.omit(divictionary$cultural), na.omit(divictionary$disability), 
                     na.omit(divictionary$diversity), na.omit(divictionary$equity), 
+                    na.omit(divictionary$lifecourse),
                     na.omit(divictionary$migration), na.omit(divictionary$minority), 
                     na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
-                    na.omit(divictionary$sexuality))
+                    na.omit(divictionary$sexuality), na.omit(divictionary$social_class))
 
 ################################################################################################# data ingestion/cleaning 
 
@@ -162,11 +162,8 @@ str_c("Started recoding tokens at: ", Sys.time())
 general_pop_terms <- pubmed_abstract_data %>% 
   as.data.table() %>%
   dt_mutate(term = ifelse(test = str_detect(string = word, 
-                          pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$aging), "zqx)\\b"), collapse = "|")), 
-                          yes = "aging", no = word)) %>% 
-  dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$ancestry), "zqx)\\b"), collapse = "|")), 
-                          yes = "ancestry", no = term)) %>% 
+                          yes = "ancestry", no = word)) %>% 
   dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$cultural), "zqx)\\b"), collapse = "|")), 
                           yes = "cultural", no = term)) %>% 
@@ -181,7 +178,10 @@ general_pop_terms <- pubmed_abstract_data %>%
                           yes = "equity", no = term)) %>% 
   dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$social_class), "zqx)\\b"), collapse = "|")), 
-                          yes = "socio-economic", no = term)) %>% 
+                          yes = "socioeconomic", no = term)) %>% 
+  dt_mutate(term = ifelse(test = str_detect(string = word, 
+                          pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$lifecourse), "zqx)\\b"), collapse = "|")), 
+                          yes = "lifecourse", no = term)) %>% 
   dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$migration), "zqx)\\b"), collapse = "|")), 
                           yes = "migration", no = term)) %>%
@@ -200,13 +200,13 @@ general_pop_terms <- pubmed_abstract_data %>%
   dt_mutate(term = ifelse(test = str_detect(string = word, 
                           pattern = paste(c("\\b(?i)(zqx", na.omit(divictionary$sexuality), "zqx)\\b"), collapse = "|")), 
                           yes = "sexuality", no = term)) %>% 
-  dt_mutate(aging_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(aging)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(ancestry_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(ancestry)\\b"), yes = 1, no = 0)) %>% 
   dt_mutate(cultural_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(cultural)\\b"), yes = 1, no = 0)) %>%
-  dt_mutate(class_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(socio-economic)\\b"), yes = 1, no = 0)) %>%
+  dt_mutate(class_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(socioeconomic)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(diversity_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(diversity)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(disability_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(disability)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(equity_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(equity)\\b"), yes = 1, no = 0)) %>%
+  dt_mutate(lifecourse_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(lifecourse)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(minority_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(minority)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(migration_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(migration)\\b"), yes = 1, no = 0)) %>%
   dt_mutate(population_cnt = ifelse(test = str_detect(string = term, pattern = "\\b(population)\\b"), yes = 1, no = 0)) %>%
@@ -222,10 +222,10 @@ str_c("Finished recoding tokens at: ", Sys.time())
 # basically, i mirror the diversity_cnt into soc_diversity so that we can group_by and count next 
 diversity_terms_matrix <- general_pop_terms %>% 
   group_by(id, year) %>% 
-  summarise(across(aging_cnt:sexuality_cnt, sum)) %>% 
+  summarise(across(ancestry_cnt:sexuality_cnt, sum)) %>% 
   # NOT including ancestry OR population
-  mutate(total_cnt = aging_cnt + cultural_cnt + class_cnt + disability_cnt + diversity_cnt + 
-           equity_cnt + minority_cnt + migration_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
+  mutate(total_cnt = cultural_cnt + class_cnt + disability_cnt + diversity_cnt + equity_cnt + 
+         lifecourse_cnt + minority_cnt + migration_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
   select(id, year, total_cnt, everything()) %>%
   arrange(-total_cnt) %>% ungroup() %>%
   mutate(soc_diversity = if_else(diversity_cnt > 0 & total_cnt != diversity_cnt, diversity_cnt, 0)) 
@@ -236,12 +236,12 @@ general_pop_terms <- diversity_terms_matrix %>%
   select(-soc_diversity, soc_diversity)
 
 ## tmp - this is to output all the TEST CSVs 
-chk <- general_pop_terms %>% filter(minority_cnt == 1)
+chk <- general_pop_terms %>% filter(lifecourse_cnt == 1)
 chk_abstracts <- pubmed_data %>% 
   rename(id = fk_pmid) %>% 
   inner_join(chk %>% select(id, word), by = "id") %>% 
   distinct(id, year, word, abstract)
-write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/minority_checks.csv")
+write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/lifecourse_checks.csv")
 #write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/subset_counts.csv")
 
 ############################################################################################## get full counts 
@@ -286,7 +286,7 @@ h1_set_counts_trends <- general_pop_terms %>%
   filter(soc_diversity == 1 & term == "diversity") %>% 
   group_by(term, year) %>% 
   count(sort = TRUE) %>% 
-  mutate(term = str_replace(term, "diversity", "diversity (v1)")) %>% 
+  mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
   bind_rows(h1_set_counts_trends) %>% 
   arrange(-n)
 
@@ -314,12 +314,6 @@ write_rds(diversity_terms_matrix %>% rename(fk_pmid = id), str_c("h1_diversity_t
 ############################################################################################# convert to percentages
 
 # articles with term mentioned each year 
-gen_pop_prc_counts <- general_pop_terms %>% 
-  filter(aging_cnt == 1) %>% # aging
-  group_by(year) %>% 
-  summarise(cnt_aging = n_distinct(id)) %>%  
-  right_join(gen_pop_prc_counts, by = "year") %>% 
-  mutate(prc_aging = round(cnt_aging / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% 
   filter(ancestry_cnt == 1) %>% # ancestry
   group_by(year) %>% 
@@ -356,6 +350,12 @@ gen_pop_prc_counts <- general_pop_terms %>%
   summarise(cnt_genetic = n_distinct(id)) %>% 
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_genetic = round(cnt_genetic / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% 
+  filter(lifecourse_cnt == 1) %>% # aging
+  group_by(year) %>% 
+  summarise(cnt_lifecourse = n_distinct(id)) %>%  
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_lifecourse = round(cnt_lifecourse / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% 
   filter(minority_cnt == 1) %>% # minority
   group_by(year) %>% 
