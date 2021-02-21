@@ -144,7 +144,7 @@ pubmed_abstract_data <- pubmed_data %>%
   filter(word %in% divictionary_string)
 
 # clean up memory 
-#rm(pubmed_data)
+rm(pubmed_data)
 
 str_c("Finished unnesting tokens at: ", Sys.time())
 
@@ -238,45 +238,17 @@ general_pop_terms <- diversity_terms_matrix %>%
   select(-soc_diversity, soc_diversity)
 
 ## tmp - this is to output all the TEST CSVs 
-chk <- general_pop_terms %>% filter(sexgender_cnt == 1)
-chk_abstracts <- pubmed_data %>% 
-  rename(id = fk_pmid) %>% 
-  inner_join(chk %>% select(id, word), by = "id") %>% 
-  distinct(id, year, word, abstract)
-write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/sexgender_checks.csv")
+#chk <- general_pop_terms %>% filter(lifecourse_cnt == 1)
+#chk_abstracts <- pubmed_data %>% 
+#  rename(id = fk_pmid) %>% 
+#  inner_join(chk %>% select(id, word), by = "id") %>% 
+#  distinct(id, year, word, abstract)
+#write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/lifecourse_checks.csv")
 #write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/subset_counts.csv")
 
 ############################################################################################## get full counts 
 
 str_c("Merging data at: ", Sys.time())
-
-# counts of term sets for all years 
-h1_set_counts_full <- general_pop_terms %>% 
-  group_by(term) %>% 
-  count(sort = TRUE) %>% 
-  mutate(term = str_replace(term, "diversity", "diversity (all)")) 
-
-h1_set_counts_full <- general_pop_terms %>% 
-  filter(soc_diversity == 1 & term == "diversity") %>% 
-  group_by(term) %>% 
-  count(sort = TRUE) %>% 
-  mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
-  bind_rows(h1_set_counts_full) %>% 
-  arrange(-n)
-
-# counts of term subsets for all years 
-h1_subset_counts_full <- general_pop_terms %>% 
-  group_by(word, term) %>% 
-  count(sort = TRUE) %>% 
-  mutate(term = str_replace(term, "diversity", "diversity (all)")) 
-
-h1_subset_counts_full <- general_pop_terms %>% 
-  filter(soc_diversity == 1 & term == "diversity") %>% 
-  group_by(word, term) %>% 
-  count(sort = TRUE) %>% 
-  mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
-  bind_rows(h1_subset_counts_full) %>% 
-  arrange(-n)
 
 # counts of all terms by year                              
 h1_set_counts_trends <- general_pop_terms %>% 
@@ -307,8 +279,6 @@ h1_subset_counts_trends <- general_pop_terms %>%
   arrange(-n)
 
 setwd("~/git/diversity/data/text_results/h1_results/")
-write_rds(h1_set_counts_full, str_c("h1_set_counts_full_",analysis_timeframe,".rds"))
-write_rds(h1_subset_counts_full, str_c("h1_subset_counts_full_",analysis_timeframe,".rds"))
 write_rds(h1_set_counts_trends, str_c("h1_set_counts_trends_",analysis_timeframe,".rds"))
 write_rds(h1_subset_counts_trends, str_c("h1_subset_counts_trends_",analysis_timeframe,".rds"))
 write_rds(diversity_terms_matrix %>% rename(fk_pmid = id), str_c("h1_diversity_terms_matrix_",analysis_timeframe,".rds"))
@@ -347,13 +317,7 @@ gen_pop_prc_counts <- general_pop_terms %>%
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_soc_diversity = round(cnt_soc_diversity / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% 
-  filter(genetic_cnt == 1) %>% #genetic
-  group_by(year) %>% 
-  summarise(cnt_genetic = n_distinct(id)) %>% 
-  right_join(gen_pop_prc_counts, by = "year") %>% 
-  mutate(prc_genetic = round(cnt_genetic / total * 100, digits = 2))
-gen_pop_prc_counts <- general_pop_terms %>% 
-  filter(lifecourse_cnt == 1) %>% # aging
+  filter(lifecourse_cnt == 1) %>% # lifecourse
   group_by(year) %>% 
   summarise(cnt_lifecourse = n_distinct(id)) %>%  
   right_join(gen_pop_prc_counts, by = "year") %>% 
@@ -432,24 +396,10 @@ h1_set_prc_trends <- list.files(pattern="h1_set_prc_trends_*") %>%
   map_df(~read_rds(.)) %>% 
   select(year, total, everything())
 
-# overall set counts 
-h1_set_counts_full <- list.files(pattern="h1_set_counts_full*") %>% 
-  map_df(~read_rds(.)) %>% 
-  group_by(term) %>% 
-  summarize(count = sum(n)) %>% 
-  arrange(-count)
-
 # overall set counts by year 
 h1_set_counts_trends <- list.files(pattern="h1_set_counts_trends*") %>% 
   map_df(~read_rds(.)) %>% 
   group_by(term, year) %>% 
-  summarize(count = sum(n)) %>% 
-  arrange(-count)
-
-# overall subset counts 
-h1_subset_counts_full <- list.files(pattern="h1_subset_counts_full*") %>% 
-  map_df(~read_rds(.)) %>% 
-  group_by(word, term) %>% 
   summarize(count = sum(n)) %>% 
   arrange(-count)
 
@@ -468,9 +418,7 @@ h1_all_diversity_ids <- list.files(pattern="h1_diversity_ids_*") %>%
 
 setwd("~/git/diversity/data/text_results/h1_results")
 write_rds(h1_set_prc_trends, "h1_all_set_prc_trends.rds")
-write_rds(h1_set_counts_full, "h1_all_set_counts_full.rds")
 write_rds(h1_set_counts_trends, "h1_all_set_counts_trends.rds")
-write_rds(h1_subset_counts_full, "h1_all_subset_counts_full.rds")
 write_rds(h1_subset_counts_trends, "h1_all_subset_counts_trends.rds")
 write_rds(h1_all_diversity_ids, "h1_all_diversity_ids.rds")
 
