@@ -16,16 +16,15 @@ library("data.table")
 library("maditr")
 library("purrr")
 library("tm")
-data(stop_words)
 
 ##################################################################################################### setting function 
 
-test_h3b <- function(analysis_timeframe){
+test_h2b <- function(analysis_timeframe){
   
   ################################################################################################# ingestion/cleaning 
   
   #rm(list = ls())
-  #analysis_timeframe <- "2018"
+  #analysis_timeframe <- "2000"
   
   str_c("Starting data pull at: ", Sys.time())
   
@@ -54,15 +53,19 @@ test_h3b <- function(analysis_timeframe){
   h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
   h2_dictionary <- read_csv("diversity_project - h2_dictionary.csv")
   h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv")
-  omb_black <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$black), "z3x)\\b"), collapse = "|")
-  omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$native_american), "z3x)\\b"), collapse = "|")
-  omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
-  omb_hispanic_latinx <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$hispanic_latinx), "z3x)\\b"), collapse = "|")
-  omb_asian <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$asian), "z3x)\\b"), collapse = "|")
-  omb_white <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$white), "z3x)\\b"), collapse = "|")
-  omb_racial <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$race), "z3x)\\b"), collapse = "|")
-  omb_ethnicity <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$ethnicity), "z3x)\\b"), collapse = "|")
-  omb_diversity <- paste(c("\\b(?i)(z3x",na.omit(h1_dictionary$diversity), "z3x)\\b"), collapse = "|")
+  omb_black <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$black), "z3x)\\b"), collapse = "|")
+  omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$native_american), "z3x)\\b"), collapse = "|")
+  omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
+  omb_hispanic_latinx <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$hispanic_latinx), "z3x)\\b"), collapse = "|")
+  omb_asian <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$asian), "z3x)\\b"), collapse = "|")
+  omb_white <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$white), "z3x)\\b"), collapse = "|")
+  omb_racial <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$race), "z3x)\\b"), collapse = "|")
+  omb_ethnicity <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$ethnicity), "z3x)\\b"), collapse = "|")
+  
+  h2_full_string <- c(na.omit(h2_dictionary$black), na.omit(h2_dictionary$native_american), 
+                           na.omit(h2_dictionary$pacific_islander), na.omit(h2_dictionary$asian), 
+                           na.omit(h2_dictionary$hispanic_latinx), na.omit(h2_dictionary$white), 
+                           na.omit(h2_dictionary$race), na.omit(h2_dictionary$ethnicity))
   
   # total articles each year 
   # banking this df now to optimize our memory for later 
@@ -75,81 +78,73 @@ test_h3b <- function(analysis_timeframe){
   
   str_c("Started bigrams at: ", Sys.time())
   
-  # recoding frequently occuring population-related bigrams 
-  us_pop_bigrams <- pubmed_data %>% 
-    unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
-    mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-                                                pattern = black_bigrams), yes = "african-american", no = bigram)) %>%
-    mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-                                                pattern = native_american_bigrams), yes = "native-american", no = rc_bigram)) %>%
-    mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-                                                pattern = pacific_islander_bigrams), yes = "pacific-islander", no = rc_bigram)) %>%
-    mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-                                                pattern = hispanic_american_bigrams), yes = "hispanic-american", no = rc_bigram)) %>%
-    mutate(rc_bigram = ifelse(test = str_detect(string = bigram,
-                                                pattern = asian_american_bigrams), yes = "asian-american", no = rc_bigram)) %>%
-    select(-bigram) %>% 
-    filter(rc_bigram == "african-american" | rc_bigram == "native-american" | rc_bigram == "hispanic-american" |
-             rc_bigram == "asian-american"   | rc_bigram == "pacific-islander") %>% 
-    count(rc_bigram, year, sort = TRUE) %>% 
-    rename(word = rc_bigram)
+  # pulls in the preprocessing dictionary 
+  preprocessing_terms <- read_csv("diversity_project - preprocessing.csv") %>%
+    select(original_string, new_string) %>% tibble::deframe()
+  
+  # convert text to lowercase 
+  pubmed_data <- pubmed_data %>% mutate(abstract = tolower(abstract))
+  
+  # replaces all the hyphenated and compound words 
+  # helps to reduce false positives (e.g. double_blind)
+  pubmed_data$abstract <- pubmed_data$abstract %>% 
+    str_replace_all(preprocessing_terms)
+  
+  # animal exclusion + human inclusion clauses
+  in_exclusions <- read_csv("diversity_project - in_exclusions.csv")
+  human_inclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(in_exclusions$humans), "zqx)\\b"), collapse = "|")
+  animal_exclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(in_exclusions$animals), "zqx)\\b"), collapse = "|")
+  
+  # remove abstracts with animals to reduce false positive animal studies 
+  pubmed_data <- pubmed_data %>% 
+    dt_mutate(human_study = ifelse(test = str_detect(string = abstract, 
+              pattern = human_inclusion_clause), yes = 1, no = 0)) %>% 
+    dt_mutate(animal_study = ifelse(test = str_detect(string = abstract, 
+              pattern = animal_exclusion_clause), yes = 1, no = 0)) %>% 
+    filter(human_study == 1 | animal_study == 0)
   
   # tokenizing the abstract data into words 
-  pubmed_data <- pubmed_data %>% 
+  pubmed_tokens <- pubmed_data %>% 
     unnest_tokens(word, abstract) %>% 
-    anti_join(stop_words)
+    # filter down to only include diversity terms 
+    filter(word %in% h2_full_string)
   
   str_c("Finished unnesting at: ", Sys.time())
   
-  # combining the hyphenated words to our full dataset 
-  us_pop_counts <- pubmed_data %>% 
-    filter(word %in% h2_dictionary$term) %>% 
-    group_by(year) %>% 
-    count(word, sort = TRUE) %>% 
-    ungroup() %>% 
-    select(word, year, n) %>% 
-    bind_rows(us_pop_bigrams) %>% 
-    arrange(-n)
-  
-  setwd("~/git/diversity/data/text_results/h3_results/")
-  write_rds(us_pop_counts, str_c("h3_omb_counts_",analysis_timeframe,".rds"))
-  
   # get counts of all the omb terms 
-  us_pop_counts_3d <- pubmed_data %>% 
+  us_pop_counts_3d <- pubmed_tokens %>% 
     mutate(term = ifelse(test = str_detect(string = word,
-                                           pattern = omb_black), yes = "black", no = word)) %>% 
+           pattern = omb_black), yes = "black", no = word)) %>% 
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_white), yes = "white", no = term)) %>% 
+           pattern = omb_white), yes = "white", no = term)) %>% 
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_asian), yes = "asian", no = term)) %>%
+           pattern = omb_asian), yes = "asian", no = term)) %>%
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
+           pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_racial), yes = "race", no = term)) %>% 
+           pattern = omb_racial), yes = "race", no = term)) %>% 
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
+           pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_native_american), yes = "native-american", no = term)) %>%
+           pattern = omb_native_american), yes = "native-american", no = term)) %>%
     mutate(term = ifelse(test = str_detect(string = word, 
-                                           pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>% 
+           pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>% 
     mutate(black = ifelse(test = str_detect(string = term, 
-                                            pattern = "\\b(black)\\b"), yes = 1, no = 0)) %>% 
+           pattern = "\\b(black)\\b"), yes = 1, no = 0)) %>% 
     mutate(white = ifelse(test = str_detect(string = term, 
-                                            pattern = "\\b(white)\\b"), yes = 1, no = 0)) %>%
+           pattern = "\\b(white)\\b"), yes = 1, no = 0)) %>%
     mutate(asian = ifelse(test = str_detect(string = term, 
-                                            pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
+           pattern = "\\b(asian)\\b"), yes = 1, no = 0)) %>%
     mutate(hispanic = ifelse(test = str_detect(string = term, 
-                                               pattern = "\\b(hispanic/latinx)\\b"), yes = 1, no = 0)) %>% 
+           pattern = "\\b(hispanic/latinx)\\b"), yes = 1, no = 0)) %>% 
     mutate(native_american = ifelse(test = str_detect(string = term, 
-                                                      pattern = "\\b(native-american)\\b"), yes = 1, no = 0)) %>% 
+           pattern = "\\b(native-american)\\b"), yes = 1, no = 0)) %>% 
     mutate(pacific_islander = ifelse(test = str_detect(string = term, 
-                                                       pattern = "\\b(pacific-islander)\\b"), yes = 1, no = 0)) %>% 
+           pattern = "\\b(pacific-islander)\\b"), yes = 1, no = 0)) %>% 
     mutate(racial = ifelse(test = str_detect(string = term, 
-                                             pattern = "\\b(race)\\b"), yes = 1, no = 0)) %>% 
+           pattern = "\\b(race)\\b"), yes = 1, no = 0)) %>% 
     mutate(ethnic = ifelse(test = str_detect(string = term, 
-                                             pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) %>% 
-    mutate(diversity = ifelse(test = str_detect(string = term, 
-                                                pattern = "\\b(diversity)\\b"), yes = 1, no = 0))
+           pattern = "\\b(ethnicity)\\b"), yes = 1, no = 0)) 
   
   # convert those to percentages 
   us_pop_prc_counts <- us_pop_counts_3d %>% 
@@ -200,15 +195,46 @@ test_h3b <- function(analysis_timeframe){
     summarise(cnt_ethnic = n_distinct(fk_pmid)) %>% 
     right_join(us_pop_prc_counts, by = "year") %>% 
     mutate(prc_ethnic = round(cnt_ethnic / total * 100, digits = 2))
-  us_pop_prc_counts <- us_pop_counts_3d %>% 
-    filter(diversity == 1) %>% 
-    group_by(year) %>% 
-    summarise(cnt_diversity = n_distinct(fk_pmid)) %>% 
-    right_join(us_pop_prc_counts, by = "year") %>% 
+  
+  # this gives you the more specific term counts 
+  annual_summary <- us_pop_counts_3d %>% 
+    select(word, term, year) %>% 
+    group_by(year, word, term) %>% 
+    count() %>% 
+    rename(count = n) %>% 
+    arrange(-count)
+  
+  # this gives you the social diversity counts from h1 
+  # (but you must run h1 before you can get this) 
+  social_diversity <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds") %>% 
+    filter(term == "diversity (social)" & year == analysis_timeframe) 
+  
+  # bind social_diversity to the annual_summary df 
+  annual_summary <- social_diversity %>% 
+    bind_rows(annual_summary) %>% 
+    arrange(-count)
+  
+  # then add social_diversity to counts and clean the cols 
+  us_pop_prc_counts$cnt_diversity <- sum(social_diversity$count)[1]
+  us_pop_prc_counts <- us_pop_prc_counts %>% 
+    select(year, total, starts_with("cnt_"), starts_with("prc_"))
+  
+  # turn that count into a percentage 
+  us_pop_prc_counts <- us_pop_prc_counts %>% 
     mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
   
-  setwd("~/git/diversity/data/text_results/h3_results/")
-  write_rds(us_pop_prc_counts, str_c("h3_omb_prcs_",analysis_timeframe,".rds"))
+  # sensitivity checks 
+  #chk_abstracts <- pubmed_data %>% 
+  #  inner_join(pubmed_tokens %>% 
+  #               select(fk_pmid, word), 
+  #             by = "fk_pmid") %>% 
+  #  distinct(fk_pmid, year, word, abstract)
+
+  setwd("~/git/diversity/data/text_results/h2_results/")
+  write_rds(annual_summary,  str_c("h2_omb_counts_",analysis_timeframe,".rds"))
+  write_rds(us_pop_counts_3d,  str_c("h2_omb_ids_",analysis_timeframe,".rds"))
+  write_rds(us_pop_prc_counts, str_c("h2_omb_prcs_",analysis_timeframe,".rds"))
+  #write_csv(chk_abstracts, str_c("h2_sensitivity_chks_",analysis_timeframe,".csv"))
   
   str_c("Finished all processes for ",analysis_timeframe, " at: ", Sys.time())
   
@@ -224,16 +250,23 @@ str_c("Finished all processes for all years at: ", Sys.time())
 
 ####################################################################################### aggregate all years
 
-setwd("~/git/diversity/data/text_results/h3_results/")
+setwd("~/git/diversity/data/text_results/h2_results/")
+
+# get all the ids from the abstracts that mention omb terms 
+h2_omb_ids <- list.files(pattern="h2_omb_ids_*") %>% 
+  map_df(~read_rds(.)) 
 
 # percentages for all sets 
-h3_omb_counts <- list.files(pattern="h3_omb_counts_*") %>% 
+h2_omb_prcs <- list.files(pattern="h2_omb_prcs_*") %>% 
+  map_df(~read_rds(.)) 
+
+# percentages for all sets 
+h2_omb_counts <- list.files(pattern="h2_omb_counts_*") %>% 
   map_df(~read_rds(.)) 
 
 # overall set counts 
-h3_omb_prcs <- list.files(pattern="h3_omb_prcs_*") %>% 
-  map_df(~read_rds(.)) 
 
-setwd("~/git/diversity/data/text_results/h3_results/")
-write_rds(h3_omb_counts, "h3_all_omb_counts.rds")
-write_rds(h3_omb_prcs, "h3_all_omb_prcs.rds")
+setwd("~/git/diversity/data/text_results/h2_results/")
+write_rds(h2_omb_ids, "h2_all_omb_ids.rds")
+write_rds(h2_omb_prcs, "h2_all_omb_prcs.rds")
+write_rds(h2_omb_counts, "h2_all_omb_counts.rds")

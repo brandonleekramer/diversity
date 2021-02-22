@@ -13,7 +13,6 @@ library("tidytext")
 library("plotly")
 library("DT")
 
-h1_all_set_counts_full <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_full.rds")
 h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
 general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
 divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
@@ -40,12 +39,12 @@ figure_1A <- general_pop_terms %>%
          term = str_replace(term, "sexgender", "sex/gender"),
          term = str_replace(term, "racial", "race/ethnicity"),
          term = str_replace(term, "\\b(?i)(diversity)\\b", "diversity (all)"),
-         term = str_replace(term, "class", "socio-economic"),
+         term = str_replace(term, "class", "socioeconomic"),
          term = str_replace(term, "soc_diversity", "diversity (social)")) %>% 
   # graphing terms over time 
   filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
   ggplot() + 
-  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
   theme_minimal() +
   labs(title = "        Figure 1A. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
@@ -56,13 +55,13 @@ figure_1A <- general_pop_terms %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("aging", "cultural","diversity (all)","diversity (social)", 
-                              "minority","race/ethnicity","sex/gender", "sexuality","socio-economic"),
-                     values=c("#E86F00", "#61B329", "#f2be00", "#9a009a", "#000000",
-                              # orange   # l.green  # mustard  # purple   # d.green
-                              "#3B9AB2", "#CC0000", "#ff8396", "#005BB7" )) + 
-                              # l. blue   # red     # pinkish  # dark blue
-                              #"#000000", # black | #"#d23ccc", # pink | # 1b7524 dark green
+  scale_color_manual(labels=c("cultural","diversity (all)","diversity (social)", "lifecourse",
+                              "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396", "#f2be00", "#9a009a","#CC0000", "#000000", 
+                               # l.green  # mustard  # purple  # d.green  # orange
+                              "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
+                              # l. blue   # red     # pinkish  # dark blue = 005BB7
+                              #000000, black | #d23ccc, pink | #1b7524, dark green 
   #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
@@ -76,37 +75,36 @@ To normalize for the growth of overall publications, we look at change in the pr
 
 ```{r figure 1b, echo=FALSE}
 # graphing terms over time 
+ggplotly(
 figure_1B <- general_pop_terms %>% 
   select(-starts_with("cnt_")) %>% 
   ggplot() + 
-  geom_line(aes(y = prc_aging, x = year, colour = "aging"), size = 1.3, stat="identity") +
-  #geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_class, x = year, colour = "socio-economic"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1.3, stat="identity", linetype = "solid") +
-  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity", linetype = "solid") +
-  #geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1.3, stat="identity") +
-  #geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_class, x = year, colour = "socioeconomic"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_lifecourse, x = year, colour = "lifecourse"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1, stat="identity") +
   labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Abstracts") +
   theme(axis.title.x = element_blank(), 
         legend.position = "none",
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("aging", "cultural","diversity (all)","diversity (social)", 
-                              "minority","race/ethnicity","sex/gender", "sexuality","socio-economic"),
-                     values=c("#E86F00", "#61B329", "#f2be00", "#9a009a", "#000000",
-                              # orange   # l.green  # mustard  # purple   # d.green
-                              "#3B9AB2", "#CC0000", "#ff8396", "#005BB7" )) + 
-                              # l. blue   # red     # pinkish  # dark blue
-                              #"#000000", # black | #"#d23ccc", # pink | # 1b7524 dark green
+  scale_color_manual(labels=c("cultural","diversity (all)","diversity (social)", "lifecourse",
+                              "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396", "#f2be00", "#9a009a","#CC0000", "#000000", 
+                               # l.green  # mustard  # purple  # d.green  # orange
+                              "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
+                              # l. blue   # red     # pinkish  # dark blue = 005BB7
+                              #000000, black | #d23ccc, pink | #1b7524, dark green 
   scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) 
+) %>% layout(legend = list(orientation = "h", x = 0.4, y = -0.2))
 ```
 
 While the raw totals suggested that diversity-related terms are rising, the proportions outlined in Figure 1B suggest that the sets of diversity-related terms has changed relatively little over time. For example, the terms associated with aging, ancestry, minority, sex/gender, sexualities, social class, and race/gender have stayed relatively stable over time. Perhaps the most interesting trend is the sex/gender line, which rises from 8% to 12% of articles from 1990 to 1996 before returning to around ~8% in 2005. In contrast, the terms associated with population, genetic, class, and diversity have all steadily increased from their baseline in 1990. 

@@ -11,6 +11,6 @@ module purge
 ml gcc/7.1.0 openmpi/3.1.4 R/4.0.0
 
 Rscript 01_hypothesis1.R
-Rscript 02_hypothesis2.R
-Rscript 03_hypothesis3a.R
-Rscript 03_hypothesis3b.R
+Rscript 02_hypothesis2a.R
+Rscript 02_hypothesis2b.R
+Rscript 03_hypothesis3.R

@@ -1,11 +1,13 @@
 ---
-title: "Hypothesis 3"
-description: "We hypothesize that (a) US-based researchers are most likely to use population terms and (b) that US-specific racial and ethnic categories have grown in use in biomedical and diversity abstracts over the past three decadess."
+title: "Hypothesis 2"
+description: "(a) The use of population terminology has increased in biomedical abstracts since 1990 and (b) The use of terms like genetic ancestry as well as national and continental terms have outpaced racial and ethnic terms in biomedical literature."
 output: html_document
-weight: 3
+weight: 2
 ---
 
-To test Hypothesis 3, we evaluated the geographical basis of population terminology use and variation in US-specific racial and ethnic categories over time. First, we extracted and parsed all of the address information of authors in our diversity corpus, recoding these data into ISO Alpha-2 country codes. We then examined how often all population terms (i.e. the dictionary of 8,200+ terms) were used from researchers in each country across both the biomedical and diversity samples. 
+While our first set of analyses established that "diversity" is increasing modestly in the biomedical literature, we also wanted to account for how terminology related to population testing has changed over time. [Fujimura and Rajagopalan's (2011)](https://journals.sagepub.com/doi/abs/10.1177/0306312710379170) have suggested that researchers now use biogeographic and genetic ancestry terms more often than race and ethnicity in their studies. Relatedly, [Panofsky and Bliss (2017)](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=ONTaswwjG9kAAAAA:zyJZCoDHuqmsuTVVUncKX8WqRWSDrhU_adG-ZzBawFV_mwVI6JgXNoLfdo0EAfNMuDmePVo8DteOJg) have found that racial and ethnic terms (including those within the US Census and OMB Directive 15 labeling schema) have been replaced by more general biogeographic terms such continental, national, and directional terminology. Below, we test how these sets of terms vary over time using computational text analysis. 
+
+To do this, we [created a dictionary](https://growthofdiversity.netlify.app/analyses/dictionaries) with various sets of terms corresponding to the existing literature. This dictionary includes a comprehensive (though not necessarily exhaustive) list of  around 2,000 continental, subcontinental, national, directional, ancestry, and OMB/US Census terms. Additionally, we compiled a list of roughly 6,500 unique terms of ethnic, tribal, and caste terms that we umbrella under the category of "subnational." In addition to an [interactive tree diagram](https://growthofdiversity.netlify.app/analyses/dictionaries) that visualizes these term sets, we have also included a searchable table to explore which terms are included in each category set. While future work will need to explore how these categories overlap and intertwine, the forthcoming analyses simply demonstrate how these term sets vary over time within the biomedical and diversity samples. 
 
 ```{r, include=FALSE}
 rm(list = ls())
@@ -14,198 +16,191 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr",
               "grid", "gridExtra", "reshape2", "extrafont", "data.table",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 
-us_pop_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_counts.rds")
-us_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_prcs.rds") 
-bycountry_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_prcs_by_country.rds")
-pop_terms_bycountry <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_terms_by_country.rds")
+h2_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_counts.rds")
+all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_prcs.rds")
 
 ```
 
-```{r figure 3a, echo=FALSE}
-figure_3A <- pop_terms_bycountry %>%   
-  drop_na(country) %>%
-  group_by(year) %>% 
-  count(term, country, sort = TRUE) %>% 
-  ungroup() %>% 
-  filter(term == "all population terms" ) %>% 
-  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
-           country == "Germany" | country == "Australia" 
-  #         | country == "France" | country == "Canada" | country == "Netherlands" 
-  #         | country == "Australia" | country == "Spain"   
-           ) %>%  
-  ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1.3, stat="identity") +
-  labs(title = "    Figure 3A. Total Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)") + 
-  theme_minimal() +
-  ylab("Term Count") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
-        legend.box = "vertical", 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
-```
-
-Figure 3A shows that US-based researchers are using population terms more than all other countries with those based in China, the UK, Australia, and Germany as the next closest countries. While the US totals steadily increase throughout the decade, it seems that all countries, especially those based in the US, have shared a sharp increase in the usage of population terms since until 2013. This spike, however, largely seems to disappear after controlling for the total number of abstracts available after this year. 
-
-```{r figure 3b, echo=FALSE}
-figure_3B <- bycountry_prc_counts %>% 
-  drop_na(country) %>% 
-  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
-           country == "Germany" | country == "Australia" 
-  #         | country == "France" | country == "Canada" | country == "Netherlands" 
-  #         | country == "Australia" | country == "Spain"   
-           ) %>% 
-  ggplot() + 
-  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.3, stat="identity") +
-  labs(title = "      Figure 3B. Proportional Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)",
-       color =  "Country") + 
-  theme_minimal() +
-  ylab("Proportion of Articles") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
-        legend.box = "vertical", 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
-```
-
-Figure 3B shows that US-based researchers use population terms in around 10-12% of all abstracts. On the other hand, no other country uses population terms in more than 5% of abstracts in a given year. While the use of population terms seems to be growing slighltly in most other countries, the proportion is declining slighltly in US-based work.
-
-Now that we know US-based researchers are most likely to use population terms (a result we fully expected), we want to further examine how OMB/US Census terms are used in our two corpora. To ensure that we are capturing US-centric terminology, we [compiled a dictionary](https://growthofdiversity.netlify.app/analyses/dictionaries) used to catch to the main OMB/US Census terms, including Asian, White, Black, Native American, Pacific Islander, Hispanic/Latinx as well as more general terms like race and ethnicity. Given that these terms can also refer to populations outside of the US, we created bigrams of US-centric terms to ensure they were specific to the American context (i.e. we constructed bigrams of all adjacent uses of African and American). 
-
-```{r figure 3c, message = FALSE, warning = FALSE, echo=FALSE}
-setwd("~/git/diversity/data/dictionaries/")
-h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
-h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv")
-omb_black <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$black), "z3x)\\b"), collapse = "|")
-omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$native_american), "z3x)\\b"), collapse = "|")
-omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
-omb_hispanic_latinx <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$hispanic_latinx), "z3x)\\b"), collapse = "|")
-omb_asian <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$asian), "z3x)\\b"), collapse = "|")
-omb_white <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$white), "z3x)\\b"), collapse = "|")
-omb_racial <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$race), "z3x)\\b"), collapse = "|")
-omb_ethnicity <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$ethnicity), "z3x)\\b"), collapse = "|")
-omb_diversity <- paste(c("\\b(?i)(z3x",na.omit(h1_dictionary$diversity), "z3x)\\b"), collapse = "|")
-
-# graphing us-specific terms over time using census categories 
-# https://www.census.gov/topics/population/race/about.html
-figure_3C <- us_pop_counts %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = omb_black), yes = "black", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_white), yes = "white", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_asian), yes = "asian", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                      pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_racial), yes = "race", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_native_american), yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_diversity), yes = "diversity", no = term)) %>%
-  filter(term == "black" | term == "white" | term == "asian" |
-         term == "hispanic/latinx" | term == "race" | term == "ethnicity" |
-         term == "native-american" | term == "pacific-islander" | term == "diversity" ) %>%  
-  group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
+```{r figure 2a, echo=FALSE}
+figure_2A <- h2_counts %>%   
+  filter(term != "ancestry") %>% 
   ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
   theme_minimal() +
-  labs(title = "     Figure 3C. Total Growth of OMB/US Census Terms \n in Biomedical Sample (1990-2020)",
+  labs(title = "     Figure 2A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
+  #scale_linetype_manual( values=linetype) +
   ylab("Term Count") +
   theme(axis.title.x = element_blank(), 
         #axis.title.y = element_blank(), 
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black",
-                              "diversity","ethnicity",
-                              "hispanic/latinx","native-american",
-                              "pacific-islander","race","white"),
-                     values=c("#005BB7", "#E86F00", 
-                              "#f2be00", "#3B9AB2", 
-                              "#9a009a", "#ff8396", 
-                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_color_manual(labels=c("all population terms", "continental", 
+                              "directional", "national", "omb/us-census", 
+                              "race/ethnicity", "subcontinental", "subnational"),
+                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
+                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
+  #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
-
-#                              "#E86F00", # orange 
-#                              "#61B329", # light green
-#                              "#f2be00", # mustard
-#                              "#800080", # purple
-#                              "#000000", # dark green 
-#                              "#005BB7", # dark blue 
-#                              "#CC0000", # red 
-#                              "#ff8396", # pinkish 
-#                              "#3B9AB2" # light blue 
 ```
 
-Figure 3C shows the OMB US Census terms are growing over time, but this growth is quite subdued compared to our previous results. For example, no term set exceeds more than 400 uses in a given year. Of these category sets, ethnicity grows the most followed by Asian, White, race, and Black. 
+In Figure 2A, the raw growth trends for the biomedical sample demonstrate that the use of population terminology has grown tremendously over time. In the top red line, we see that when all 8,200+ population terms are combined together into one set, the growth trends increase from just 166 in 1990 to more than 5,000 in 2017. As we can see in the orange and yellow lines, the majority of population terminology is a result of national and continental terms being used more often. While subnational, subcontinental, directional, racial/ethnic, and OMB/US Census terms do rise, these trends never top more than 650 instances in a given year. In fact, the terms in the ancestry set have never surpassed 50 instances per year throughout our sampling period. 
 
-
-```{r figure_3D, message = FALSE, warning=FALSE, echo=FALSE}
-# graphing terms over time 
-figure_3D <- us_pop_prc_counts %>% ggplot() + 
-  geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"),size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") +
-  labs(title = "    Figure 3D. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2020)",
+```{r figure_2B, echo=FALSE}
+figure_2B <- all_pop_prc_counts %>% 
+  filter(term != "ancestry") %>%
+  ggplot() + 
+  geom_line(aes(y = percentage, x = year, colour = term), size = 1.3, stat="identity") +
+  labs(title = "    Figure 2B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Articles") +
   theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
         legend.box = "vertical", 
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black",
-                              "diversity","ethnicity",
-                              "hispanic/latinx","native-american",
-                              "pacific-islander","race","white"),
-                     values=c("#005BB7", "#E86F00", 
-                              "#f2be00", "#3B9AB2", 
-                              "#9a009a", "#ff8396", 
-                              "#61B329",  "#CC0000", "#CC0000")) +
+  scale_color_manual(labels=c("all population terms", "continental", 
+                              "directional", "national", "omb/us-census", 
+                              "race/ethnicity", "subcontinental", "subnational"),
+                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
+                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
 
-Similarly, Figure 3D shows that the OMB/US Census terms vary little over time. While there are some brief spikes in usage, most totals never surpass 1% of abstracts in any given year. This plot further corroborates for the notion that researchers are moving away from the use of racial and ethnic terms to describe populations in their work.
+Looking at these trends as proportions, Figure 2B again demonstrates that the overall growth of all population terms (20.06% in 1990 to 30.88% in 2017) is mostly the result of growth in national and continental terms, which increase 9.52% (from 13.06% to 22.58%) and 5.84% (from 7.64% to 13.48%) respectively. On the other hand, the subcontinental, subnational, directional, ancestry, racial/ethnic, and OMB/US Census sets have seen almost no change over time. These results suggests that if the use of population terms is increasing over time, it again is doing so quite modestly and happens mostly through the use of national and continential terms. This is consistent with the Panofsky and Bliss (2017) who, in a much smaller sample of publications from *Nature Genetics*, also find that national and continential terms are becoming the vernacular of choice amoung leading biomedical scholars when conducting population difference testing.
 
 ### Main Takeaway 
 
-Overall, Figures 3A-3F support our hypothesis that *(a)* US-based researchers tend to use population terminology at disproportionately higher rates than scientists from other countries and *(b)* that terminology based on the US-Census and OMB Directive 15 have increased since 1990. However, when looking more closely at these trends, we also find that the use of US-specific terminology has marginally decreased since 2005 - once again suggesting that biomedical scientists seem to have abandoned the use of race and ethnicity in exchange for geographic terminology to enact population differences in their research.
+At the beginning of this section, we hypothesized that (a) the use of population terminology has increased in biomedical abstracts since 1990 and (b) that the use of terms like genetic ancestry as well as national and continental terms have outpaced racial and ethnic terms in biomedical literature. Our results suggest that population terminology has indeed increased over time within the biomedical sample. However, in the diversity sample, population terminology grew only through the early-1990s before platauing until the mid-2000's and declining thereafter. The majority of growth in these samples has been due to an increase in national and contintental terminology, as most other term sets have either stayed relatively consistent or decreased since the mid-2000's. Thus, while there is strong support for growth in national and continental terms, we find no evidence that the use of genetic ancestry terms have replaced population labels relating to race and ethnicity.
 
 ### Appendices 
 
-Here is a list of the terms that were used to classify the OMB/US Census terms in the final two sets of analyses.
+Here is a list of the 8,200+ terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. If you have suggestions about what to add and/or reclassify, please send an email to the authors using the email link in the top-right corner.
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/Documents/Diversity/Data")
-terms_table <- read_csv("diversity_project - h3_dictionary.csv") 
-terms_table <- terms_table %>% select(asian, black, hispanic_latinx, native_american,	pacific_islander,white)
-terms_table[is.na(terms_table)] <- ""
-DT::datatable(terms_table)
+all_pop_terms_table <- read_csv("diversity_project - h2_dictionary.csv")
+all_pop_terms_table <- all_pop_terms_table %>% select(-source, -date, -subregional)
+all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
+DT::datatable(all_pop_terms_table)
+```
+
+Here are the counts for top continental terms in the biomedical sample.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+datatable(pop_terms_bycats %>% 
+  filter(continental == 1) %>% 
+  select(word, continental) %>% 
+  count(word, sort = TRUE))
+```
+
+Here are the counts for top subcontinental terms in the biomedical sample.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+datatable(pop_terms_bycats %>% 
+  filter(subcontinental == 1) %>% 
+  select(word, subcontinental) %>% 
+  count(word, sort = TRUE))
+```
+
+Here are the counts for top national terms in the biomedical sample.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+datatable(pop_terms_bycats %>% 
+  filter(national == 1) %>% 
+  select(word, national) %>% 
+  count(word, sort = TRUE))
+```
+
+Here are the counts for top subnational terms in the biomedical sample.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+datatable(pop_terms_bycats %>% 
+  filter(subnational == 1) %>% 
+  select(word, subnational) %>% 
+  count(word, sort = TRUE))
+```
+
+Here are examples of how "Chinese" is used in context in the biomedical sample. 
+
+```{r chinese_check, warning=FALSE, message=FALSE, echo = FALSE}
+chinese_check <- pop_terms_bycats %>% 
+  filter(national == 1) %>% 
+  select(pubmed_id, national) %>% 
+  group_by(pubmed_id) %>% 
+  summarize(national = sum(national)) %>% 
+  inner_join(text_data, by = "pubmed_id") %>% 
+  select(abstract, national) %>% 
+  mutate(abstract = tolower(abstract)) %>% 
+  filter(grepl("chinese", abstract))
+
+chinese_check %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
+  count(bigram, sort = TRUE) %>% 
+  filter(grepl("chinese", bigram))
+
+```
+
+Here are examples of how "American" is used in context in the biomedical sample. 
+
+```{r american_check, warning=FALSE, message=FALSE, echo = FALSE}
+american_check <- pop_terms_bycats %>% 
+  filter(national == 1) %>% 
+  select(pubmed_id, national) %>% 
+  group_by(pubmed_id) %>% 
+  summarize(national = sum(national)) %>% 
+  inner_join(text_data, by = "pubmed_id") %>% 
+  select(abstract, national) %>% 
+  mutate(abstract = tolower(abstract)) %>% 
+  filter(grepl("american", abstract))
+
+datatable(american_check)
+
+american_check %>% 
+  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>% 
+  count(bigram, sort = TRUE) %>% 
+  filter(grepl("american", bigram))
+```
+
+Here is the correlation matrix for term sets in the biomedical sample.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+perc_wider <- all_pop_prc_counts %>% 
+  select(-n, -total) %>% 
+  pivot_wider(names_from = term, values_from = percentage) %>% 
+  select(-year)
+corr_matrix <- Hmisc::rcorr(as.matrix(perc_wider))
+datatable(data.frame(corr_matrix$r) %>% 
+  rownames_to_column(var = "terms") %>% 
+  rename(all_terms = all.population.terms,
+         omb_uscensus = omb.us.census,
+         race_ethnicity = race.ethnicity) %>% 
+  select(terms, all_terms, national, continental, subnational,  subcontinental,   
+         race_ethnicity,omb_uscensus, directional, ancestry) %>% 
+  mutate_at(vars(all_terms:ancestry), funs(round(., 3))) %>% 
+  arrange(-all_terms))
+```
+
+Here is the correlation matrix for term sets in the diversity sample.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+div_perc_wider <- div_prc_counts %>% 
+  select(-n, -total) %>% 
+  pivot_wider(names_from = term, values_from = percentage) %>% 
+  select(-year)
+div_corr_matrix <- Hmisc::rcorr(as.matrix(div_perc_wider))
+datatable(data.frame(div_corr_matrix$r) %>% 
+  rownames_to_column(var = "terms") %>% 
+  rename(all_terms = all.population.terms,
+         omb_uscensus = omb.us.census,
+         race_ethnicity = race.ethnicity) %>% 
+  select(terms, all_terms, subnational, omb_uscensus, race_ethnicity,
+         continental, national,subcontinental,directional,  ancestry) %>% 
+  mutate_at(vars(all_terms:ancestry), funs(round(., 3))) %>% 
+  arrange(-all_terms))
 ```
 
 

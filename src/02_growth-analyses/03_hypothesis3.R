@@ -16,7 +16,7 @@
 
 ######################################################################################################## testing h2 
 
-test_h2 <- function(analysis_timeframe){
+test_h3 <- function(analysis_timeframe){
 
 # this file produces 2 outputs 
 # 1. counts all of the terms in a nested dictionary of population terms from around the world 

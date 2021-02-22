@@ -65,9 +65,6 @@ diversity_only <- c(na.omit(divictionary$cultural), na.omit(divictionary$disabil
                     na.omit(divictionary$race_ethnicity), na.omit(divictionary$sex_gender),
                     na.omit(divictionary$sexuality), na.omit(divictionary$social_class))
 
-data(stop_words)
-stop_words <- stop_words %>% filter(!word %in% divictionary_string)
-
 ################################################################################################# data ingestion/cleaning 
 
 str_c("Starting data pull at: ", Sys.time())
@@ -138,13 +135,11 @@ pubmed_abstract_data <- pubmed_data %>%
   distinct(fk_pmid, year, abstract) %>% 
   rename(id = fk_pmid) %>% 
   unnest_tokens(word, abstract) %>% 
-  # run this since the dataset is so huge now 
-  anti_join(stop_words) %>% 
   # filter down to only include diversity terms 
   filter(word %in% divictionary_string)
 
 # clean up memory 
-rm(pubmed_data)
+#rm(pubmed_data)
 
 str_c("Finished unnesting tokens at: ", Sys.time())
 
@@ -226,8 +221,10 @@ diversity_terms_matrix <- general_pop_terms %>%
   group_by(id, year) %>% 
   summarise(across(ancestry_cnt:sexuality_cnt, sum)) %>% 
   # NOT including ancestry OR population
-  mutate(total_cnt = cultural_cnt + class_cnt + disability_cnt + diversity_cnt + equity_cnt + 
-         lifecourse_cnt + minority_cnt + migration_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
+  mutate(total_cnt = cultural_cnt + class_cnt + 
+         disability_cnt + diversity_cnt + equity_cnt + 
+         lifecourse_cnt + minority_cnt + migration_cnt + 
+         racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
   select(id, year, total_cnt, everything()) %>%
   arrange(-total_cnt) %>% ungroup() %>%
   mutate(soc_diversity = if_else(diversity_cnt > 0 & total_cnt != diversity_cnt, diversity_cnt, 0)) 
@@ -236,15 +233,6 @@ general_pop_terms <- diversity_terms_matrix %>%
   select(id, soc_diversity) %>% 
   left_join(general_pop_terms, by = "id") %>% 
   select(-soc_diversity, soc_diversity)
-
-## tmp - this is to output all the TEST CSVs 
-#chk <- general_pop_terms %>% filter(lifecourse_cnt == 1)
-#chk_abstracts <- pubmed_data %>% 
-#  rename(id = fk_pmid) %>% 
-#  inner_join(chk %>% select(id, word), by = "id") %>% 
-#  distinct(id, year, word, abstract)
-#write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/lifecourse_checks.csv")
-#write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/subset_counts.csv")
 
 ############################################################################################## get full counts 
 
@@ -277,6 +265,15 @@ h1_subset_counts_trends <- general_pop_terms %>%
   mutate(term = str_replace(term, "diversity", "diversity (social)")) %>% 
   bind_rows(h1_subset_counts_trends) %>% 
   arrange(-n)
+
+## tmp - this is to output all the TEST CSVs 
+#chk <- general_pop_terms %>% filter(lifecourse_cnt == 1)
+#chk_abstracts <- pubmed_data %>% 
+#  rename(id = fk_pmid) %>% 
+#  inner_join(chk %>% select(id, word), by = "id") %>% 
+#  distinct(id, year, word, abstract)
+#write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/lifecourse_checks.csv")
+#write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/subset_counts.csv")
 
 setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(h1_set_counts_trends, str_c("h1_set_counts_trends_",analysis_timeframe,".rds"))
@@ -382,6 +379,7 @@ str_c("Finished all processes for ",analysis_timeframe, " at: ", Sys.time())
 
 for (year in 1990:2020) {
   test_h1(year)
+  str_c("Just finished:", print(year))
 }
 
 str_c("Finished all processes for all years at: ", Sys.time())
@@ -412,7 +410,8 @@ h1_subset_counts_trends <- list.files(pattern="h1_subset_counts_trends*") %>%
 
 # overall subset counts by year 
 h1_all_diversity_ids <- list.files(pattern="h1_diversity_ids_*") %>% 
-  map_df(~read_rds(.)) 
+  map_df(~read_rds(.)) %>% 
+  distinct(id) %>% arrange(id)
 
 # need to do the matrix aggregation next 
 
