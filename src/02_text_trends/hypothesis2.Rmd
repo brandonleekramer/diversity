@@ -50,15 +50,8 @@ figure_3C <- h2_omb_counts %>%
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
 
-#                              "#E86F00", # orange 
-#                              "#61B329", # light green
-#                              "#f2be00", # mustard
-#                              "#800080", # purple
-#                              "#000000", # dark green 
-#                              "#005BB7", # dark blue 
-#                              "#CC0000", # red 
-#                              "#ff8396", # pinkish 
-#                              "#3B9AB2" # light blue 
+# "#E86F00", # orange  "#61B329", # light green  "#f2be00", # mustard  "#800080", # purple
+# "#000000", # dark green  "#005BB7", # dark blue   "#CC0000", # red "#ff8396", # pinkish "#3B9AB2" # light blue 
 ```
 
 Figure 3C shows the OMB US Census terms are growing over time, but this growth is quite subdued compared to our previous results. For example, no term set exceeds more than 400 uses in a given year. Of these category sets, ethnicity grows the most followed by Asian, White, race, and Black. 

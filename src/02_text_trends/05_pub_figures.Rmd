@@ -31,6 +31,8 @@ by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.articles_per_year")
 # disconnect from postgresql database 
 dbDisconnect(conn)
 
+sum(by_year$count)
+
 ggplot(data = by_year, aes(x = year, y = count)) + 
   geom_bar(stat="identity", position="dodge") +
   labs(title = "Supp. Figure 1. Number of Abstracts on PubMed/MEDLINE (1990-2020)") + 
@@ -49,6 +51,10 @@ ggplot(data = by_year, aes(x = year, y = count)) +
 #h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
 general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
 
+custom_variables <- c("prc_ancestry", "prc_cultural", "prc_diversity", 
+                      "prc_genetic", "prc_population", "prc_racial", "prc_sexgender", "prc_sexuality")
+custom_linetype <- c("solid", "solid",  "solid", "twodash", "dotted", "dashed")
+
 `%notin%` <- Negate(`%in%`)
 
 figure_1A <- general_pop_terms %>% 
@@ -65,13 +71,8 @@ figure_1A <- general_pop_terms %>%
   filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
   ggplot() + 
   geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
-  theme_minimal() +
-  labs(title = "        Figure 1A. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)",
-       color =  "Term") + 
-  #scale_linetype_manual( values=linetype) +
-  ylab("Term Count") +
+  theme_minimal() + labs(title = "        Figure 1A. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + ylab("Term Count") +
   theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
@@ -82,47 +83,15 @@ figure_1A <- general_pop_terms %>%
                               "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
                               # l. blue   # red     # pinkish  # dark blue = 005BB7
                               #000000, black | #d23ccc, pink | #1b7524, dark green  + 
-  #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
 
-figure_1A_log <- general_pop_terms %>% 
-  # recode terms 
-  select(-starts_with("prc_")) %>% 
-  pivot_longer(!year, names_to = "term", values_to = "n") %>%
-  mutate(term = str_replace(term, "cnt_", ""),
-         term = str_replace(term, "sexgender", "sex/gender"),
-         term = str_replace(term, "racial", "race/ethnicity"),
-         term = str_replace(term, "\\b(?i)(diversity)\\b", "diversity (all)"),
-         term = str_replace(term, "class", "socioeconomic"),
-         term = str_replace(term, "soc_diversity", "diversity (social)")) %>% 
-  # graphing terms over time 
-  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
-  ggplot() + 
-  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
-  theme_minimal() +
-  labs(title = "        Figure 1B. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)",
-       color =  "Term") + 
-  #scale_linetype_manual( values=linetype) +
+figure_1A_log <- figure_1A + 
   ylab("Term Count (Log Scale)") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("cultural","diversity (all)","diversity (social)", "lifecourse",
-                              "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396", "#f2be00", "#9a009a","#CC0000", "#000000", 
-                               # l.green  # mustard  # purple  # d.green  # orange
-                              "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
-                              # l. blue   # red     # pinkish  # dark blue = 005BB7
-                              #000000, black | #d23ccc, pink | #1b7524, dark green  + 
-  scale_y_log10() +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+  scale_y_log10() 
 
 # graphing terms over time 
-figure_1B <- general_pop_terms %>% 
+figure_1B_pre <- general_pop_terms %>% 
   select(-starts_with("cnt_")) %>% 
   ggplot() + 
   geom_line(aes(y = prc_lifecourse, x = year, colour = "lifecourse"), size = 1.3, stat="identity") +
@@ -138,11 +107,7 @@ figure_1B <- general_pop_terms %>%
   geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
   geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
   labs(title = "        Figure 1C. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
-  theme_minimal() +
-  ylab("Proportion of Abstracts") +
-  theme(axis.title.x = element_blank(), 
-        legend.position = "none",
-        plot.title = element_text(size=12, hjust = 0.5)) +
+  theme_minimal() + 
   scale_color_manual(labels=c("cultural","diversity (all)","diversity (social)", "lifecourse",
                               "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
                      values=c("#ff8396", "#f2be00", "#9a009a","#CC0000", "#000000", 
@@ -150,80 +115,27 @@ figure_1B <- general_pop_terms %>%
                               "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
                               # l. blue   # red     # pinkish  # dark blue = 005BB7
                               #000000, black | #d23ccc, pink | #1b7524, dark green  + 
-  #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) 
+
+figure_1B <- figure_1B_pre +
+  ylab("Proportion of Abstracts") +
+  theme(axis.title.x = element_blank(), 
+        legend.position = "none",
+        plot.title = element_text(size=12, hjust = 0.5)) 
 
 # graphing terms over time 
-figure_1B_log <- general_pop_terms %>% 
-  select(-starts_with("cnt_")) %>% 
-  ggplot() + 
-  geom_line(aes(y = prc_lifecourse, x = year, colour = "lifecourse"), size = 1.3, stat="identity") +
-  #geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_class, x = year, colour = "socio-economic"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1.3, stat="identity", linetype = "solid") +
-  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity", linetype = "solid") +
-  #geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1.3, stat="identity") +
-  #geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
-  labs(title = "        Figure 1D. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
-  theme_minimal() +
+figure_1B_log <- figure_1B + 
   ylab("Proportion of Abstracts (Log Scale)") +
   theme(axis.title.x = element_blank(), 
         legend.position = "none",
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("cultural","diversity (all)","diversity (social)", "lifecourse",
-                              "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396", "#f2be00", "#9a009a","#CC0000", "#000000", 
-                               # l.green  # mustard  # purple  # d.green  # orange
-                              "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
-                              # l. blue   # red     # pinkish  # dark blue = 005BB7
-                              #000000, black | #d23ccc, pink | #1b7524, dark green  + 
-  scale_y_log10() +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+  scale_y_log10() 
 
-custom_variables <- c("prc_ancestry", "prc_cultural", "prc_diversity", 
-                      "prc_genetic", "prc_population", "prc_racial", "prc_sexgender", "prc_sexuality")
-custom_linetype <- c("solid", "solid",  "solid", "twodash", "dotted", "dashed")
-
-
-
-legend <- general_pop_terms %>% 
-  select(-starts_with("cnt_")) %>% 
-  ggplot() + 
-  geom_line(aes(y = prc_lifecourse, x = year, colour = "aging"), size = 1.3, stat="identity") +
-  #geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_class, x = year, colour = "socio-economic"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1.3, stat="identity", linetype = "solid") +
-  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity", linetype = "solid") +
-  #geom_line(aes(y = prc_genetic, x = year, colour = "genetic"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1.3, stat="identity") +
-  #geom_line(aes(y = prc_population, x = year, colour = "population"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1.3, stat="identity") +
-  labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
-  theme_minimal() +
-  ylab("Proportion of Abstracts") +
+legend <- figure_1B_pre +
   theme(axis.title.x = element_blank(), 
         legend.position = "bottom",
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("cultural","diversity (all)","diversity (social)", "lifecourse",
-                              "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396", "#f2be00", "#9a009a","#CC0000", "#000000", 
-                               # l.green  # mustard  # purple  # d.green  # orange
-                              "#005BB7", "#E86F00", "#3B9AB2", "#61B329" )) + 
-                              # l. blue   # red     # pinkish  # dark blue = 005BB7
-                              #000000, black | #d23ccc, pink | #1b7524, dark green  + 
-  scale_y_log10() +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))
+        plot.title = element_text(size=12, hjust = 0.5))
 
 legend <- cowplot::get_legend(legend)
 
@@ -275,7 +187,7 @@ figure_3A <- h2_omb_counts %>%
   ggplot() + 
   geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
   theme_minimal() +
-  labs(title = "     Figure 2A. Total Growth of OMB/US Census Terms \n in Biomedical Sample (1990-2020)",
+  labs(title = "     Figure 2A. Total Growth of OMB/US Census Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   ylab("Term Count") +
   theme(axis.title.x = element_blank(), 
@@ -304,7 +216,7 @@ figure_3B_pre <- h2_omb_prcs %>%
   geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
   geom_line(aes(y = prc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity") +
-  labs(title = "    Figure 2B. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2020)",
+  labs(title = "    Figure 2B. Proportional Growth of OMB/US Census \n Terms in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Articles") +

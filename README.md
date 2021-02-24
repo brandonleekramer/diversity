@@ -3,7 +3,7 @@
 
 As of: 02-23-2021
 
-This repository provides the source code for the Kramer and Lee's "The Rise of Diversity and Population Terminology in Biomedical Research." After uploading the PubMed/MEDLINE database with `PubMedPortable.py`, we use `R`'s `tidytext` package to examine trends in the use of diversity in more than 3.1 million scientific abstracts from 1990-2020. Overall, our analyses demonstrate that various types of "diversity" and other population terminiology, including race and ethnicity, are rising over time. While we provide some prelimiary results and a full appendix on our [project website](https://growthofdiversity.netlify.app/), the source code, database, and outputs are detailed below. This project is still in progress, but is updated often. 
+This repository provides the source code for the Kramer and Lee's "The Rise of Diversity and Population Terminology in Biomedical Research." After uploading the PubMed/MEDLINE database with `PubMedPortable.py`, we use `R`'s `tidytext` package to examine trends in the use of diversity in more than 19 million scientific abstracts from 1990-2020. Overall, our analyses demonstrate that various types of "diversity" and other population terminiology, including race and ethnicity, are rising over time. While we provide some prelimiary results and a full appendix on our [project website](https://growthofdiversity.netlify.app/), the source code, database, and outputs are detailed below. This project is still in progress, but is updated often. 
 
 #### TODO  
 
