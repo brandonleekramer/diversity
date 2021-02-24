@@ -1,0 +1,6 @@
+black_bigrams <- "\\b(?i)(african american|african americans|afro american|afro americans|african-american|african-americans|afro-american|afro-americans)\\b"
+native_american_bigrams <- "\\b(?i)(native american|native americans|american indian|american indians|alaskan native|alaskan natives|alaska nativez|alaska natives|native-american|native-americans|american-indian|american-indians|alaskan-native|alaskan-natives|alaska-native|alaska-natives)\\b"
+pacific_islander_bigrams <- "\\b(?i)(pacific islander|pacific islanders|native hawaiian|native hawaiians|pacific-islander|pacific-islanders|native-hawaiian|native-hawaiians)\\b"
+hispanic_american_bigrams <- "\\b(?i)(hispanic-american|hispanic american|hispanic-americans|hispanic americans)\\b"
+asian_american_bigrams <- "\\b(?i)(asian-american|asian american)\\b"
+asian_american_bigrams <- "\\b(?i)(caucasian-american|caucasian american)\\b"

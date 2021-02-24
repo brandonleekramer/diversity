@@ -1,5 +1,5 @@
 ---
-title: "Hypothesis 3"
+title: "Hypothesis 2"
 description: "We hypothesize that (a) US-based researchers are most likely to use population terms and (b) that US-specific racial and ethnic categories have grown in use in biomedical and diversity abstracts over the past three decadess."
 output: html_document
 weight: 3

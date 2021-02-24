@@ -26,27 +26,21 @@ conn <- dbConnect(drv = PostgreSQL(),
                   password = Sys.getenv("db_pwd"))
 
 # query the users_gh data (table of all github users) 
-by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.annual_counts")
+by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.articles_per_year")
 
 # disconnect from postgresql database 
 dbDisconnect(conn)
 
 ggplot(data = by_year, aes(x = year, y = count)) + 
   geom_bar(stat="identity", position="dodge") +
-  labs(title = "Supp. Figure 1. Number of Publication Abstracts in Datasets (1990-2020)",
-       caption = "Data Source: ISI Web of Science") + 
+  labs(title = "Supp. Figure 1. Number of Abstracts on PubMed/MEDLINE (1990-2020)") + 
   theme(axis.title.x = element_blank(),
         plot.title = element_text(size=11, hjust = 0.2),
         legend.title = element_text(size = 10, hjust = 0.5),
         panel.background = element_rect(fill = "white")) +
   ylab("Number of Abstracts") +
-  #scale_fill_manual(values=c('black','darkgray')) +
-  scale_x_discrete(labels = c("1990" = "1990", "1991" = "", "1992" = "", "1993" = "", "1994" = "",
-                              "1996" = "", "1997" = "", "1998" = "", "1999" = "",
-                              "2001" = "", "2002" = "", "2003" = "", "2004" = "",
-                              "2006" = "", "2007" = "", "2008" = "", "2009" = "", "2010" = "2010",
-                              "2011" = "", "2012" = "", "2013" = "", "2014" = "",
-                              "2016" = "", "2017" = "", "2018" = "", "2019" = "", "2020" = "2020"))
+  scale_y_continuous(breaks = c(250000,500000,750000,1000000,1250000,1500000), 
+                     labels = c("250K", "500K", "750K", "1.0M", "1.25M", "1.5M"))
 ```
 
 ```{r figure 1ab, fig.height=8, fig.width=11.5, echo=FALSE}

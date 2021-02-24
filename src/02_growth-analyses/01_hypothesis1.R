@@ -273,7 +273,7 @@ h1_subset_counts_trends <- general_pop_terms %>%
 #  inner_join(chk %>% select(id, word), by = "id") %>% 
 #  distinct(id, year, word, abstract)
 #write_csv(chk_abstracts, "~/git/diversity/data/sensitivity_checks/lifecourse_checks.csv")
-#write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/subset_counts.csv")
+#write_csv(h1_subset_counts_trends, "~/git/diversity/data/sensitivity_checks/h1_term_counts.csv")
 
 setwd("~/git/diversity/data/text_results/h1_results/")
 write_rds(h1_set_counts_trends, str_c("h1_set_counts_trends_",analysis_timeframe,".rds"))

@@ -4,5 +4,6 @@
 .RData
 .Ruserdata
 .rds
-/data/
+/data/sensitivity_checks
+/data/text_results
 .Rproj.user

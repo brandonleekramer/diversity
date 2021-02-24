@@ -19,7 +19,7 @@ library("tm")
 
 ##################################################################################################### setting function 
 
-test_h2b <- function(analysis_timeframe){
+test_h2 <- function(analysis_timeframe){
   
   ################################################################################################# ingestion/cleaning 
   
@@ -48,7 +48,7 @@ test_h2b <- function(analysis_timeframe){
   str_c("Finished data pull at: ", Sys.time())
   
   # lets pull in the dictionaries 
-  source("~/git/diversity/data/dictionaries/omb_terms.R")
+  source("~/git/diversity/data/dictionaries/diversity_project - omb_terms.R")
   setwd("~/git/diversity/data/dictionaries/")
   h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
   h2_dictionary <- read_csv("diversity_project - h2_dictionary.csv")
@@ -222,18 +222,19 @@ test_h2b <- function(analysis_timeframe){
   # turn that count into a percentage 
   us_pop_prc_counts <- us_pop_prc_counts %>% 
     mutate(prc_diversity = round(cnt_diversity / total * 100, digits = 2))
-  
-  # sensitivity checks 
-  #chk_abstracts <- pubmed_data %>% 
-  #  inner_join(pubmed_tokens %>% 
-  #               select(fk_pmid, word), 
-  #             by = "fk_pmid") %>% 
-  #  distinct(fk_pmid, year, word, abstract)
 
   setwd("~/git/diversity/data/text_results/h2_results/")
   write_rds(annual_summary,  str_c("h2_omb_counts_",analysis_timeframe,".rds"))
   write_rds(us_pop_counts_3d,  str_c("h2_omb_ids_",analysis_timeframe,".rds"))
   write_rds(us_pop_prc_counts, str_c("h2_omb_prcs_",analysis_timeframe,".rds"))
+  
+  #sensitivity checks 
+  #chk_abstracts <- pubmed_data %>% 
+  #  inner_join(pubmed_tokens %>% 
+  #               select(fk_pmid, word), 
+  #             by = "fk_pmid") %>% 
+  #  distinct(fk_pmid, year, word, abstract)
+  #setwd("~/git/diversity/data/sensitivity_checks/")
   #write_csv(chk_abstracts, str_c("h2_sensitivity_chks_",analysis_timeframe,".csv"))
   
   str_c("Finished all processes for ",analysis_timeframe, " at: ", Sys.time())
@@ -243,7 +244,7 @@ test_h2b <- function(analysis_timeframe){
 ##################################################################################### for loop of all years 
 
 for (year in 1990:2020) {
-  test_h3b(year)
+  test_h2(year)
 }
 
 str_c("Finished all processes for all years at: ", Sys.time())
@@ -254,7 +255,11 @@ setwd("~/git/diversity/data/text_results/h2_results/")
 
 # get all the ids from the abstracts that mention omb terms 
 h2_omb_ids <- list.files(pattern="h2_omb_ids_*") %>% 
-  map_df(~read_rds(.)) 
+  map_df(~read_rds(.)) %>% 
+  select(fk_pmid, year, black:ethnic) %>% 
+  group_by(fk_pmid, year) %>% 
+  summarise(across(black:ethnic, sum)) %>% 
+  arrange(fk_pmid, year)
 
 # percentages for all sets 
 h2_omb_prcs <- list.files(pattern="h2_omb_prcs_*") %>% 

@@ -1,5 +1,5 @@
 ---
-title: "Hypothesis 3"
+title: "Hypothesis 2"
 description: "We hypothesize that (a) US-based researchers are most likely to use population terms and (b) that US-specific racial and ethnic categories have grown in use in biomedical and diversity abstracts over the past three decadess."
 output: html_document
 weight: 3
@@ -14,113 +14,24 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr",
               "grid", "gridExtra", "reshape2", "extrafont", "data.table",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 
-us_pop_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_counts.rds")
-us_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_omb_prcs.rds") 
-bycountry_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_prcs_by_country.rds")
-pop_terms_bycountry <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_pop_terms_by_country.rds")
+h2_omb_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_counts.rds") 
+h2_omb_prcs <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_prcs.rds") 
 
 ```
-
-```{r figure 3a, echo=FALSE}
-figure_3A <- pop_terms_bycountry %>%   
-  drop_na(country) %>%
-  group_by(year) %>% 
-  count(term, country, sort = TRUE) %>% 
-  ungroup() %>% 
-  filter(term == "all population terms" ) %>% 
-  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
-           country == "Germany" | country == "Australia" 
-  #         | country == "France" | country == "Canada" | country == "Netherlands" 
-  #         | country == "Australia" | country == "Spain"   
-           ) %>%  
-  ggplot() + geom_line(aes(y = n, x = year, colour = country), size = 1.3, stat="identity") +
-  labs(title = "    Figure 3A. Total Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)") + 
-  theme_minimal() +
-  ylab("Term Count") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
-        legend.box = "vertical", 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
-```
-
-Figure 3A shows that US-based researchers are using population terms more than all other countries with those based in China, the UK, Australia, and Germany as the next closest countries. While the US totals steadily increase throughout the decade, it seems that all countries, especially those based in the US, have shared a sharp increase in the usage of population terms since until 2013. This spike, however, largely seems to disappear after controlling for the total number of abstracts available after this year. 
-
-```{r figure 3b, echo=FALSE}
-figure_3B <- bycountry_prc_counts %>% 
-  drop_na(country) %>% 
-  filter(  country == "United States" | country == "China" | country == "United Kingdom" | 
-           country == "Germany" | country == "Australia" 
-  #         | country == "France" | country == "Canada" | country == "Netherlands" 
-  #         | country == "Australia" | country == "Spain"   
-           ) %>% 
-  ggplot() + 
-  geom_line(aes(y = prc_pop_terms, x = year, colour = country), size = 1.3, stat="identity") +
-  labs(title = "      Figure 3B. Proportional Growth of All Population Terms \n by Country in PubMed/MEDLINE Abstracts (1990-2020)",
-       color =  "Country") + 
-  theme_minimal() +
-  ylab("Proportion of Articles") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
-        legend.box = "vertical", 
-        legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(values=c("#61B329", "#E2B306", "#3B9AB2", "#E86F00", "#E21F00")) +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
-```
-
-Figure 3B shows that US-based researchers use population terms in around 10-12% of all abstracts. On the other hand, no other country uses population terms in more than 5% of abstracts in a given year. While the use of population terms seems to be growing slighltly in most other countries, the proportion is declining slighltly in US-based work.
 
 Now that we know US-based researchers are most likely to use population terms (a result we fully expected), we want to further examine how OMB/US Census terms are used in our two corpora. To ensure that we are capturing US-centric terminology, we [compiled a dictionary](https://growthofdiversity.netlify.app/analyses/dictionaries) used to catch to the main OMB/US Census terms, including Asian, White, Black, Native American, Pacific Islander, Hispanic/Latinx as well as more general terms like race and ethnicity. Given that these terms can also refer to populations outside of the US, we created bigrams of US-centric terms to ensure they were specific to the American context (i.e. we constructed bigrams of all adjacent uses of African and American). 
 
 ```{r figure 3c, message = FALSE, warning = FALSE, echo=FALSE}
-setwd("~/git/diversity/data/dictionaries/")
-h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
-h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv")
-omb_black <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$black), "z3x)\\b"), collapse = "|")
-omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$native_american), "z3x)\\b"), collapse = "|")
-omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
-omb_hispanic_latinx <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$hispanic_latinx), "z3x)\\b"), collapse = "|")
-omb_asian <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$asian), "z3x)\\b"), collapse = "|")
-omb_white <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$white), "z3x)\\b"), collapse = "|")
-omb_racial <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$race), "z3x)\\b"), collapse = "|")
-omb_ethnicity <- paste(c("\\b(?i)(z3x",na.omit(h3_dictionary$ethnicity), "z3x)\\b"), collapse = "|")
-omb_diversity <- paste(c("\\b(?i)(z3x",na.omit(h1_dictionary$diversity), "z3x)\\b"), collapse = "|")
 
 # graphing us-specific terms over time using census categories 
 # https://www.census.gov/topics/population/race/about.html
-figure_3C <- us_pop_counts %>% 
-  mutate(term = ifelse(test = str_detect(string = word,
-                       pattern = omb_black), yes = "black", no = word)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_white), yes = "white", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_asian), yes = "asian", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                      pattern = omb_hispanic_latinx), yes = "hispanic/latinx", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_racial), yes = "race", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_ethnicity), yes = "ethnicity", no = term)) %>% 
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_native_american), yes = "native-american", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_pacific_islander), yes = "pacific-islander", no = term)) %>%
-  mutate(term = ifelse(test = str_detect(string = word, 
-                       pattern = omb_diversity), yes = "diversity", no = term)) %>%
-  filter(term == "black" | term == "white" | term == "asian" |
-         term == "hispanic/latinx" | term == "race" | term == "ethnicity" |
-         term == "native-american" | term == "pacific-islander" | term == "diversity" ) %>%  
-  group_by(term, year) %>% summarise(n = sum(n)) %>% arrange(-n) %>% 
-  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+
+figure_3C <- h2_omb_counts %>% 
+  group_by(term, year) %>% 
+  summarise(n = sum(count)) %>% 
+  arrange(-n) %>% 
+  ggplot() + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
   theme_minimal() +
   labs(title = "     Figure 3C. Total Growth of OMB/US Census Terms \n in Biomedical Sample (1990-2020)",
        color =  "Term") + 
@@ -130,14 +41,12 @@ figure_3C <- us_pop_counts %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black",
-                              "diversity","ethnicity",
-                              "hispanic/latinx","native-american",
+  scale_color_manual(labels=c("asian","black", "diversity (social)",
+                              "ethnicity", "hispanic/latinx", "native-american",
                               "pacific-islander","race","white"),
-                     values=c("#005BB7", "#E86F00", 
-                              "#f2be00", "#3B9AB2", 
-                              "#9a009a", "#ff8396", 
-                              "#61B329",  "#CC0000", "#CC0000")) +
+                     values=c("#005BB7", "#E86F00", "#800080", 
+                              "#61B329", "#3B9AB2", "#ff8396", 
+                              "#000000", "#f2be00", "#CC0000")) +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
 
@@ -157,7 +66,8 @@ Figure 3C shows the OMB US Census terms are growing over time, but this growth i
 
 ```{r figure_3D, message = FALSE, warning=FALSE, echo=FALSE}
 # graphing terms over time 
-figure_3D <- us_pop_prc_counts %>% ggplot() + 
+figure_3D <- h2_omb_prcs %>% 
+  ggplot() + 
   geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.3, stat="identity") +
   geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.3, stat="identity") +
   geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.3,stat="identity") +
@@ -166,7 +76,7 @@ figure_3D <- us_pop_prc_counts %>% ggplot() +
   geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
   geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity") +
   labs(title = "    Figure 3D. Proportional Growth of \n US-Specific Terms in Biomedical Sample (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
@@ -178,14 +88,12 @@ figure_3D <- us_pop_prc_counts %>% ggplot() +
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("asian","black",
-                              "diversity","ethnicity",
-                              "hispanic/latinx","native-american",
+  scale_color_manual(labels=c("asian","black", "diversity (social)",
+                              "ethnicity", "hispanic/latinx", "native-american",
                               "pacific-islander","race","white"),
-                     values=c("#005BB7", "#E86F00", 
-                              "#f2be00", "#3B9AB2", 
-                              "#9a009a", "#ff8396", 
-                              "#61B329",  "#CC0000", "#CC0000")) +
+                     values=c("#005BB7", "#E86F00", "#800080", 
+                              "#61B329", "#3B9AB2", "#ff8396", 
+                              "#000000", "#f2be00", "#CC0000")) +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
@@ -201,8 +109,8 @@ Overall, Figures 3A-3F support our hypothesis that *(a)* US-based researchers te
 Here is a list of the terms that were used to classify the OMB/US Census terms in the final two sets of analyses.
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
-setwd("~/Documents/Diversity/Data")
-terms_table <- read_csv("diversity_project - h3_dictionary.csv") 
+setwd("~/git/diversity/data/dictionaries/")
+terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
 terms_table <- terms_table %>% select(asian, black, hispanic_latinx, native_american,	pacific_islander,white)
 terms_table[is.na(terms_table)] <- ""
 DT::datatable(terms_table)

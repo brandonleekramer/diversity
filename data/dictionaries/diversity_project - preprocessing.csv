@@ -1,0 +1,414 @@
+hyp_test,category,original_string,new_string,notes
+h1,cultural,aspirate cultures,aspirate_cultures,lowers false positive rate
+h1,cultural,bacteria culture,bacteria_culture,lowers false positive rate
+h1,cultural,bacteria cultures,bacteria_cultures,lowers false positive rate
+h1,cultural,bacterial culture,bacterial_culture,lowers false positive rate
+h1,cultural,bacterial cultures,bacterial_cultures,lowers false positive rate
+h1,cultural,blood culture,blood_culture,lowers false positive rate
+h1,cultural,blood culture,blood_culture,lowers false positive rate
+h1,cultural,blood cultures,blood_cultures,lowers false positive rate
+h1,cultural,blood cultures,blood_cultures,lowers false positive rate
+h1,cultural,cell culture,cell_culture,lowers false positive rate
+h1,cultural,cell cultured,cell_cultured,lowers false positive rate
+h1,cultural,cell cultures,cell_cultures,lowers false positive rate
+h1,cultural,cells cultured,cells_cultured,lowers false positive rate
+h1,cultural,cross culture,cross_cultural,increases accuracy
+h1,cultural,cross-culture,cross_cultural,increases accuracy
+h1,cultural,cross cultural,cross_cultural,increases accuracy
+h1,cultural,cross-cultural,cross_cultural,increases accuracy
+h1,cultural,culture filtrate,culture_filtrate,lowers false positive rate
+h1,cultural,culture medium,culture_medium,lowers false positive rate
+h1,cultural,culture supernatants,culture_supernatants,lowers false positive rate
+h1,cultural,cultured cells,cultured_cells,lowers false positive rate
+h1,cultural,fibroblast cultures,fibroblast_cultures,lowers false positive rate
+h1,cultural,in cultured,in_cultured,lowers false positive rate
+h1,cultural,liquid culture,liquid_culture,lowers false positive rate
+h1,cultural,liquid cultures,liquid_cultures,lowers false positive rate
+h1,cultural,lymphocyte culture,lymphocyte_culture,lowers false positive rate
+h1,cultural,lymphocyte cultures,lymphocyte_cultures,lowers false positive rate
+h1,cultural,monolayer culture,monolayer_culture,lowers false positive rate
+h1,cultural,monolayer cultures,monolayer_cultures,lowers false positive rate
+h1,cultural,mycobacterial culture,mycobacterial_culture,lowers false positive rate
+h1,cultural,mycobacterial cultures,mycobacterial_cultures,lowers false positive rate
+h1,cultural,multi-culturally,multiculturally,increases accuracy
+h1,cultural,multi-cultural,multicultural,increases accuracy
+h1,cultural,organ culture,organ_culture,lowers false positive rate
+h1,cultural,positive cultures,positive_cultures,lowers false positive rate
+h1,cultural,primary culture,primary_culture,lowers false positive rate
+h1,cultural,primary cultures,primary_cultures,lowers false positive rate
+h1,cultural,priming culture,priming_culture,lowers false positive rate
+h1,cultural,priming cultures,priming_cultures,lowers false positive rate
+h1,cultural,serum culture,serum_culture,lowers false positive rate
+h1,cultural,serum cultures,serum_cultures,lowers false positive rate
+h1,cultural,sputum culture,sputum_culture,lowers false positive rate
+h1,cultural,suspension culture,suspension_culture,lowers false positive rate
+h1,cultural,suspension cultures,suspension_cultures,lowers false positive rate
+h1,cultural,term cultures,term_cultures,lowers false positive rate
+h1,cultural,tissue culture,tissue_culture,lowers false positive rate
+h1,cultural,tissue cultures,tissue_cultures,lowers false positive rate
+h1,cultural,urine culture,urine_culture,lowers false positive rate
+h1,cultural,urine cultures,urine_cultures,lowers false positive rate
+h1,cultural,viral culture,viral_culture,lowers false positive rate
+h1,cultural,viral cultures,viral_cultures,lowers false positive rate
+h1,cultural,vitro culture,vitro_culture,lowers false positive rate
+h1,cultural,vitro cultures,vitro_cultures,lowers false positive rate
+h1,disability,able bodied,able_bodied,
+h1,disability,able-bodied,able_bodied,
+h1,disability,birth defect,birth_defect,
+h1,disability,birth defects,birth_defect,
+h1,disability,blind tested,blind_testing,lowers false positive rate
+h1,disability,blind testing,blind_testing,lowers false positive rate
+h1,disability,blind-tested,blind_testing,lowers false positive rate
+h1,disability,blind-testing,blind_testing,lowers false positive rate
+h1,disability,cognitive delay,cognitive_delay,
+h1,disability,cognitively delay,cognitively_delayed,
+h1,disability,congenital defect,congenital_defect,
+h1,disability,deaf blind,deafblind,
+h1,disability,deaf-blind,deafblind,
+h1,disability,deaf-mute,deafmute,
+h1,disability,developmental delay,developmental_delay,
+h1,disability,developmental impairment,developmental_impairment,
+h1,disability,developmentally delayed,developmentally_delayed,
+h1,disability,developmentally impaired,developmentally_impaired,
+h1,disability,differently abled,differently_abled,
+h1,disability,differently-abled,differently_abled,
+h1,disability,double blind,double_blind,lowers false positive rate
+h1,disability,double-blind,double_blind,lowers false positive rate
+h1,disability,hard of hearing,hard_of_hearing,
+h1,disability,hearing impaired,hearing_impaired,
+h1,disability,hearing impairment,hearing_impairment,
+h1,disability,hearing-impaired,hearing_impaired,
+h1,disability,limited vision,limited_vision,
+h1,disability,limited-vision,limited_vision,
+h1,disability,low vision,low_vision,
+h1,disability,mental retardation,mental_retardation,
+h1,disability,mentally retarded,mentally_retarded,
+h1,disability,neuro-diverse,neurodiverse,
+h1,disability,neurological disorder,neurological_disorder,
+h1,disability,physician blind,physician_blind,lowers false positive rate
+h1,disability,physician-blind,physician_blind,lowers false positive rate
+h1,disability,single blind,single_blind,
+h1,disability,single-blind,single_blind,
+h1,disability,special needs,special_needs,
+h1,disability,substance abuse,substance_abuse,
+h1,disability,substance abuser,substance_abuser,
+h1,disability,visual impairment,visual_impairment,
+h1,disability,visually impaired,visually_impaired,
+h1,lifecourse,age-related,age_related,
+h1,lifecourse,age-specific,age_specific,
+h1,lifecourse,middle age,middle_age,
+h1,lifecourse,middle aged,middle_aged,
+h1,lifecourse,middle-age,middle_age,
+h1,lifecourse,middle-aged,middle_aged,
+h1,lifecourse,pre-adolescence,preadolescence,
+h1,lifecourse,pre-adolescent,preadolescent,
+h1,lifecourse,pre-adolescents,preadolescents,
+h1,lifecourse,pre-pubescence,prepubescence,
+h1,lifecourse,pre-pubescent,prepubescent,
+h1,lifecourse,pre-pubescents,prepubescents,
+h1,lifecourse,year old,years_old,
+h1,lifecourse,years of age,years_of_age,
+h1,lifecourse,years old,years_old,
+h1,lifecourse,years old,years_old,
+h1,migration,asylum seeker,asylum_seeker,
+h1,migration,asylum seekers,asylum_seeker,
+h1,migration,foreign-born,foreign_born,
+h1,minority,a minority,a_minority,lowers false positive rate
+h1,minority,minority group,minority_group,
+h1,minority,minority groups,minority_group,
+h1,minority,minority of,minority_of,lowers false positive rate
+h1,minority,minority population,minority_population,
+h1,minority,minority populations,minority_population,
+h1,minority,under-represented,underrepresented,
+h1,sex/gender,bi-gender,bigender,
+h1,sex/gender,cis-gender,cisgender,
+h1,sex/gender,cis-normative,cisnormative,
+h1,sex/gender,cis-people,cispeople,
+h1,sex/gender,cis-person,cisperson,
+h1,sex/gender,double-sex,doublesex,
+h1,sex/gender,f2m,female_to_male,
+h1,sex/gender,female assigned at birth,female_assigned_at_birth,
+h1,sex/gender,female sex,female_sex,
+h1,sex/gender,female to male,female_to_male,
+h1,sex/gender,female-assigned-at-birth,female_assigned_at_birth,
+h1,sex/gender,female-to-male,female_to_male,
+h1,sex/gender,femaletomale,female_to_male,
+h1,sex/gender,feminine of center,feminine_of_center,
+h1,sex/gender,feminine presenting,feminine_presenting,
+h1,sex/gender,feminine-of-center,feminine_of_center,
+h1,sex/gender,feminine-presenting,feminine_presenting,
+h1,sex/gender,fluid gender,genderfluid,
+h1,sex/gender,fluid-gender,genderfluid,
+h1,sex/gender,ftm,female_to_male,
+h1,sex/gender,gender binary,gender_binary,
+h1,sex/gender,gender fluid,genderfluid,
+h1,sex/gender,gender neutrois,gender_neutrois,
+h1,sex/gender,gender non conforming,gender_nonconforming,
+h1,sex/gender,gender non-conforming,gender_nonconforming,
+h1,sex/gender,gender nonconforming,gender_nonconforming,
+h1,sex/gender,gender normative,gender_normative,
+h1,sex/gender,gender queer,genderqueer,
+h1,sex/gender,gender straight,gender_straight,
+h1,sex/gender,gender variance,gender_variant,
+h1,sex/gender,gender variant,gender_variant,
+h1,sex/gender,gender-binary,gender_binary,
+h1,sex/gender,gender-fluid,genderfluid,
+h1,sex/gender,gender-normative,gender_normative,
+h1,sex/gender,gender-queer,genderqueer,
+h1,sex/gender,gender-variance,gender_variant,
+h1,sex/gender,gender-variant,gender_variant,
+h1,sex/gender,inter-sex,intersex,
+h1,sex/gender,inter-sexual,intersex,
+h1,sex/gender,intersexual,intersex,
+h1,sex/gender,m2f,male_to_female,
+h1,sex/gender,male assigned at birth,male_assigned_at_birth,
+h1,sex/gender,male sex,male_sex,
+h1,sex/gender,male to female,male_to_female,
+h1,sex/gender,male-assigned-at-birth,male_assigned_at_birth,
+h1,sex/gender,male-to-female,male_to_female,
+h1,sex/gender,maletofemale,male_to_female,
+h1,sex/gender,masculine of center,masculine_of_center,
+h1,sex/gender,masculine presenting,masculine_presenting,
+h1,sex/gender,masculine-of-center,masculine_of_center,
+h1,sex/gender,masculine-presenting,masculine_presenting,
+h1,sex/gender,mtf,male_to_female,
+h1,sex/gender,non-binary,nonbinary,
+h1,sex/gender,poly gender,polygender,
+h1,sex/gender,poly-gender,polygender,
+h1,sex/gender,polygendered,polygender,
+h1,sex/gender,sex adjusted,sex_adjusted,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex assigned at birth,sex_assigned_at_birth,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex chromosome,sex_chromosome,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex chromosomes,sex_chromosomes,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex determination,sex_determination,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex determining,sex_determining,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex difference,sex_difference,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex gene,sex_gene,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex genes,sex_genes,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex hormone,sex_hormone,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex hormones,sex_hormones,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex matched,sex_matched,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex ratio,sex_ratio,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex specific,sex_specific,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex specifically,sex_specifically,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex steroid,sex_steroid,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex steroids,sex_steroids,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex stratified,sex_stratified,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-adjusted,sex_adjusted,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-assigned-at-birth,sex_assigned_at_birth,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-gene,sex_gene,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-genes,sex_genes,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-linked,sex_linked,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-matched,sex_matched,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-ratio,sex_ratio,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-specific,sex_specific,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-specifically,sex_specifically,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-steroid,sex_steroid,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-steroids,sex_steroids,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sex-stratified,sex_stratified,"increases accuracy, decrease confidence margin"
+h1,sex/gender,sexual differentiation,sexual_differentiation,
+h1,sex/gender,sexual dimorphism,sexual_dimorphism,
+h1,sex/gender,sexual dimorphisms,sexual_dimorphism,
+h1,sex/gender,sexually dimorphic,sexually_dimorphic,
+h1,sex/gender,sexually transmitted,sexually_transmitted,
+h1,sex/gender,sexually-transmitted,sexually_transmitted,
+h1,sex/gender,trans-gender,transgender,
+h1,sex/gender,trans-gendered,transgender,
+h1,sex/gender,trans-man,transman,
+h1,sex/gender,trans-men,transmen,
+h1,sex/gender,trans-phobic,transphobic,
+h1,sex/gender,trans-sexual,transsexual,
+h1,sex/gender,trans-sexuals,transsexuals,
+h1,sex/gender,trans-woman,transwoman,
+h1,sex/gender,trans-women,transwomen,
+h1,sexuality,andro-phile,androphile,
+h1,sexuality,andro-philes,androphiles,
+h1,sexuality,andro-philic,androphilic,
+h1,sexuality,andro-sexual,androsexual,
+h1,sexuality,andro-sexuals,androsexuals,
+h1,sexuality,bi-curious,bicurious,
+h1,sexuality,bi-phobic,biphobic,
+h1,sexuality,bi-sexual,bisexual,
+h1,sexuality,bi-sexual,bisexual,
+h1,sexuality,bi-sexuals,bisexuals,
+h1,sexuality,bi-sexuals,bisexuals,
+h1,sexuality,commercial sex,commercial_sex,
+h1,sexuality,demi-romantic,demiromantic,
+h1,sexuality,demi-romantics,demiromantics,
+h1,sexuality,hetero-normative,heteronormative,
+h1,sexuality,hetero-sexist,heterosexist,
+h1,sexuality,hetero-sexual,heterosexual,
+h1,sexuality,hetero-sexuals,heterosexuals,
+h1,sexuality,homo-sexual,homosexual,
+h1,sexuality,homo-sexuals,homosexuals,
+h1,sexuality,mono-gamous,monogamous,
+h1,sexuality,pan-sexual,pansexual,
+h1,sexuality,poly-amorous,polyamorous,
+h1,sexuality,safe sex,safe_sex,
+h1,sexuality,safer sex,safer_sex,
+h1,sexuality,sex-education,sex_education,
+h1,sexuality,sex education,sex_education,
+h1,sexuality,sex life,sex_life,"increases accuracy, decrease confidence margin"
+h1,sexuality,sex partner,sex_partner,"increases accuracy, decrease confidence margin"
+h1,sexuality,sex partners,sex_partners,"increases accuracy, decrease confidence margin"
+h1,sexuality,sex worker,sex_worker,lowers false positive rate
+h1,sexuality,sex workers,sex_workers,lowers false positive rate
+h1,sexuality,sexual activity,sexual_activity,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual attraction,sexual_attraction,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual development,sexual_development,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual dysfunction,sexual_dysfunction,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual function,sexual_function,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual intercourse,sexual_intercourse,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual orientation,sexual_orientation,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual preference,sexual_preference,"increases accuracy, decrease confidence margin"
+h1,sexuality,sexual reproduction,sexual_reproduction,"increases accuracy, decrease confidence margin"
+h1,sexuality,skolio-sexual,skoliosexual,
+h1,sexuality,skolio-sexuals,skoliosexuals,
+h1,sexuality,unprotected sex,unprotected_sex,
+h1,social_class,at-risk,at_risk,
+h1,social_class,blue-collar,blue_collar,
+h1,social_class,college educated,college_educated,
+h1,social_class,college-educated,college_educated,
+h1,social_class,economic instability,economic_instability,
+h1,social_class,economically deprived,economically_deprived,
+h1,social_class,economically stable,economically_stable,
+h1,social_class,economically unstable,economically_unstable,
+h1,social_class,economically vulnerable,economically_vulnerable,
+h1,social_class,economically-deprived,economically_deprived,
+h1,social_class,economically-stable,economically_stable,
+h1,social_class,economically-unstable,economically_unstable,
+h1,social_class,economically-vulnerable,economically_vulnerable,
+h1,social_class,high income,high_income,
+h1,social_class,high-income,high_income,
+h1,social_class,high-ses,high_ses,
+h1,social_class,higher educated,higher_educated,
+h1,social_class,higher income,higher_income,
+h1,social_class,higher-educated,higher_educated,
+h1,social_class,higher-income,higher_income,
+h1,social_class,highest income,highest_income,
+h1,social_class,highest-income,highest_income,
+h1,social_class,highly educated,highly_educated,
+h1,social_class,highly-educated,highly_educated,
+h1,social_class,less educated,less_educated,
+h1,social_class,less-educated,less_educated,
+h1,social_class,less-fortunate,less_fortunate,
+h1,social_class,low-class,low_class,
+h1,social_class,low-income,low_income,
+h1,social_class,low-ses,low_ses,
+h1,social_class,lower class,lower_class,
+h1,social_class,lower educated,lower_educated,
+h1,social_class,lower income,lower_income,
+h1,social_class,lower-class,lower_class,
+h1,social_class,lower-educated,lower_educated,
+h1,social_class,lower-income,lower_income,
+h1,social_class,lowest income,lowest_income,
+h1,social_class,lowest-income,lowest_income,
+h1,social_class,middle-class,middle_class,
+h1,social_class,middle-income,middle_income,
+h1,social_class,mode-educated,more_educated,
+h1,social_class,more educated,more_educated,
+h1,social_class,ruling-class,ruling_class,
+h1,social_class,socio-economic,socioeconomic,
+h1,social_class,socio-economically,socioeconomically,
+h1,social_class,under educated,under_educated,
+h1,social_class,under-educated,undereducated,
+h1,social_class,under-educated,under_educated,
+h1,social_class,under-privileged,underprivileged,
+h1,social_class,under-resourced,underresourced,
+h1,social_class,under-served,underserved,
+h1,social_class,upper income,upper_income,
+h1,social_class,upper-class,upper_class,
+h1,social_class,upper-income,upper_income,
+h1,social_class,well educated,well_educated,
+h1,social_class,well-educated,well_educated,
+h1,social_class,well-off,well_off,
+h1,social_class,well-to-do,well_to_do,
+h1,social_class,white-collar,white_collar,
+h1,social_class,working-class,working_class,
+h2,omb_census,african american,african_american,
+h2,omb_census,african americans,african_americans,
+h2,omb_census,african-american,african_american,
+h2,omb_census,african-americans,african_americans,
+h2,omb_census,afro american,african_american,
+h2,omb_census,afro americans,african_americans,
+h2,omb_census,afro-american,african_american,
+h2,omb_census,afro-americans,african_americans,
+h2,omb_census,alaska native,alaska_native,
+h2,omb_census,alaska natives,alaska_natives,
+h2,omb_census,alaska-native,alaska_native,
+h2,omb_census,alaska-natives,alaska_natives,
+h2,omb_census,alaskan native,alaska_native,
+h2,omb_census,alaskan natives,alaska_natives,
+h2,omb_census,alaskan-native,alaska_native,
+h2,omb_census,alaskan-natives,alaska_natives,
+h2,omb_census,american indian,american_indian,
+h2,omb_census,american indians,american_indians,
+h2,omb_census,american-indian,american_indian,
+h2,omb_census,american-indians,american_indians,
+h2,omb_census,native american,native_american,
+h2,omb_census,native americans,native_americans,
+h2,omb_census,native-american,native_american,
+h2,omb_census,native-americans,native_americans,
+h2,omb_census,native hawaiian,native_hawaiian,
+h2,omb_census,native hawaiians,native_hawaiians,
+h2,omb_census,native-hawaiian,native_hawaiian,
+h2,omb_census,native-hawaiians,native_hawaiians,
+h2,omb_census,pacific islander,pacific_islander,
+h2,omb_census,pacific islanders,pacific_islanders,
+h2,omb_census,pacific-islander,pacific_islander,
+h2,omb_census,pacific-islanders,pacific_islanders,
+h2,omb_census,hispanic american,hispanic_american,
+h2,omb_census,hispanic americans,hispanic_americans,
+h2,omb_census,hispanic-american,hispanic_american,
+h2,omb_census,hispanic-americans,hispanic_americans,
+h2,omb_census,asian american,asian_american,
+h2,omb_census,asian-american,asian_american,
+h2,omb_census,asian americans,asian_americans,
+h2,omb_census,asian-americans,asian_americans,
+h2,omb_census,caucasian-american,caucasian_american,
+h2,omb_census,caucasian-americans,caucasian_americans,
+h2,omb_census,white american,white_american,
+h2,omb_census,white americans,white_americans,
+h2,omb_census,white-matter,white_matter,lowers false positive rate
+h2,omb_census,white matter,white_matter,lowers false positive rate
+h2,omb_census,white and gray matter,white_and_gray_matter,lowers false positive rate
+h2,omb_census,new zealand white,new_zealand_white,lowers false positive rate
+h2,omb_census,white blood cell,white_blood_cell,lowers false positive rate
+h2,omb_census,white blood cells,white_blood_cells,lowers false positive rate
+h2,omb_census,white-cell,white_cell,lowers false positive rate
+h2,omb_census,white cell,white_cell,lowers false positive rate
+h2,omb_census,white cells,white_cells,lowers false positive rate
+h2,omb_census,white adipose,white_adipose,lowers false positive rate
+h2,omb_census,egg white,egg_white,lowers false positive rate
+h2,omb_census,white pulp,white_pulp,lowers false positive rate
+h2,omb_census,white noise,white_noise,lowers false positive rate
+h2,omb_census,white light,white_light,lowers false positive rate
+h2,omb_census,white dwarf,white_dwarf,lowers false positive rate
+h2,omb_census,white dwarfs,white_dwarfs,lowers false positive rate
+h2,omb_census,white rabbits,white_rabbits,lowers false positive rate
+h2,omb_census,white coat,white_coat,lowers false positive rate
+h2,omb_census,white clover,white_clover,lowers false positive rate
+h2,omb_census,white dairy,white_dairy,lowers false positive rate
+h2,omb_census,white gene,white_gene,lowers false positive rate
+h2,omb_census,white lead,white_lead,lowers false positive rate
+h2,omb_census,white spotting,white_spotting,lowers false positive rate
+h2,omb_census,white grape juice,white_grape_juice,lowers false positive rate
+h2,omb_census,non-hispanic white,nonhispanic_white,increases accuracy
+h2,omb_census,non-hispanic whites,nonhispanic_whites,increases accuracy
+h2,omb_census,non-hispanic black,nonhispanic_black,increases accuracy
+h2,omb_census,non-hispanic blacks,nonhispanic_blacks,increases accuracy
+h2,omb_census,non-hispanic,nonhispanic,increases accuracy
+h2,omb_census,non-black,nonblack,lowers false positive rate
+h2,omb_census,non-blacks,nonblacks,lowers false positive rate
+h2,omb_census,non-white,nonwhite,lowers false positive rate
+h2,omb_census,non-whites,nonwhites,lowers false positive rate
+h2,omb_census,black tea,black_tea,lowers false positive rate
+h2,omb_census,black hole,black_hole,lowers false positive rate
+h2,omb_census,black holes,black_holes,lowers false positive rate
+h2,omb_census,black sea,black_sea,lowers false positive rate
+h2,omb_census,carbon black,carbon_black,lowers false positive rate
+h2,omb_census,black spruce,black_spruce,lowers false positive rate
+h2,omb_census,black swallowtails,black_swallowtails,lowers false positive rate
+h2,omb_census,black box,black_box,lowers false positive rate
+h2,omb_census,black carp,black_carp,lowers false positive rate
+h2,omb_census,black death,black_death,lowers false positive rate
