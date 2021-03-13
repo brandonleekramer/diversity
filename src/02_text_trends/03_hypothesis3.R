@@ -14,14 +14,6 @@
 #install.packages("maditr", repos = "http://cran.us.r-project.org")
 #install.packages("purrr", repos = "http://cran.us.r-project.org")
 
-######################################################################################################## testing h3 
-
-test_h3 <- function(analysis_timeframe){
-
-# this file produces 2 outputs 
-# 1. counts all of the terms in a nested dictionary of population terms from around the world 
-# 2. converts those counts into percentage of publications over time 
-  
 library("readr")
 library("dplyr") 
 library("stringr")  
@@ -32,11 +24,19 @@ library("data.table")
 library("maditr")
 library("purrr")
 
+######################################################################################################## testing h3 
+
+test_h3 <- function(analysis_timeframe){
+
+# this file produces 2 outputs 
+# 1. counts all of the terms in a nested dictionary of population terms from around the world 
+# 2. converts those counts into percentage of publications over time 
+
 #rm(list = ls())
 #analysis_timeframe <- "1990"
 
 ################################################################################################# ingestion/cleaning 
-
+  
 str_c("Starting data pull at: ", Sys.time())
 
 # connect to postgresql to get our data
@@ -135,7 +135,7 @@ pubmed_abstract_data <- pubmed_data %>%
   filter(word %in% na.omit(h3_dictionary$term))
 
 # clean up memory 
-rm(pubmed_data)
+# rm(pubmed_data)
 
 str_c("Finished unnesting tokens at: ", Sys.time())
 
@@ -153,195 +153,145 @@ pop_terms_bycats <- pubmed_abstract_data %>%
   dt_mutate(directional = ifelse(test = str_detect(string = word, pattern = directional_terms), 1, 0)) %>%
   dt_mutate(race_ethnicity = ifelse(test = str_detect(string = word, pattern = race_ethnicity), 1, 0)) %>%
   dt_mutate(omb_uscensus = ifelse(test = str_detect(string = word, pattern = omb_uscensus), 1, 0)) %>%
-  dt_mutate(ancestry = ifelse(test = str_detect(string = word, pattern = ancestry), 1, 0))
+  dt_mutate(ancestry = ifelse(test = str_detect(string = word, pattern = ancestry), 1, 0)) %>% 
+  dt_mutate(word = if_else(directional == 1 & word == "north_america", "north", word),
+            word = if_else(directional == 1 & word == "north_american", "north", word),
+            word = if_else(directional == 1 & word == "north_americans", "north", word),
+            word = if_else(directional == 1 & word == "south_america", "south", word),
+            word = if_else(directional == 1 & word == "south_american", "south", word),
+            word = if_else(directional == 1 & word == "south_americans", "south", word)) 
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(all_pop_terms == 1) %>%
-  group_by(year) %>% 
-  count(all_pop_terms) %>% 
-  arrange(year) %>% 
+  filter(all_pop_terms == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "all population terms") %>% 
-  select(term, n, year) 
+  select(term, everything())
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(continental == 1) %>%
-  group_by(year) %>% 
-  count(continental) %>% 
-  arrange(year) %>% 
+  filter(continental == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "continental") %>% 
-  select(term, n, year) %>% 
+  select(term, everything()) %>% 
   bind_rows(h3_counts)
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(subcontinental == 1) %>%
-  group_by(year) %>% 
-  count(subcontinental) %>% 
-  arrange(year) %>% 
+  filter(subcontinental == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "subcontinental") %>% 
-  select(term, n, year) %>% 
+  select(term, everything()) %>% 
   bind_rows(h3_counts)
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(national == 1) %>%
-  group_by(year) %>% 
-  count(national) %>% 
-  arrange(year) %>% 
+  filter(national == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "national") %>% 
-  select(term, n, year) %>% 
+  select(term, everything()) %>% 
   bind_rows(h3_counts)
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(subnational == 1) %>%
-  group_by(year) %>% 
-  count(subnational) %>% 
-  arrange(year) %>% 
+  filter(subnational == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "subnational") %>% 
-  select(term, n, year) %>% 
+  select(term, everything()) %>% 
   bind_rows(h3_counts)
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(directional == 1) %>%
-  group_by(year) %>% 
-  count(directional) %>% 
-  arrange(year) %>% 
+  filter(directional == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "directional") %>% 
-  select(term, n, year) %>% 
+  select(term, everything()) %>% 
   bind_rows(h3_counts)
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(race_ethnicity == 1) %>%
-  group_by(year) %>% 
-  count(race_ethnicity) %>% 
-  arrange(year) %>% 
+  filter(race_ethnicity == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "race/ethnicity") %>% 
-  select(term, n, year) %>% 
+  select(term, everything()) %>% 
   bind_rows(h3_counts)
 
 h3_counts <- pop_terms_bycats %>% 
-  filter(omb_uscensus == 1) %>%
-  group_by(year) %>% 
-  count(omb_uscensus) %>% 
-  arrange(year) %>% 
+  filter(omb_uscensus == 1) %>% 
+  group_by(word) %>% 
+  count() %>% 
+  arrange(-n) %>% 
   mutate(term = "omb/us-census") %>% 
-  select(term, n, year) %>% 
-  bind_rows(h3_counts)
-
-h3_counts <- pop_terms_bycats %>% 
-  filter(ancestry == 1) %>%
-  group_by(year) %>% 
-  count(ancestry) %>% 
-  arrange(year) %>% 
-  mutate(term = "ancestry") %>% 
-  select(term, n, year) %>% 
-  bind_rows(h3_counts)
-
-h3_counts <- h3_counts %>% 
+  select(term, everything()) %>% 
+  bind_rows(h3_counts) %>% 
+  # add the year and sort  
+  mutate(year = analysis_timeframe) %>% 
   arrange(year, -n)
 
-setwd("~/git/diversity/data/text_results/h3_results/")
-write_rds(h3_counts, str_c("h3_set_counts_",analysis_timeframe,".rds"))
-
-############################################################################################## percentages over time 
-
-# articles with term mentioned each year 
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(all_pop_terms == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "all population terms") %>% 
-  select(term, n, year)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(continental == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "continental") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(subcontinental == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "subcontinental") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(national == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "national") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(subnational == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "subnational") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(directional == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "directional") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(race_ethnicity == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "race/ethnicity") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(omb_uscensus == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "omb/us-census") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- pop_terms_bycats %>% 
-  filter(ancestry == 1) %>% 
-  group_by(year) %>% 
-  summarise(n = n_distinct(id)) %>% 
-  mutate(term = "ancestry") %>% 
-  select(term, n, year) %>% 
-  bind_rows(all_pop_prc_counts)
-
-all_pop_prc_counts <- all_pop_prc_counts %>% 
-  right_join(bycats_prc_counts, by = "year") %>% 
-  mutate(percentage = round(n / total * 100, digits = 2))
-
-all_pop_prc_counts <- all_pop_prc_counts %>% 
-  arrange(year, -percentage) %>% 
-  select(-total)
-
-# this saves all of the unique ids that mention h1 diversity sets 
-# basically, this table of uniques ids can go back to postgresql 
-setwd("~/git/diversity/data/text_results/h3_results/")
-write_rds(pubmed_abstract_data %>% distinct(id), 
-          str_c("h3_diversity_ids_",analysis_timeframe,".rds"))
-
-
-
+h3_counts_chk <- h3_counts %>% filter(term != "all population terms")
 
 setwd("~/git/diversity/data/text_results/h3_results/")
-write_rds(all_pop_prc_counts, str_c("h3_prc_trends_",analysis_timeframe,".rds"))
+write_rds(h3_counts, str_c("h3_counts_",analysis_timeframe,".rds"))
+
+############################################################################################## sensitivity analyses
+
+#words_of_interest = c("apache", "ree", "mono", "ho", "bia", "mayo", "tunica", 
+#                      "bia", "het", "wa", "nat", "lu", "lak", "ava", "zo")
+
+#sensitivity_chks = pop_terms_bycats %>% 
+#  filter(word %in% words_of_interest) %>% 
+#  rename(fk_pmid = id) %>%
+#  inner_join(pubmed_data %>% select(-year), by = "fk_pmid") %>% 
+#  select(fk_pmid, year, word, abstract, everything()) 
+
+#second_chk = sensitivity_chks %>% 
+#  filter(word == "wa") %>% 
+#  unnest_tokens(bigram, abstract, token = "ngrams", n = 2) %>%
+#  count(bigram) %>% 
+#  filter(grepl(paste(words_of_interest, collapse = "|"), bigram)) %>% 
+#  arrange(-n)
+
+############################################################################################## percentages 
+
+percentages = h3_counts %>% 
+  group_by(term) %>% 
+  count(wt = n) %>% 
+  mutate(year = analysis_timeframe,
+         total = bycats_prc_counts$total,
+         percentage = round(n / total * 100, digits = 2)) %>% 
+  select(term, year, n, total, percentage) %>% 
+  arrange(year, -percentage) 
+
+setwd("~/git/diversity/data/text_results/h3_results/")
+write_rds(percentages, str_c("h3_prc_trends_",analysis_timeframe,".rds"))
 
 str_c("Finished all processes for ",analysis_timeframe, " at: ", Sys.time())
+
+############################################################################################## distinct ids 
+
+distinct_ids = pop_terms_bycats %>% 
+  rename(fk_pmid = id) %>% 
+  group_by(fk_pmid, year) %>% 
+  summarise(across(all_pop_terms:omb_uscensus, sum)) %>% 
+  arrange(fk_pmid, year)
+
+# this saves all of the unique ids that mention h3 diversity sets 
+# basically, this table of uniques ids can go back to postgresql 
+setwd("~/git/diversity/data/text_results/h3_results/")
+write_rds(distinct_ids, str_c("h3_population_ids_",analysis_timeframe,".rds"))
 
 } # closing the function 
 
 ##################################################################################### for loop of all years 
 
-for (year in 1990:2020) {
+for (year in 1992:2020) {
   test_h3(year)
 }
 
@@ -351,18 +301,25 @@ str_c("Finished all processes for all years at: ", Sys.time())
 
 setwd("~/git/diversity/data/text_results/h3_results/")
 
+#chk <- read_rds("h3_all_prcs.rds")
+
 # percentages for all sets 
-h3_all_counts <- list.files(pattern="h3_set_counts_*") %>% 
+h3_all_counts <- list.files(pattern="h3_counts_*") %>% 
   map_df(~read_rds(.)) 
 
 # overall set counts 
 h3_all_prcs <- list.files(pattern="h3_prc_trends_*") %>% 
-  map_df(~read_rds(.)) 
+  map_df(~read_rds(.))
+
+# all the unique ids 
+h3_allpop_ids <- list.files(pattern="h3_population_ids_*") %>% 
+  map_df(~read_rds(.))
 
 # need to do the matrix aggregation next 
 
 setwd("~/git/diversity/data/text_results/h3_results/")
 write_rds(h3_all_counts, "h3_all_counts.rds")
 write_rds(h3_all_prcs, "h3_all_prcs.rds")
+write_rds(h3_allpop_ids, "h3_all_population_ids.rds")
 
 str_c("Aggregated data for all years at: ", Sys.time())

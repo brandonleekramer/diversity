@@ -1,5 +1,5 @@
 ---
-title: "Hypothesis 2"
+title: "Hypothesis 3"
 description: "(a) The use of population terminology has increased in biomedical abstracts since 1990 and (b) The use of terms like genetic ancestry as well as national and continental terms have outpaced racial and ethnic terms in biomedical literature."
 output: html_document
 weight: 2
@@ -16,17 +16,19 @@ for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr",
               "grid", "gridExtra", "reshape2", "extrafont", "data.table",
               "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
 
-h2_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_counts.rds")
-all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_prcs.rds")
+h3_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_counts.rds")
+all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_prcs.rds")
 
 ```
 
 ```{r figure 2a, echo=FALSE}
-figure_2A <- h2_counts %>%   
-  filter(term != "ancestry") %>% 
-  ggplot() + geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+figure_3A <- h3_counts %>% 
+  group_by(term, year) %>% 
+  summarise(n = sum(n)) %>% 
+  ggplot() + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
   theme_minimal() +
-  labs(title = "     Figure 2A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+  labs(title = "     Figure 3A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
   ylab("Term Count") +
@@ -36,10 +38,13 @@ figure_2A <- h2_counts %>%
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(labels=c("all population terms", "continental", 
-                              "directional", "national", "omb/us-census", 
-                              "race/ethnicity", "subcontinental", "subnational"),
-                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
-                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
+                              "directional", "national", 
+                              "omb/us-census", "race/ethnicity", 
+                              "subcontinental", "subnational"),
+                     values=c("#E21F00", "#f2be00",
+                              "#005BB7", "#E86F00",
+                              "#3B9AB2", "#ff8396", 
+                              "#9a009a", "#61B329")) +
   #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() 
@@ -62,10 +67,14 @@ figure_2B <- all_pop_prc_counts %>%
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(labels=c("all population terms", "continental", 
-                              "directional", "national", "omb/us-census", 
-                              "race/ethnicity", "subcontinental", "subnational"),
-                     values=c("#E21F00", "#3B9AB2", "#f2be00", "#E86F00",
-                              "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
+                              "directional", "national", 
+                              "omb/us-census", "race/ethnicity", 
+                              "subcontinental", "subnational"),
+                     values=c("#E21F00", "#f2be00",
+                              "#005BB7", "#E86F00",
+                              "#3B9AB2", "#ff8396", 
+                              "#9a009a", "#61B329")) +
+  #scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly()
 ```
@@ -82,7 +91,7 @@ Here is a list of the 8,200+ terms that were collapsed into the "all population 
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/Documents/Diversity/Data")
-all_pop_terms_table <- read_csv("diversity_project - h2_dictionary.csv")
+all_pop_terms_table <- read_csv("diversity_project - h3_dictionary.csv")
 all_pop_terms_table <- all_pop_terms_table %>% select(-source, -date, -subregional)
 all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
 DT::datatable(all_pop_terms_table)

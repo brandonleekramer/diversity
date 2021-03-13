@@ -15,23 +15,30 @@ rm(list = ls())
 for (pkg in c("tidyverse",  "tidytext", "widyr", "irlba", "broom"
               )) {library(pkg, character.only = TRUE)}
 
-setwd("~/Documents/Diversity/Data")
-# loading the .csv file 
-biomed_text_data <- read_csv("biomedical_corpus.csv") %>% 
-  rowid_to_column(var = "id") %>% 
-  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
-         abstract = AB, references = CR, year = PY, times_cited = TC, doi = DI, pubmed_id = UT) %>% 
-  select(id, authors, title, year, publication, abstract, references, year, times_cited, doi) %>% 
-  drop_na(abstract) %>% 
-# filtering 2018 articles because they seem to be incomplete 
-  filter(year != "2018") 
+analysis_timeframe = 1990
+install.packages()
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
 
-biomed_text_data$postID<-row.names(biomed_text_data)
+# query the users_gh data (table of all github users) 
+pubmed_data <- dbGetQuery(conn, str_c(
+                          "SELECT DISTINCT(fk_pmid), year, abstract  
+                          FROM pubmed_2021.biomedical_abstracts 
+                          WHERE year =", analysis_timeframe, ";"))
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
 ```
 
 ```{r}
 #create context window with length 8
-tidy_skipgrams <- biomed_text_data %>%
+tidy_skipgrams <- pubmed_data %>%
     unnest_tokens(ngram, abstract, token = "ngrams", n = 8) %>%
     mutate(ngramID = row_number()) %>% 
     tidyr::unite(skipgramID, postID, ngramID) %>%

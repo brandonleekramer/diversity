@@ -1,6 +1,9 @@
 
 
 
-/home/kb7hp/git/diversity/src/02_growth-analyses/
+/home/kb7hp/git/diversity/src/02_text_trends/
 01_hypothesis1.slurm
 04_run_all_hypotheses.slurm
+
+/home/kb7hp/git/diversity/src/04_word_embeddings/
+04_train_embeddings.slurm

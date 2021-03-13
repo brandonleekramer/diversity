@@ -4,6 +4,8 @@
 .RData
 .Ruserdata
 .rds
+.bin
+.model
 /data/sensitivity_checks
 /data/text_results
-.Rproj.user
+/data/word_embeddings

@@ -1,0 +1,10 @@
+
+os.chdir("/sfs/qumulo/qhome/kb7hp/git/diversity/data/word_embeddings/")
+#nodelist = pd.read_csv("diversity_project - h1_dictionary.csv")
+with open('pubmed_word2vec_1990_95.bin', mode='rb') as file: 
+    fileContent = file.read()
+    
+    
+----
+#import nltk
+#nltk.download('wordnet')
