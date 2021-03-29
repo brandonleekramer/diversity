@@ -25,7 +25,9 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/results/hypothesis2/</guid>
-      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  Next, we wanted to examine the growth of OMB Directive 15 and US Census terms. To test Hypothesis 2, we compiled a dictionary used to catch to the main OMB/US Census terms, including Asian, White, Black, Native American, Pacific Islander, Hispanic/Latinx as well as more general terms like race and ethnicity.</description>
+      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  Next, we wanted to examine the growth of OMB Directive 15 and US Census terms. Initially, we posed this hypothesis:
+ H2: The use of US-specific racial and ethnic terms have increased in biomedical abstracts from 1990-2020.   
+To test this assertion, we compiled a dictionary used to catch to the main OMB/US Census terms, including Asian, White, Black, Native American, Pacific Islander, Hispanic/Latinx as well as more general terms like race and ethnicity.</description>
     </item>
     
     <item>
