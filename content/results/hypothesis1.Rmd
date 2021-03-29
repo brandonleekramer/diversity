@@ -1,0 +1,170 @@
+---
+title: "Hypothesis 1"
+description: "The use of the term “diversity” and related terminology increased in biomedical abstracts from 1990-2020"
+output: html_document
+weight: 1
+---
+
+```{css, echo=FALSE}
+/* this chunk of code centers all of the headings */
+h1, h2, h3, h4 {
+  text-align: center;
+}
+```
+
+```{r, include=FALSE}
+rm(list = ls())
+
+library("tidyverse")
+library("tidytext")
+library("plotly")
+library("DT")
+
+h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
+divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
+```
+
+Over the past several years, social scientists have noted that the discourse of "diversity" is expanding in use across various organizations (<ins>[Berrey 2015](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins>; <ins>[Ray 2019](https://journals.sagepub.com/doi/abs/10.1177/0003122418822335)</ins>). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research. Specifically, we are interested in eventually understand how diversity may or may not be replacing the discourse of race and ethinicity. First, we need to establish how often diversity is used within biomedical research. On this page, we are interested in measuring how often diversity and its various metonyms (i.e. related phrases) are used in biomedical research over the past three decades (1990-2020). Before getting started, we posed a working hypothesis to guide our work: 
+
+<br>
+<center>
+<span style="color:black"> H1: The use of the term "diversity" and its related terminology <br> has increased in biomedical abstracts from 1990-2020. </span>
+</center>
+<br>
+
+To test Hypothesis 1, we opted to use a supervised text mining approach that depends on the use of a nested dictionary. This basically means that we constructed several dictionaries of terms that can be classified into 11 different categories of diversity: cultural, disability, diversity, equity/justice, lifecourse, migration, minority, race/ethnicity, sex/gender, and sexuality. Within each of these categories, there are 4-104 different terms that are of interest to us. For a full list of terms in each category, you can search the Supplementary Tables below or see a hierarchical visualization of the dictionaries on <ins>[Methods](/methods/)</ins> page.
+
+Once these dictionaries were aggregated, we developed a strategy that (1) counted how often each of the terms within each category were mentioned in biomedical abstracts each year and (2) then calculated what percentage of the overall abstracts that the terms arose within to control for the overall rise in publications over time (see <ins>[Supplementary Analyses](/supplementary/)</ins>). Below, we provide a simple description of the variations in term usage while our manuscript provides a more detailed analysis of the implications for our broader arguments. 
+
+Importantly, as we document in our <ins>[methodology](/methods/)</ins>, measuring "diversity" is somewhat complicated by the fact that it is a polysemous concept - meaning that diversity itself has multiple, diverse meanings (<ins>[Abascal et al. 2021](https://advances.sciencemag.org/content/7/11/eabf2507)</ins>; <ins>[Mayorga-Gallo 2019](https://journals.sagepub.com/doi/abs/10.1177/0002764219842619?casa_token=HHfLLMyoQ7cAAAAA:nRfaKooM-oe1hF_iWjFVktrASiPtzCsmbl-Si-17kEA9Famn7rquX__wM4JxVZXLK1y_QV6WOs_QZQ)</ins>). Specifially, in biomedical research, diversity more commonly means heterogeneity than referring to a form of social representation or relating to a matter of addressing equity, inclusion, or justice. Thus, in the figure below, you will see two diversity lines: "diversity (all)" refers to all means of terms in the diversity category while "diversity (social)" refers to all mentions of diversity that co-occur with any of the other terms in the other 11 diversity categories mentioned above. For example, if diversity is mentioned alongside race or gender, diversity will be classified as a form of "social diversity." In this case, the term will be counted in both lines displayed in the graph. If diversity is not mentioned alongside any of the other diversity terms in our dictionaries, it will only be included in the "diversity (all)" line. 
+
+```{r figure 1a, fig.height=6.5, echo=FALSE}
+`%notin%` <- Negate(`%in%`)
+
+figure_1A <- general_pop_terms %>% 
+  # recode terms 
+  select(-starts_with("prc_")) %>% 
+  pivot_longer(!year, names_to = "term", values_to = "n") %>%
+  mutate(term = str_replace(term, "cnt_", ""),
+         term = str_replace(term, "sexgender", "sex/gender"),
+         term = str_replace(term, "racial", "race/ethnicity"),
+         term = str_replace(term, "\\b(?i)(diversity)\\b", "diversity (all)"),
+         term = str_replace(term, "class", "socioeconomic"),
+         term = str_replace(term, "soc_diversity", "diversity (social)")) %>% 
+  # graphing terms over time 
+  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
+  ggplot() + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
+  theme_minimal() +
+  labs(title = "        Figure 1A. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Term") + 
+  #scale_linetype_manual( values=linetype) +
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "bottom",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("cultural", "disability", "diversity (all)","diversity (social)", "equity", "lifecourse",
+                              "migration", "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
+                               # l.green  # mustard  # purple  # d.green  # orange
+                              "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")) + 
+                              # l. blue   # red     # pinkish  # dark blue = 005BB7
+                              #000000, black | #d23ccc, pink | #1b7524, dark green 
+  #scale_y_log10() +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() %>% 
+  layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
+```
+
+Figure 1A shows the growth in the raw word frequencies of diversity-related terms from 1990-2020. The most obvious trends are the dramatic upward trends in the lifecourse and sex/gender categories - increasing by roughly 5-fold each. The terms are frequently mentioned refer to the age and sex of populations being tested in clinical trials. Next, we see the "diversity (all)" category in yellow, which grew over 15-fold. Surprisingly, this growth is small compared to the 23-fold rise in the use of "diversity (social)" over the same period - a trend that provides robust support of our first hypothesis. We also observe notable growth a fairly marked increased in socio-economic and race/ethnicity terms, which jump about 20- and 9-fold respectively. The cultural, minority, and sexuality all increase over time, but this is a bit more subdued given that they never surpass more than 1,500 mentions in a given year. 
+
+```{r figure 1b, fig.height=6.5, echo=FALSE}
+# graphing terms over time 
+ggplotly(
+figure_1B <- general_pop_terms %>% 
+  select(-starts_with("cnt_")) %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_class, x = year, colour = "socioeconomic"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 1, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_lifecourse, x = year, colour = "lifecourse"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_migration, x = year, colour = "migration"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_equity, x = year, colour = "equity"), size = 1, stat="identity") +
+  geom_line(aes(y = prc_disability, x = year, colour = "disability"), size = 1, stat="identity") +
+  labs(title = "        Figure 1B. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Abstracts") +
+  theme(axis.title.x = element_blank(), 
+        #legend.position = "none",
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("cultural", "disability", "diversity (all)","diversity (social)", "equity", "lifecourse",
+                              "migration", "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
+                               # l.green  # mustard  # purple  # d.green  # orange
+                              "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")) +
+  #scale_y_log10() +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))) %>% 
+  layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
+```
+
+To normalize for the growth of overall publications, we look at change in the proportion of available abstracts. Figure 1B shows that the rise in lifecourse and sex/gender terms are still quite robust, increasing by about 10% and 5% over the time span of our analysis. The other growth trends are obviously much more muted. Diversity (all) increased by about 4% while diversity (social) is still mentioned in less than 1% of all abstracts by 2020. While this percent change of this category is more marked than the race/ethnicity category, the terms in the latter category are still referenced more often overall. Of the remaining categories, the socioeconomic category is the only other that has seen noticeable change. That said, it is still somewhat surprising to see a "fundamental" cause of health disparities mentioned so rarely in our sample of biomedical abstracts (<ins>[Link and Phelan 1995](https://www.jstor.org/stable/2626958?casa_token=fU0DluGoHicAAAAA:yXM1fgJY3nU02FJjfIt89gR0TCin2coKGHw4OT81ABzqRgl2FEqT1UEkgO-yD6_vq5KIEYTaIhpT7ZrEgbzUght0AgmNpkYiwF1NmODYTl_whLyzk65N)</ins>; <ins>[Phelan et al. 2010](https://journals.sagepub.com/doi/abs/10.1177/0022146510383498)</ins>).
+
+<br>
+
+#### Main Takeaways 
+
+Overall, we see robust support for Hypothesis 1 - that "diversity" is on the rise in biomedical research. Lifecourse and sex/gender terms have shown the most marked increases over time - mentioned in roughly 23% and 15% of all abstracts respectively. While race/ethnicity has risen slightly since 1990, these terms have mostly stagnated since the year 2005. Since then, the use of diversity in its "social" sense has nearly doubled, but is still only used in ~1% of all abstracts. These analyses also show the importance of accurately measuring diversity in context. Hopefully, the dictionaries and software tools developed in this project will help other researchers examine diversity in other contexts as well.
+
+<br>
+
+#### Appendices 
+
+Here is a list of the terms in each category analyzed above. You can scroll through each category or use the search tool to see if a term of interest was used in the analyses.
+
+```{r, warning = FALSE, message = FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+first_table <- divictionary %>% select(cultural, diversity, equity, minority, race_ethnicity)
+first_table[is.na(first_table)] <- ""
+datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
+```
+```{r, echo = FALSE}
+second_table <- divictionary %>% select(disability, lifecourse, migration, sex_gender, sexuality)
+second_table[is.na(second_table)] <- ""
+datatable(second_table, rownames = FALSE)
+```
+
+```{r biomedical_wordfreqs, echo = FALSE}
+subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_full.rds") %>% 
+  filter(!term %in% c("genetic", "population", "ancestry")) %>% 
+  mutate(term = str_replace(term, "aging", "lifecourse")) %>% 
+  rename(`term set` = term, `words in term set` = word, `count for all years` = count) %>% 
+  select(`term set`, `words in term set`, `count for all years`)
+datatable(subset_counts, caption = 'Supplementary Table 1B: Frequency of Words Used in Each Term Set (1990-2020)', rownames = FALSE)
+```
+
+<br>
+
+#### References 
+
+Abascal, M., Wu, J., & Baldassarri, D. (2021). People use both heterogeneity and minority representation to evaluate diversity. *Scientific Advances*, 7(11), eabf2507. 
+
+Berrey, E. (2015). *The Enigma of Diversity.* University of Chicago Press: Chicago, IL.
+
+Link, B. G., & Phelan, J. (1995). Social conditions as fundamental causes of disease. *Journal of Health and Social Behavior*, 80-94.
+
+Mayorga-Gallo, S. (2019). The white-centering logic of diversity ideology. *American Behavioral Scientist*, 63(13), 1789-1809.
+
+Phelan, J. C., Link, B. G., & Tehranifar, P. (2010). Social conditions as fundamental causes of health inequalities: theory, evidence, and policy implications. *Journal of Health and Social Behavior*, 51(1), S28-S40.
+
+Ray, V. (2019). A theory of racialized organizations. *American Sociological Review*, 84(1), 26-53.
+

@@ -1,6 +1,6 @@
 baseURL = "/"
 languageCode = "en-us"
-title = "Diversity ∙ Supplementary Materials"
+title = "The Rise of Diversity and Population Terminology in Biomedical Research"
 theme = "min_night"
 disqusShortname = ""
 googleAnalytics = ""
@@ -10,8 +10,8 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     post = "/:year/:month/:day/:slug/"
 
 [params]
-    author = "Anonymized"
-    description = "Measuring the Growth of Diversity and Population Terminology in Biomedical Research"
+    author = "Brandon Kramer"
+    description = "Brandon Kramer & Catherine Lee"
     logo = "favicon/network-labels-new.png"
     accent = "#000000" # dark colors do best
     backgroundColor = "#ffffff"
@@ -21,29 +21,34 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     highlightLanguages = ["r", "bash", "go"]
 
 # adjust these as you see fit
+#[[menu.main]]
+#    url = "/overview/"
+#    name = "Home"
+#    weight = 1
+
 [[menu.main]]
     url = "/"
     name = "Home"
     weight = 1
-
+    
 [[menu.main]]
-    url = "/description/"
-    name = "Project Description"
+    url = "/methods/"
+    name = "Overview"
     weight = 2
     
 [[menu.main]]
-    url = "/analyses/"
-    name = "Analyses"
+    url = "/results/"
+    name = "Results"
     weight = 3
 
 # Social icons to be shown on the right-hand side of the navigation bar
 # The "name" field should match the name of the icon to be used
 # The list of available icons can be found at http://fontawesome.io/icons/
 
-[[menu.icon]]
-    url = "https://journals.sagepub.com/home/asr"
-    name = "fas fa-book"
-    weight = 1
+#[[menu.icon]]
+#    url = "https://journals.sagepub.com/home/asr"
+#    name = "fas fa-book"
+#    weight = 1
 
 [[menu.icon]]
     url = "https://github.com/brandonleekramer/diversity"

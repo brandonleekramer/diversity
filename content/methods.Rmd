@@ -1,0 +1,226 @@
+---
+output: html_document
+---
+
+```{css, echo=FALSE}
+/* this chunk of code centers all of the headings */
+h1, h2, h3, h4 {
+  text-align: center;
+}
+```
+
+```{r setup, include=FALSE}
+rm(list = ls())
+for (pkg in c("tidyverse", "collapsibleTree", "DT", "RPostgreSQL")) {library(pkg, character.only = TRUE)}
+setwd("~/git/diversity/data/dictionaries")
+h1_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1")
+h2_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis2")
+h3_dictionary <- read.csv("diversity_project - h3_dictionary.csv", colClasses=c("regional"="character")) 
+```
+
+<center>
+
+![](/./methods_files/network-labels-new.png)
+
+</center>
+
+### The Rise of Diversity and Population <br/> Terminology in Biomedical Research
+#### Brandon Kramer & Catherine Lee
+
+This website was designed to serve as supplement to a paper in progress on the rise of diversity in biomedical research. While the motivation and methods are outlined below, our findings can be found by clicking the <ins>[Results](/results/)</ins> tab above.
+
+### Overview
+
+While existing research on race and affirmative action have detailed the growth of diversity projects in education and employment that obfuscate the language of race and racism, the field of science & technology studies have documented scientists persistent attempts to molecularize race in biomedical research. In this paper, we employ computational text analysis to examine quantitative trends in the use of diversity terms, OMB/Census terms, and other population labels in a sample of 2.6+ million biomedical abstracts spanning the last 30 years. These analyses demonstrate that while racial, ethnic, and OMB/Census terms have mostly stagnated during the past 15 years, the use of “diversity” continues to rise, suggesting that biomedical researchers increasingly use a different grammar to construct population differences. We also observe that some population labels have grown dramatically with specific kinds of population terms outpacing others. Most notably, we find that the use of national and continental terms rose exponentially while terms like race and OMB/Census labels have actually dropped over the past decade. Together, our work points to a potential shift in the way that biomedical researchers enact population distinctions, relying more on biogeographical distinctions rather than racial or ethnic classifiers. Overall, this work not only informs science studies and bioethics scholars’ research on the politics of diversity in biomedical research, but also shares a novel set of methodological tools, including open source software and a new public dataset, to research this topic.  
+
+### Data/Methodology
+
+```{r supp_fig1, fig.width=7, fig.height=4, include=FALSE}
+
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
+
+# query the users_gh data (table of all github users) 
+by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.biomedical_articles_per_year")
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
+```
+
+```{r fig.width=7, fig.height=4, warning=FALSE, message=FALSE, echo = FALSE}
+
+ggplot(data = by_year, aes(x = year, y = count)) + 
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Number of Publication Abstracts in Datasets (1990-2020)",
+       caption = "Data Source: ISI Web of Science") + 
+  theme(axis.title.x = element_blank(),
+        plot.title = element_text(size=11, hjust = 0.2),
+        legend.title = element_text(size = 10, hjust = 0.5),
+        panel.background = element_rect(fill = "white")) +
+  ylab("Number of Abstracts") 
+```
+
+Our dataset derives from the <ins>[PubMed/MEDLINE database](https://www.nlm.nih.gov/databases/download/pubmed_medline.html)</ins> -- a free, publicly-available collection of more than 27 million scientific abstracts provided by the U.S. National Library of Medicine. After downloading the entirety of these data and building them up into a PostgreSQL database with the <ins>[PubMed Portable package in Python](https://github.com/KerstenDoering/PubMedPortable/wiki#build-up-a-relational-database-in-postgresql)</ins>, we narrowed our focus on the top journals in the field of biomedicine ranging from the years 1990 to 2020. To do this, we filtered our data to the top-250 biomedical journals <ins>[based on the impact factor in 2019](https://www.kaggle.com/umairnasir14/impact-factor-of-top-1000-journals)</ins>, leaving us with ~2.6 million abstracts. After aggregating these data, we conducted several pre-processing steps to standardize the data, including converting text to lower case, removing special characters and numbers, and transforming select compound and hyphenated terms. 
+
+While the specifics of each hypothesis test are detailed below, our overall analysis strategy depends on a "nested dictionary" approach to supervised text mining. This basically means that we created "dictionaries" with a number of "terms" that fall into "categories" for each hypothesis. We then used those dictionaries to count how often the terms in each category are mentioned within our corpus of abstracts. Although the magnitude of the data and reproducibility of the algorithms are useful for future research, we believe the potential utility of the dictionaries is what might help motivate future research on this topic. The dictionaries are by no means comprehensive, despite being predicated on past work, and could certainly benefit from continued scholarly debate, including from bioethics and AI ethics scholars. To make these dictionaries as transparent as possible, we have detailed their construction below in addition to visualizing their hierarchical relations and providing searchable tables. We encourage any and all feedback about the best way to improve these dictionaries for future research, which can be shared via <ins>[email here](brandonleekramer@gmail.com)</ins>. 
+
+Once all of our dictionaries were constructed, we ingested the data and used <ins>[R's tidytext package](https://www.tidytextmining.com/)</ins> to unnest and count all of the terms in our corpus (both in raw counts and as proportions). The code for each hypothesis can be found on <ins>[GitHub](https://github.com/brandonleekramer/diversity/tree/master/src/02_text_trends)</ins>.
+
+### Hypothesis 1
+
+<center>
+H1: The use of the term “diversity” and related terminology will increase in biomedical abstracts
+</center>
+
+<br>
+
+For Hypothesis 1, our main goal was to examine the growth of the term diversity and its various metonyms, including cultural, disability, diversity, equity/justice, lifecourse, migration, minority, race/ethnicity, sex/gender, and sexuality. For each category, we manually compiled the terms based on our scholarly expertise in these fields and the likelihood of those terms being used to represent diversity in biomedicine. In the case of sex/gender and sexualties terms, we referenced the <ins>[Oxford Dictionary of Gender Studies](https://www.oxfordreference.com/view/10.1093/acref/9780191834837.001.0001/acref-9780191834837?btog=chap&hide=true&pageSize=20&skipEditions=true&sort=titlesort&source=%2F10.1093%2Facref%2F9780191834837.001.0001%2Facref-9780191834837)</ins> and, for the disability category, we also used the <ins>[National Center on Disability and Justice's Style Guide](https://ncdj.org/style-guide/)</ins> to inform term inclusion. 
+
+Our original lists were more comprehensive for some categories, but extensive sensitivity analyses of each category revealed that the inclusion of some terms yielded a substantial number of "false positive" results. For example, when we included "blind" in the disability category, but found that the majority of results returned related to "double-blind" studies, which are not indicative of the social diversity we are interested here. False-positive results were largely dealt with my removing terms that were too general to provide meaningful results or by <ins>[reclassifying certain combinations of words during our preprocessing stage to minimize inflated count totals](https://github.com/brandonleekramer/diversity/blob/master/data/dictionaries/diversity_project%20-%20preprocessing.csv)</ins>. This strategy proved effective in generating accurate results, which we validated by manually spot-checking a random sample of abstracts to ensure they are capturing valid mentions of the terms. 
+
+Perhaps, most importantly, the term "diversity" was a concept that took considerable effort to validate in our work. Diversity is a particularly polysemous term; it is has many meanings depending on the context. In fact, our research suggests that diversity rarely refers to issues of diversity, equity, and inclusion, but instead is much more commonly referring to heterogeneity, divergence, variation, complexity, or variability in biomedical research <ins>[(Word2Vec Results)](https://github.com/brandonleekramer/diversity/blob/master/src/04_word_embeddings/04_eda_word2vec.ipynb)</ins>. Thus, we decided to include two categories: one with all mentions of diversity in addition to including all mentions of "social diversity." The second category includes *only* mentions of diversity that co-occur alongside any of the other terms from the other diversity categories in our first dictionary. To verify that this approach was meaningful and accurate, we took a random sample of 1% of abstracts from both the "all diversity" and "social diversity" categories to manually validate that the terms fell into the appropriate category. Overall, we found that this approach was 90%+ accurate in distinguishing between the two uses.
+
+For those interested, the terms embedded within each category can be visualized by clicking on the <ins>[collapsibleTree](https://adeelk93.github.io/collapsibleTree/)</ins> charts or by searching the <ins>[interactive tables](https://rstudio.github.io/DT/)</ins> below. 
+
+```{r, echo=FALSE, warning = FALSE, message = FALSE, fig.height=7}
+h1_dictionary %>% 
+  group_by(category, term) %>% 
+  summarize(`number of terms` = n()) %>% 
+  mutate(category = str_replace(category, "sex_gender", "sex/gender"),
+         category = str_replace(category, "race_ethnicity", "race/ethnicity"),
+         category = str_replace(category, "social_class", "social class")) %>%  
+collapsibleTreeSummary(
+    hierarchy = c("category", "term"),
+    root = "category",
+    width = 800,
+    attribute = "number of terms",
+    zoomable = TRUE,
+    fontSize = 16, 
+    nodeSize = "leafCount",
+    maxPercent = 50
+  )
+```
+```{r, warning = FALSE, message = FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+first_table <- divictionary %>% select(cultural, diversity, equity, minority, race_ethnicity)
+first_table[is.na(first_table)] <- ""
+datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
+```
+```{r, echo = FALSE}
+second_table <- divictionary %>% select(disability, lifecourse, migration, sex_gender, sexuality)
+second_table[is.na(second_table)] <- ""
+datatable(second_table, rownames = FALSE)
+```
+
+<br>
+<br>
+
+### Hypothesis 2 
+
+In the second set of analyses, we evaluate <ins>[OMB Directive 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html)</ins> and <ins>[US Census](https://www.census.gov/topics/population/race/about.html)</ins> categories. This coding process was similar to the one detailed above where we are compiling terms and then providing the raw and proportional counts of how often they are mentioned in the corpus. It is worth noting that sensitivity analyses were needed in this hypothesis - mainly to validate that "black" and "white" were being used to refer to populations rather than other contexts. 
+
+```{r , echo=FALSE, warning=FALSE, message=FALSE}
+h2_dictionary %>% 
+  group_by(category, term) %>% 
+  summarize(`number of terms` = n()) %>% 
+collapsibleTreeSummary(
+    hierarchy = c("category", "term"),
+    root = "category",
+    width = 800,
+    attribute = "number of terms",
+    zoomable = TRUE,
+    fontSize = 16, 
+    nodeSize = "leafCount",
+    maxPercent = 50
+  )
+```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
+terms_table <- terms_table %>% select(asian, black, hispanic_latinx)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table, rownames = FALSE)
+```
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
+terms_table <- terms_table %>% select(native_american,	pacific_islander,white)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table, rownames = FALSE)
+```
+
+### Hypothesis 3 
+
+In Hypothesis 3, we expanded the scope of our research project by examining the rise of population terms used in biomedical research. In their inductive analysis of population terms used in *Nature Genetics*, Panofsky and Bliss (<ins>[2017](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=eF0JAnU0cn0AAAAA:w30aMLvvQ6dhsF1lr4Z9gU2zEVQx3ViBYSQnAjA_yYMGGSL03coBF8-fuhxvWhp3GIWSdSUQFqrR)</ins>) offer us a number of important insights about how to approach the task of collecting a census on these terms. First, these scholars note that researchers use population terms in ambiguous ways - using their polyvocality to enact population differences in genetic research. These scholars also note that continental, national, and directional terms are used increasingly more than racial and ethnic terms. Still, we are interested in getting an accurate count of each category and in order to do this we need a dictionary of terms to search on for each category. Although we did spend time searching for a comprehensive dictionary to serve our purposes, we were unable to find such a data source, especially of subnational, caste, and/or ethnic terms. 
+
+We ultimately decided to engage in an abductive data collection approach using <ins>[Wikipedia](https://www.wikipedia.org/)</ins> as our primary source. Although the use of Wikipedia is not without its criticisms 
+<ins>[(Black 2008;](https://www.emerald.com/insight/content/doi/10.1108/14684520810865994/full/html?casa_token=u1beY859p2wAAAAA:P36z4aoC-iRw-T6odh_xtUObCsNXjYmWU35SwDNAA783rUtKJgrgJ6H8irMh-VQBW0-iXamyutUIxYyluSKVSDdcCeXqH1qgYyI6RfWdXp_83pwVmsL9)</ins> <ins>[Collier and Bear 2012;](https://dl.acm.org/doi/pdf/10.1145/2145204.2145265?casa_token=SxOYBgDnrFgAAAAA:HYu4VgoXGxCjk2A3GJPU-YE3wRbRhI2bFzWdNm4ue7hTHcZu1vv_wdyorr5cAxOeO1dLT-eU9t7gVQ)</ins> <ins>[Kostakis 2010)](https://journals.uic.edu/ojs/index.php/fm/article/download/2613/2479)</ins>, the site is also among the top-15 websites used on the web <ins>[(Alexa 2020)](https://www.alexa.com/topsites)</ins>, is subject to continuous peer review and editing, and is an active historical document that is crowdsourced by millions of online users <ins>[(Wikipedia 2020)](https://www.wikipedia.org/)</ins>. Thus, while the site is certainly subject to malicious and/or unqualified editing, it is also likely to be more comprehensive than any one single national governing apparatus that is subject to scrutiny by other political actors. As a reminder, our purpose in constructing a dictionary is not to create a hierarchical classification system or to aggregate (mis-)information about populations nor to classify them into strata. We largely circumvent such activities, noting how these terms have been used throughout the long history of scientific racism and other violent racialized activities. Instead, our goal is to aggregate a dictionary of the terms that scientists could use to enact population differences and create a census of how often these terms are used over time. 
+
+To compile this list, we first collected all of the relevant <ins>[continental](https://en.wikipedia.org/wiki/List_of_adjectival_and_demonymic_forms_of_place_names)</ins>, <ins>[subcontinental](https://en.wikipedia.org/wiki/List_of_adjectivals_and_demonyms_for_subcontinental_regions)</ins>, and <ins>[national](https://en.wikipedia.org/wiki/List_of_sovereign_states)</ins> terms from Wikipedia. Generating these lists was relatively straight-forward. Next, following Panofsky and Bliss (<ins>[2017](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=eF0JAnU0cn0AAAAA:w30aMLvvQ6dhsF1lr4Z9gU2zEVQx3ViBYSQnAjA_yYMGGSL03coBF8-fuhxvWhp3GIWSdSUQFqrR)</ins>), we also collected terminology related to <ins>[cardinal directions](https://en.wikipedia.org/wiki/Cardinal_direction)</ins>, terms from the <ins>[Center of Disease Control Office of Management and Budget (OMB) Directive No. 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html)</ins> and <ins>[United States Census categories](https://www.census.gov/topics/population/race/about.html)</ins> as well as terms related to (genetic) ancestry, race, and ethnicity. As a point of clarification, racial and ethnic terms refer simply to variations of "race" and "ethnicity" and not terms like black, white, asian, etc. When applicable, those terms fall under the OMB/US Census category sets. 
+
+```{r , echo=FALSE, fig.height=7}
+categories <- h3_dictionary %>% 
+  filter(category != "subnational") %>% 
+  select(category, continental, regional, subclass, term)
+
+collapsibleTreeSummary(categories, 
+                c("category", "continental", "regional", "subclass", "term"), 
+                collapsed = T,
+                fontSize = 16, 
+                nodeSize = "leafCount",
+                maxPercent = 50
+)
+```
+
+In what proved to be the most complicated aspect of our curation process, we decided to collect all of the ethnic, tribal, and caste terms we could find from around the world and classify them under the umbrella category of "subnational." This process began with a catalog of <ins>[all indiginous peoples from around the world](https://en.wikipedia.org/wiki/List_of_indigenous_peoples)</ins> - a directory that was broken apart by continent. Next, we collected terms from pages that list populations from each continent: 
+
+* <ins>[Africa](https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa)</ins>, <ins>[Asia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Asia)</ins>, <ins>[Europe](https://en.wikipedia.org/wiki/Ethnic_groups_in_Europe)</ins>, <ins>[North America](https://en.wikipedia.org/wiki/Classification_of_indigenous_peoples_of_the_Americas)</ins>, <ins>[South America](https://en.wikipedia.org/wiki/Indigenous_peoples_of_South_America)</ins>, <ins>[Oceania](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Oceania)</ins> as well as their <ins>[adjectival and demonymic forms](https://en.wikipedia.org/wiki/List_of_adjectival_and_demonymic_forms_of_place_names)</ins>.
+
+Moreover, we drilled down to collect additional terms from the pages of smaller geographical units or large populations within each continent:
+
+* Africa: <ins>[Northern Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_North_Africa)</ins>, <ins>[Eastern Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_East_Africa)</ins>, <ins>[Northeastern Africa](https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa#North_east_Africa)</ins>, <ins>[Southeastern Africa](https://en.wikipedia.org/wiki/List_of_ethnic_groups_of_Africa#Southeast_Africa)</ins>, <ins>[Western Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_West_Africa)</ins>, <ins>[Southern Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_Southern_Africa)</ins>, <ins>[Central Africa](https://en.wikipedia.org/wiki/Category:Indigenous_peoples_of_Central_Africa)</ins>, the <ins>[Bantu](https://en.wikipedia.org/wiki/Category:Bantu_peoples)</ins> and <ins>[Fula](https://en.wikipedia.org/wiki/Category:Fula_people)</ins>, <ins>[African Pygmies](https://en.wikipedia.org/wiki/Category:African_Pygmies)</ins> peoples
+* Asia: <ins>[Middle East](https://en.wikipedia.org/wiki/Ethnic_groups_in_the_Middle_East)</ins>, <ins>[Caucasus](https://en.wikipedia.org/wiki/Demographics_of_Central_Asia#Ethnic_groups_in_Central_Asia)</ins>, </ins>[Siberia](https://en.wikipedia.org/wiki/Indigenous_peoples_of_Siberia)</ins>, <ins>[Eurasia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Eurasia)</ins>, <ins>[East Asia](https://en.wikipedia.org/wiki/East_Asian_people)</ins>, <ins>[Southeast Asia](https://en.wikipedia.org/wiki/Ethnic_groups_of_Southeast_Asia)</ins>, <ins>[South Asia](https://en.wikipedia.org/wiki/South_Asian_ethnic_groups)</ins>, <ins>[Indian Caste](https://en.wikipedia.org/wiki/Caste_system_in_India)</ins>, and <ins>[Jewish ethnic](https://en.wikipedia.org/wiki/Jewish_ethnic_divisions)</ins> terms 
+* Europe: <ins>[All Terms Listed by Country](https://en.wikipedia.org/wiki/Ethnic_groups_in_Europe)</ins>
+* North America: <ins>[Arctic](https://en.wikipedia.org/wiki/List_of_indigenous_peoples)</ins>, <ins>[Subarctic](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Subarctic)</ins>, <ins>[First Nations](https://en.wikipedia.org/wiki/List_of_First_Nations_peoples)</ins>, <ins>[Pacific Northwest](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Pacific_Northwest_Coast)</ins>, <ins>[Northwest Plateau](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Northwest_Plateau)</ins>, <ins>[Great Plains](https://en.wikipedia.org/wiki/Plains_Indians)</ins>, <ins>[East Woodlands](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Eastern_Woodlands)</ins>, <ins>[Northeast Woodlands](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Northeastern_Woodlands)</ins>, <ins>[Southeast Woodlands](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Southeastern_Woodlands)</ins>, <ins>[Great Basin](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_Great_Basin)</ins>, [California](https://en.wikipedia.org/wiki/Indigenous_peoples_of_California), <ins>[American Southwest](https://en.wikipedia.org/wiki/Indigenous_peoples_of_the_North_American_Southwest)</ins>, <ins>[Aridoamerica](https://en.wikipedia.org/wiki/Aridoamerica)</ins>, <ins>[Mesoamerica](https://en.wikipedia.org/wiki/Classification_of_indigenous_peoples_of_the_Americas)</ins>, <ins>[Carribean](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Americas)</ins>, <ins>[Central America](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Americas)</ins>, and <ins>[Mexico](https://en.wikipedia.org/wiki/Indigenous_peoples_of_Mexico)</ins> 
+* South America: Peoples of <ins>[Argentina](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Argentina)</ins>, <ins>[Bolivia](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Bolivia)</ins>, <ins>[Brazil](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Brazil)</ins>, <ins>[Chile](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Chile)</ins>, <ins>[Colombia](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Colombia)</ins>, <ins>[Ecuador](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Ecuador)</ins>, <ins>[French Guiana](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Guyana)</ins>, <ins>[Guyana](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Guyana)</ins>, <ins>[Paraguay](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Paraguay)</ins>, <ins>[Peru](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Peru)</ins>, <ins>[Suriname](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Suriname)</ins>, <ins>[Uruguay](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Uruguay)</ins>, <ins>[Venezuela](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Venezuela)</ins>
+* Oceania: <ins>[Australia](https://en.wikipedia.org/wiki/Aboriginal_Australians)</ins>, <ins>[Austronesia](https://en.wikipedia.org/wiki/Austronesian_peoples)</ins>, <ins>[Micronesia](https://en.wikipedia.org/wiki/Micronesia#Demographics)</ins>, <ins>[Melanesia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Oceania)</ins>, and <ins>[Polynesia](https://en.wikipedia.org/wiki/Polynesians)</ins>
+
+The point of this exercise was not to classify populations into any hierarchical category. In fact, we explicitly chose to create the umbrella term "subnational" to circumvent further contributing to the violent history of hierarchical classification into races, classes, or castes. Instead, this process was meant to compile the largest, most inclusive list of population terms we could logically manage - knowing that this list will likely never be exhaustive because the enactment of population differences depends on ambiguity, polyvocality, and dynamism. In total, our list includes more than 6,500 terms. In addition to visualizing these terms in the collapsibleTrees below, you can also search through the interactive table.
+
+```{r , echo=FALSE, warning=FALSE, fig.height=7}
+subnational <- h3_dictionary %>% 
+  filter(category == "subnational") %>% 
+  select(category, continental, regional, subclass, term)
+
+collapsibleTreeSummary(subnational, 
+                c("continental", "regional", "subclass", "term"), 
+                collapsed = T,
+                fontSize = 16, 
+                nodeSize = "leafCount",
+                maxPercent = 50
+)
+```
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+all_pop_terms_table <- read_csv("diversity_project - h3_dictionary.csv")
+all_pop_terms_table <- all_pop_terms_table %>% select(-regional, -source, -str_type, -date_added, -subclass)
+all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
+DT::datatable(all_pop_terms_table, rownames = FALSE)
+```
+
+<br>
+
+For our main findings, please check out our <ins>[Results](/results/)</ins> page and for methodological questions, please feel free to contact us at <ins>[email](brandonleekramer@gmail.com)</ins>. 
+
+
+
+

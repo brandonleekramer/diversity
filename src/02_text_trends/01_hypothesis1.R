@@ -5,7 +5,7 @@
 ####################################################################################### install.packages (for slurm) 
 
 #rm(list = ls())
-#analysis_timeframe <- "2000"
+#analysis_timeframe <- "1990"
 
 #install.packages("readr", repos = "http://cran.us.r-project.org")
 #install.packages("stringi", repos = "http://cran.us.r-project.org", dependencies=TRUE, INSTALL_opts = c('--no-lock'))
@@ -314,11 +314,29 @@ gen_pop_prc_counts <- general_pop_terms %>%
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_soc_diversity = round(cnt_soc_diversity / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% 
+  filter(disability_cnt == 1) %>% #disability 
+  group_by(year) %>% 
+  summarise(cnt_disability = n_distinct(id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_disability = round(cnt_disability / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% 
+  filter(equity_cnt == 1) %>% #equity 
+  group_by(year) %>% 
+  summarise(cnt_equity = n_distinct(id)) %>% 
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_equity = round(cnt_equity / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% 
   filter(lifecourse_cnt == 1) %>% # lifecourse
   group_by(year) %>% 
   summarise(cnt_lifecourse = n_distinct(id)) %>%  
   right_join(gen_pop_prc_counts, by = "year") %>% 
   mutate(prc_lifecourse = round(cnt_lifecourse / total * 100, digits = 2))
+gen_pop_prc_counts <- general_pop_terms %>% 
+  filter(migration_cnt == 1) %>% # migration
+  group_by(year) %>% 
+  summarise(cnt_migration = n_distinct(id)) %>%  
+  right_join(gen_pop_prc_counts, by = "year") %>% 
+  mutate(prc_migration = round(cnt_migration / total * 100, digits = 2))
 gen_pop_prc_counts <- general_pop_terms %>% 
   filter(minority_cnt == 1) %>% # minority
   group_by(year) %>% 

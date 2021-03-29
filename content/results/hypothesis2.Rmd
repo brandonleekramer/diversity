@@ -1,0 +1,120 @@
+---
+title: "Hypothesis 2"
+description: "Change in US-specific racial and ethnic categories in biomedical abstracts from 1990-2020"
+output: html_document
+weight: 2
+---
+
+```{css, echo=FALSE}
+/* this chunk of code centers all of the headings */
+h1, h2, h3, h4 {
+  text-align: center;
+}
+```
+
+```{r, include=FALSE}
+rm(list = ls())
+
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr",
+              "grid", "gridExtra", "reshape2", "extrafont", "data.table",
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+
+h2_omb_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_counts.rds") 
+h2_omb_prcs <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_prcs.rds") 
+
+```
+
+Next, we wanted to examine the growth of <ins>[OMB Directive 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html)</ins> and <ins>[US Census](https://www.census.gov/topics/population/race/about.html)</ins> terms. To test Hypothesis 2, we [compiled a dictionary](/methods/) used to catch to the main OMB/US Census terms, including Asian, White, Black, Native American, Pacific Islander, Hispanic/Latinx as well as more general terms like race and ethnicity. Given that these terms can also refer to populations outside of the US, we recoded compound and hyphenated US-centric terms to ensure they were specific to the American context. Then, we used <ins>[R's tidytext package](https://www.tidytextmining.com/)</ins> to unnest and count all of the terms in our corpus (both in raw counts and as proportions).
+
+```{r figure 3c, message = FALSE, warning = FALSE, echo=FALSE}
+
+# graphing us-specific terms over time using census categories 
+# https://www.census.gov/topics/population/race/about.html
+
+figure_2A <- h2_omb_counts %>% 
+  group_by(term, year) %>% 
+  summarise(n = sum(count)) %>% 
+  arrange(-n) %>% 
+  ggplot() + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
+  theme_minimal() +
+  labs(title = "     Figure 2A. Total Growth of OMB/US Census Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Term") + 
+  ylab("Term Count") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("asian","black", "diversity (social)",
+                              "ethnicity", "hispanic/latinx", "native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", "#800080", 
+                              "#61B329", "#3B9AB2", "#ff8396", 
+                              "#000000", "#f2be00", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() %>% 
+  layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
+
+# "#E86F00", # orange  "#61B329", # light green  "#f2be00", # mustard  "#800080", # purple
+# "#000000", # dark green  "#005BB7", # dark blue   "#CC0000", # red "#ff8396", # pinkish "#3B9AB2" # light blue 
+```
+
+Figure 2A shows the OMB US Census terms are growing over time, but this growth is quite subdued compared to our previous results. For example, no category exceeds more than 3,000 uses in a given year. Of these category sets, race and ethnicity grow the most followed by White, Black, Asian and Hispanic/Latinx. Notably, uses of "social diversity" end up around the same total as Hispanic/Latinx, but are much lower than the other terms just mentioned. 
+
+```{r figure_3D, message = FALSE, warning=FALSE, echo=FALSE}
+# graphing terms over time 
+figure_2B <- h2_omb_prcs %>% 
+  ggplot() + 
+  geom_line(aes(y = prc_black, x = year, colour = "black"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_white, x = year, colour = "white"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_asian, x = year, colour = "asian"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_hispanic, x = year, colour = "hispanic/latinx"),size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_native_american, x = year, colour = "native-american"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_pacific_islander, x = year, colour = "pacific-islander"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 1.3,stat="identity") +
+  geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 1.3, stat="identity") +
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (social)"), size = 1.3, stat="identity") +
+  labs(title = "    Figure 2B. Proportional Growth of \n US-Specific Terms in PubMed/MEDLINE Abstracts (1990-2020)",
+       color =  "Term") + 
+  theme_minimal() +
+  ylab("Proportion of Articles") +
+  theme(axis.title.x = element_blank(), 
+        #axis.title.y = element_blank(), 
+        #legend.position = "none",
+        legend.box = "vertical", 
+        #legend.position = "none",
+        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_color_manual(labels=c("asian","black", "diversity (social)",
+                              "ethnicity", "hispanic/latinx", "native-american",
+                              "pacific-islander","race","white"),
+                     values=c("#005BB7", "#E86F00", "#800080", 
+                              "#61B329", "#3B9AB2", "#ff8396", 
+                              "#000000", "#f2be00", "#CC0000")) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() %>% 
+  layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
+```
+
+Figure 2B shows proportional variation in OMB/Census terms over time. While almost all of the categories rise gradually until the late-2000's, the terms white, black, race and ethnicity all taper off and, in some cases, decline thereafter. In contrast, we see that the "diversity (social)" category continues to rise, though does not eclipse most of the racial/ethnic categories. This suggests that racial/ethnic terms are less commonly used that a decade ago, and interest in diversity is on the rise. Therefore, it seems that Berrey <ins>[(2015)](https://press.uchicago.edu/ucp/books/book/chicago/E/bo19910067.html)</ins> may be right about diversity becoming more prominent than racial/ethnic terms. However, this method cannot tell us with certainty that diversity is replacing racial/ethnic terms. While we plan to explore this more through computational methods like <ins>[Word2Vec](https://github.com/brandonleekramer/diversity/blob/master/src/04_word_embeddings/04_eda_word2vec.ipynb)</ins> and BERT, qualitative researcher would be wise to supplement this research by questioning biomedical researchers about how they conceptualize diversity relative to the traditional racial/ethnic terms, especially given that most STS scholarship has assume that these types of terms are still on the rise.
+
+### Appendices 
+
+Here is a list of the terms that were used to classify the OMB/US Census terms in the final two sets of analyses.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
+terms_table <- terms_table %>% select(asian, black, hispanic_latinx)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table, rownames = FALSE)
+```
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
+terms_table <- terms_table %>% select(native_american,	pacific_islander,white)
+terms_table[is.na(terms_table)] <- ""
+DT::datatable(terms_table, rownames = FALSE)
+```
+

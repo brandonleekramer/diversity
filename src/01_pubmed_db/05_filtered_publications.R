@@ -3,7 +3,7 @@
 library(tidyverse)
 library(RPostgreSQL)
 
-filtered_publications <- read_csv("~/git/diversity/data/dictionaries/pubmed_2021 - top_journals.csv") %>% select(publication)
+filtered_publications <- read_csv("~/git/diversity/data/journal_rankings/top_250_journals.csv") %>% select(publication)
 
 # connect to postgresql to get data (in rivanna)
 conn <- dbConnect(drv = PostgreSQL(), 

@@ -1,0 +1,98 @@
+---
+title: "Supplementary Materials"
+#description: "Descriptive Analyses of Data Sources"
+output: html_document
+weight: 5
+---
+
+```{r supp_fig1, fig.width=7, fig.height=4, include=FALSE}
+
+rm(list = ls())
+
+for (pkg in c("tidyverse", "ggplot2", "RPostgreSQL")) {library(pkg, character.only = TRUE)}
+
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
+
+# query the users_gh data (table of all github users) 
+by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.biomedical_articles_per_year")
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
+```
+
+```{r fig.width=7, fig.height=4, warning=FALSE, message=FALSE, echo = FALSE}
+
+ggplot(data = by_year, aes(x = year, y = count)) + 
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Supp. Figure 1. Number of Publication Abstracts in Datasets (1990-2020)",
+       caption = "Data Source: ISI Web of Science") + 
+  theme(axis.title.x = element_blank(),
+        plot.title = element_text(size=11, hjust = 0.2),
+        legend.title = element_text(size = 10, hjust = 0.5),
+        panel.background = element_rect(fill = "white")) +
+  ylab("Number of Abstracts") +
+  #scale_fill_manual(values=c('black','darkgray')) +
+  scale_x_discrete(labels = c("1990" = "1990", "1991" = "", "1992" = "", "1993" = "", "1994" = "",
+                              "1996" = "", "1997" = "", "1998" = "", "1999" = "",
+                              "2001" = "", "2002" = "", "2003" = "", "2004" = "",
+                              "2006" = "", "2007" = "", "2008" = "", "2009" = "", "2010" = "2010",
+                              "2011" = "", "2012" = "", "2013" = "", "2014" = "",
+                              "2016" = "", "2017" = "", "2018" = "", "2019" = "", "2020" = "2020"))
+```
+
+```{r supp_fig_2, fig.width=7, fig.height=4}
+
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
+
+# query the users_gh data (table of all github users) 
+by_journal <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.biomedical_articles_per_journal")
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
+clean_journals <- by_journal %>% 
+  separate(publication, c("publication"), sep = "\\(", extra = "drop") %>% 
+  separate(publication, c("publication"), sep = "\\:", extra = "drop") %>% 
+  mutate(publication = str_replace(publication, pattern = "Proceedings of the National Academy of Sciences of the United States of America", replacement = "PNAS"),
+         publication = str_replace(publication, pattern = "Annual International Conference of the IEEE Engineering in Medicine and Biology Society. IEEE Engineering in Medicine and Biology Society. Annual International Conference", replacement = "IEEE EMB")) %>% 
+  arrange(count) %>% 
+  top_n(count, n = 50)
+
+
+ggplot(data = clean_journals, aes(x = count, y = publication)) + 
+  geom_bar(stat="identity", position="dodge") +
+  labs(title = "Supp. Figure 2. Number of Publication Abstracts Per Journal (1990-2020)",
+       caption = "Data Source: ISI Web of Science") + 
+  theme(axis.title.x = element_blank(),
+        plot.title = element_text(size=11, hjust = 0.2),
+        legend.title = element_text(size = 10, hjust = 0.5),
+        panel.background = element_rect(fill = "white")) +
+  ylab("Number of Abstracts")
+  
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
