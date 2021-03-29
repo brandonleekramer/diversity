@@ -98,7 +98,7 @@ figure_2B <- all_pop_prc_counts %>%
 
 Looking at these trends as proportions, Figure 3B again demonstrates that the overall growth of all population terms (19.5% in 1990 to 67.4% in 2020) is mostly the result of growth in national and continental terms, which increase from 6.9% to 36.2% and from 2.1% to 9.49% respectively. Most of the subcontinental, subnational, directional, racial/ethnic, and OMB/US Census categories have exhibited more subtle increases over time. These results suggests that the use of population terms is increasing over time, and that this mostly due to national and continental terms. This is consistent with the Panofsky and Bliss <ins>[(2017)](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=ONTaswwjG9kAAAAA:zyJZCoDHuqmsuTVVUncKX8WqRWSDrhU_adG-ZzBawFV_mwVI6JgXNoLfdo0EAfNMuDmePVo8DteOJg)</ins> who, in a much smaller sample of publications from *Nature Genetics*, also find that national and continental terms are becoming the vernacular of choice among leading biomedical scholars when conducting population difference testing.
 
-### Appendices 
+### Appendix 
 
 Here is a list of the 6,500+ distinct terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. If you have suggestions about what to add and/or reclassify, please send an <ins>[email to the authors](brandonleekramer@gmail.com)</ins>.
 

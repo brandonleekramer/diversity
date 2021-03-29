@@ -107,7 +107,7 @@ figure_2B <- h2_omb_prcs %>%
 
 Figure 2B shows proportional variation in OMB/Census terms over time. While almost all of the categories rise gradually until the late-2000's, the terms white, black, race and ethnicity all taper off and, in some cases, decline thereafter. In contrast, we see that the "diversity (social)" category continues to rise, though does not eclipse most of the racial/ethnic categories. This suggests that racial/ethnic terms are less commonly used that a decade ago, and interest in diversity is on the rise. Therefore, it seems that Berrey <ins>[(2015)](https://press.uchicago.edu/ucp/books/book/chicago/E/bo19910067.html)</ins> may be right about diversity becoming more prominent than racial/ethnic terms. However, this method cannot tell us with certainty that diversity is replacing racial/ethnic terms. While we plan to explore this more through computational methods like <ins>[Word2Vec](https://github.com/brandonleekramer/diversity/blob/master/src/04_word_embeddings/04_eda_word2vec.ipynb)</ins> and BERT, qualitative researchers may want to supplement this research by questioning biomedical researchers about how they conceptualize diversity relative to more traditional racial/ethnic terms, especially given that most STS scholarship has assume that these types of terms are still on the rise. We now know that this is not necessarily the case.
 
-### Appendices 
+### Appendix 
 
 Here is a list of the terms that were used to classify the OMB/US Census terms in the final two sets of analyses.
 
