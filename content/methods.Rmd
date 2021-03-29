@@ -106,17 +106,10 @@ collapsibleTreeSummary(
     maxPercent = 50
   )
 ```
-```{r, warning = FALSE, message = FALSE, echo = FALSE}
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
-divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
-first_table <- divictionary %>% select(cultural, diversity, equity, minority, race_ethnicity)
-first_table[is.na(first_table)] <- ""
-datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
-```
-```{r, echo = FALSE}
-second_table <- divictionary %>% select(disability, lifecourse, migration, sex_gender, sexuality)
-second_table[is.na(second_table)] <- ""
-datatable(second_table, rownames = FALSE)
+tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1") 
+DT::datatable(tree_data, rownames = FALSE)
 ```
 
 <br>
@@ -144,17 +137,8 @@ collapsibleTreeSummary(
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
-terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
-terms_table <- terms_table %>% select(asian, black, hispanic_latinx)
-terms_table[is.na(terms_table)] <- ""
-DT::datatable(terms_table, rownames = FALSE)
-```
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
-setwd("~/git/diversity/data/dictionaries")
-terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
-terms_table <- terms_table %>% select(native_american,	pacific_islander,white)
-terms_table[is.na(terms_table)] <- ""
-DT::datatable(terms_table, rownames = FALSE)
+tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis2") 
+DT::datatable(tree_data, rownames = FALSE)
 ```
 
 ### Hypothesis 3 

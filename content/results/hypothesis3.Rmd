@@ -18,7 +18,7 @@ While our first set of analyses established that "diversity" is increasing in th
 
 <br>
 <center>
-<span style="color:black"> H3A: The use of population terminology will increase in biomedical abstracts from 1990-2020 and; <br> H3B: this growth will be driven by national and continental terms. </span>
+<span style="color:black"> H3A: The use of population terminology will increase in biomedical abstracts from 1990-2020 and; <br> H3B: This growth will be driven by national and continental terms rather than racial/ethnic terms. </span>
 </center>
 <br>
 

@@ -130,17 +130,23 @@ Overall, we see robust support for Hypothesis 1 - that "diversity" is on the ris
 
 Here is a list of the terms in each category analyzed above. You can scroll through each category or use the search tool to see if a term of interest was used in the analyses.
 
-```{r, warning = FALSE, message = FALSE, echo = FALSE}
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
-divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
-first_table <- divictionary %>% select(cultural, diversity, equity, minority, race_ethnicity)
-first_table[is.na(first_table)] <- ""
-datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
+tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1") 
+DT::datatable(tree_data, rownames = FALSE)
+```
+
+```{r, warning = FALSE, message = FALSE, echo = FALSE}
+#setwd("~/git/diversity/data/dictionaries")
+#divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+#first_table <- divictionary %>% select(cultural, diversity, equity, minority, race_ethnicity)
+#first_table[is.na(first_table)] <- ""
+#datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
 ```
 ```{r, echo = FALSE}
-second_table <- divictionary %>% select(disability, lifecourse, migration, sex_gender, sexuality)
-second_table[is.na(second_table)] <- ""
-datatable(second_table, rownames = FALSE)
+#second_table <- divictionary %>% select(disability, lifecourse, migration, sex_gender, sexuality)
+#second_table[is.na(second_table)] <- ""
+#datatable(second_table, rownames = FALSE)
 ```
 
 ```{r biomedical_wordfreqs, echo = FALSE}
