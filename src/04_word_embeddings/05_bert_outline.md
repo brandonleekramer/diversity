@@ -4,19 +4,16 @@
 My main goal is to use BERT to compare the terms diversity and race/ethnicity. I have already done this using Word2Vec and found that diversity was too polysemous to be captured using Word2Vec's algorithm. Thus, I moved to BERT because I read that BERT can account for this polysemy by creating multiple vectors of the term diversity, which can then be compared to the race and ethnicity vectors. Here are the steps I think I need to take:
 
     ├── Pick a BERT benchmark model
-        ├── BioBERT 
-        ├── BlueBERT
+        ├── Do I use BioBERT or BlueBERT? 
+        ├── Can I take specific years/decades of data from the pretrained models? 
         
     ├── Conduct transfer learning with labeled data 
         ├── Dataframe would be n of abstracts labeled "social diversity" or "other diversity" 
 
-    ├── 03_github-sectoring
-        ├── Full sectoring approach
-        ├── Academic 
-        ├── Business
-        ├── Government
-        ├── Household
-        ├── Non-Profit
+    ├── Extract word embeddings 
+        ├── Look at each of the word embeddings (diversity, race, ethnicity) 
+        ├── Compare word similarity for diversity and race/ethnicity  
+        ├── Run SVD and then plot all of the vectors 
         
 ### References 
 
