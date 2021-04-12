@@ -75,7 +75,6 @@ divictionary <- read_csv("diversity_project - h1_dictionary.csv")
 h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv") 
 
 # pulling in concatenated population terms from our dataset 
-ancestry <- h3_dictionary %>% filter(category == "ancestry")
 continental_terms <- h3_dictionary %>% filter(category == "continental")
 subcontinental_terms <- h3_dictionary %>% filter(category == "subcontinental")
 national_terms <- h3_dictionary %>% filter(category == "national")
@@ -86,7 +85,6 @@ omb_uscensus <- h3_dictionary %>% filter(category == "omb/us census")
 
 # creating detection string patterns for all the categories
 all_pop_terms <- paste(c("\\b(?i)(zcx", h3_dictionary$term, "zxc)\\b"), collapse = "|")
-ancestry <- paste(c("\\b(?i)(zxz", ancestry$term, "zxz)\\b"), collapse = "|")
 continental_terms <- paste(c("\\b(?i)(zxz", continental_terms$term, "zxz)\\b"), collapse = "|")
 subcontinental_terms <- paste(c("\\b(?i)(zxz", subcontinental_terms$term, "zxz)\\b"), collapse = "|")
 national_terms <- paste(c("\\b(?i)(zxz", national_terms$term, "zxz)\\b"), collapse = "|")

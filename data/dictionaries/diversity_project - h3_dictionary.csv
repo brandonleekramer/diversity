@@ -962,13 +962,18 @@ white,,omb/us census,NA,NA,white,https://www.census.gov/topics/population/race/a
 white_american,,omb/us census,NA,NA,white,https://www.census.gov/topics/population/race/about.html,2020-05-27
 white_americans,,omb/us census,NA,NA,white,https://www.census.gov/topics/population/race/about.html,2020-05-27
 whites,,omb/us census,NA,NA,white,https://www.census.gov/topics/population/race/about.html,2020-05-27
-ethnic,adjective,race/ethnicity,NA,NA,NA,hypothesis1,2020-05-26
-ethnically,adjective,race/ethnicity,NA,NA,NA,hypothesis1,2020-05-26
-ethnicity,entity,race/ethnicity,NA,NA,NA,hypothesis1,2020-05-26
-race,entity,race/ethnicity,NA,NA,NA,hypothesis1,2020-05-26
-racial,adjective,race/ethnicity,NA,NA,NA,hypothesis1,2020-05-26
-racially,adjective,race/ethnicity,NA,NA,NA,hypothesis1,2020-05-26
-arab,,subcontinental,africa,middle eastern,NA,https://en.wikipedia.org/wiki/List_of_adjectivals_and_demonyms_for_subcontinental_regions,2020-05-29
+ethnic,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+ethnicity,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+ethnically,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+race,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+races,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+racial,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+racially,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+racism,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+racisms,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+racist,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+racists,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
+arab,,race/ethnicity,NA,NA,NA,hypothesis1,2021-04-03
 arabia,,subcontinental,africa,middle eastern,NA,https://en.wikipedia.org/wiki/List_of_adjectivals_and_demonyms_for_subcontinental_regions,2020-05-29
 arabian,,subcontinental,africa,middle eastern,NA,https://en.wikipedia.org/wiki/List_of_adjectivals_and_demonyms_for_subcontinental_regions,2020-05-29
 arabians,,subcontinental,africa,middle eastern,NA,https://en.wikipedia.org/wiki/List_of_adjectivals_and_demonyms_for_subcontinental_regions,2020-05-29
