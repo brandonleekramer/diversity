@@ -18,12 +18,6 @@ h2_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypoth
 h3_dictionary <- read.csv("diversity_project - h3_dictionary.csv", colClasses=c("regional"="character")) 
 ```
 
-<center>
-
-![](/./methods_files/network-labels-new.png)
-
-</center>
-
 ### The Rise of Diversity and Population <br/> Terminology in Biomedical Research
 #### Brandon Kramer & Catherine Lee
 
@@ -46,7 +40,7 @@ conn <- dbConnect(drv = PostgreSQL(),
                   password = Sys.getenv("db_pwd"))
 
 # query the users_gh data (table of all github users) 
-by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.biomedical_articles_per_year")
+by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.biomedical_human_per_year")
 
 # disconnect from postgresql database 
 dbDisconnect(conn)
@@ -66,7 +60,7 @@ ggplot(data = by_year, aes(x = year, y = count)) +
   ylab("Number of Abstracts") 
 ```
 
-Our dataset derives from the <ins>[PubMed/MEDLINE database](https://www.nlm.nih.gov/databases/download/pubmed_medline.html)</ins> -- a free, publicly-available collection of more than 27 million scientific abstracts provided by the U.S. National Library of Medicine. After downloading the entirety of these data and building them up into a PostgreSQL database with the <ins>[PubMed Portable package in Python](https://github.com/KerstenDoering/PubMedPortable/wiki#build-up-a-relational-database-in-postgresql)</ins>, we narrowed our focus on the top journals in the field of biomedicine ranging from the years 1990 to 2020. To do this, we filtered our data to the top-250 biomedical journals <ins>[based on the impact factor in 2019](https://www.kaggle.com/umairnasir14/impact-factor-of-top-1000-journals)</ins>, leaving us with ~2.6 million abstracts. After aggregating these data, we conducted several pre-processing steps to standardize the data, including converting text to lower case, removing special characters and numbers, and transforming select compound and hyphenated terms. 
+Our dataset derives from the <ins>[PubMed/MEDLINE database](https://www.nlm.nih.gov/databases/download/pubmed_medline.html)</ins> -- a free, publicly-available collection of more than 27 million scientific abstracts provided by the U.S. National Library of Medicine. After downloading the entirety of these data and building them up into a PostgreSQL database with the <ins>[PubMed Portable package in Python](https://github.com/KerstenDoering/PubMedPortable/wiki#build-up-a-relational-database-in-postgresql)</ins>, we narrowed our focus on the top journals in the field of biomedicine ranging from the years 1990 to 2020. To do this, we filtered our data to the 250 biomedical journals <ins>[based on Elseveir’s 2019 CiteScore rankings](https://www.kaggle.com/umairnasir14/impact-factor-of-top-1000-journals)</ins>, leaving us with ~2.5 million abstracts. After aggregating these data, we conducted several pre-processing steps to standardize the data, including converting text to lower case, removing special characters and numbers, and transforming select compound and hyphenated terms. 
 
 While the specifics of each hypothesis test are detailed below, our overall analysis strategy depends on a "nested dictionary" approach to supervised text mining. This basically means that we created "dictionaries" with a number of "terms" that fall into "categories" for each hypothesis. We then used those dictionaries to count how often the terms in each category are mentioned within our corpus of abstracts. Although the magnitude of the data and reproducibility of the algorithms are useful for future research, we believe the potential utility of the dictionaries is what might help motivate future research on this topic. The dictionaries are by no means comprehensive, despite being predicated on past work, and could certainly benefit from continued scholarly debate, including from bioethics and AI ethics scholars. To make these dictionaries as transparent as possible, we have detailed their construction below in addition to visualizing their hierarchical relations and providing searchable tables. We encourage any and all feedback about the best way to improve these dictionaries for future research, which can be shared via <ins>[email here](brandonleekramer@gmail.com)</ins>. 
 

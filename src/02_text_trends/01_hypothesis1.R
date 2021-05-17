@@ -5,7 +5,7 @@
 ####################################################################################### install.packages (for slurm) 
 
 #rm(list = ls())
-#analysis_timeframe <- "1990"
+#analysis_timeframe <- 1990
 
 #install.packages("readr", repos = "http://cran.us.r-project.org")
 #install.packages("stringi", repos = "http://cran.us.r-project.org", dependencies=TRUE, INSTALL_opts = c('--no-lock'))
@@ -94,7 +94,7 @@ str_c("Finishing data pull at: ", Sys.time())
 # total articles each year 
 # we are banking this df of the total abstract counts for each year now 
 # so that we can optimize our memory for later (removing raw pubmed_data soon)
-gen_pop_prc_counts <- pubmed_data %>% 
+gen_pop_prc_counts_chk <- pubmed_data %>% 
   distinct(fk_pmid, year, abstract) %>% 
   group_by(year) %>% 
   count(year) %>% 
@@ -125,6 +125,22 @@ pubmed_data <- pubmed_data %>%
   dt_mutate(animal_study = ifelse(test = str_detect(string = abstract, 
             pattern = animal_exclusion_clause), yes = 1, no = 0)) %>% 
   filter(human_study == 1 | animal_study == 0)
+
+# save the human only entries 
+human_research_abstracts <- pubmed_data %>% 
+  distinct(fk_pmid, year, human_study, animal_study) 
+setwd("~/git/diversity/data/text_results/h1_results/")
+write_rds(human_research_abstracts, str_c("h1_human_research_ids_",analysis_timeframe,".rds"))
+
+# total articles each year 
+# we are banking this df of the total abstract counts for each year now 
+# so that we can optimize our memory for later (removing raw pubmed_data soon)
+gen_pop_prc_counts <- pubmed_data %>% 
+  distinct(fk_pmid, year, abstract) %>% 
+  group_by(year) %>% 
+  count(year) %>% 
+  ungroup() %>% 
+  rename(total = n)
 
 ######################################################################################## unnesting phase 
 
@@ -430,6 +446,11 @@ h1_subset_counts_trends <- list.files(pattern="h1_subset_counts_trends*") %>%
 h1_all_diversity_ids <- list.files(pattern="h1_diversity_ids_*") %>% 
   map_df(~read_rds(.)) %>% 
   distinct(id) %>% arrange(id)
+
+# all human research ids 
+all_human_research_ids <- list.files(pattern="h1_human_research_ids_*") %>% 
+  map_df(~read_rds(.)) 
+write_rds(all_human_research_ids, "h1_all_human_research_ids.rds")
 
 # need to do the matrix aggregation next 
 

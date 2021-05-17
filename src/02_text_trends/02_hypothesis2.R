@@ -24,7 +24,7 @@ test_h2 <- function(analysis_timeframe){
   ################################################################################################# ingestion/cleaning 
   
   #rm(list = ls())
-  #analysis_timeframe <- "2000"
+  #analysis_timeframe <- 1990
   
   str_c("Starting data pull at: ", Sys.time())
   
@@ -69,12 +69,12 @@ test_h2 <- function(analysis_timeframe){
   
   # total articles each year 
   # banking this df now to optimize our memory for later 
-  total_pubs <- pubmed_data %>% 
-    distinct(fk_pmid, year, abstract) %>% 
-    group_by(year) %>% 
-    count(year) %>% 
-    ungroup() %>% 
-    rename(total = n)
+  #total_pubs <- pubmed_data %>% 
+  #  distinct(fk_pmid, year, abstract) %>% 
+  #  group_by(year) %>% 
+  #  count(year) %>% 
+  #  ungroup() %>% 
+  #  rename(total = n)
   
   str_c("Started bigrams at: ", Sys.time())
   
@@ -102,6 +102,15 @@ test_h2 <- function(analysis_timeframe){
     dt_mutate(animal_study = ifelse(test = str_detect(string = abstract, 
               pattern = animal_exclusion_clause), yes = 1, no = 0)) %>% 
     filter(human_study == 1 | animal_study == 0)
+  
+  # total articles each year 
+  # banking this df now to optimize our memory for later 
+  total_pubs <- pubmed_data %>% 
+    distinct(fk_pmid, year, abstract) %>% 
+    group_by(year) %>% 
+    count(year) %>% 
+    ungroup() %>% 
+    rename(total = n)
   
   # tokenizing the abstract data into words 
   pubmed_tokens <- pubmed_data %>% 

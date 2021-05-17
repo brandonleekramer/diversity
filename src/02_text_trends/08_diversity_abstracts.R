@@ -14,7 +14,7 @@ conn <- dbConnect(drv = PostgreSQL(),
                   user = Sys.getenv("db_userid"), 
                   password = Sys.getenv("db_pwd"))
 diversity_abstracts <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.soc_diversity_abstracts")
-dbDisconnect(conn)
+dbDisconnect(conn = conn)
 
 
 setwd("~/git/diversity/data/dictionaries/")

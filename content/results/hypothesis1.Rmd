@@ -150,7 +150,7 @@ DT::datatable(tree_data, rownames = FALSE)
 ```
 
 ```{r biomedical_wordfreqs, echo = FALSE}
-subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_full.rds") %>% 
+subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds") %>% 
   filter(!term %in% c("genetic", "population", "ancestry")) %>% 
   mutate(term = str_replace(term, "aging", "lifecourse")) %>% 
   rename(`term set` = term, `words in term set` = word, `count for all years` = count) %>% 
