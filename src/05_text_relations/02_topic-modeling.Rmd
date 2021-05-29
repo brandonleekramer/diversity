@@ -1,0 +1,560 @@
+---
+title: "Topic Modeling"
+author: "Brandon L. Kramer"
+date: "1/17/2020"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+rm(list = ls())
+#knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "~/diversity-data")
+knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+```
+
+```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+# loading packages 
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "topicmodels", "tm", "ldatuning", "parallel",
+              "lubridate", "plotly", "stringi", "ggraph", "LDAvis", "textstem")) {library(pkg, character.only = TRUE)}
+# loading the .csv file 
+text_data <- read_csv("diversity_corpus.csv") %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+```
+
+```{r}
+
+# changing pnas journal title 
+tm_data <- text_data %>% 
+  mutate(publication = tolower(publication)) %>% 
+  separate(publication, into = c("publication", "void"), 
+           sep = "[(]") %>% 
+  separate(publication, into = c("publication", "void"), 
+           sep = "[:]") %>% select(-void) %>%
+  mutate(publication = ifelse(test = str_detect(string = publication, 
+  pattern = "\\b(?i)(proceedings of the national academy of sciences of the united states of america)\\b"), 
+  yes = "pnas", no = publication)) 
+
+# adding in pub_ids
+tm_data <- tm_data %>% 
+  mutate (pub_id = row_number()) %>% 
+  select(pub_id, everything())
+
+# and a quick look author_year_id 
+tm_data <- tm_data %>% 
+  mutate(tmp = stringr::word(text_data$author, 1, sep = " ")) %>% 
+  mutate(tmp = tolower(tmp)) 
+tm_data$article_info <- paste0(tm_data$tmp,"_",tm_data$year)
+
+# lemmatizing 
+tm_data <- tm_data %>% 
+  unnest_tokens(word, abstract) %>% 
+  select (pub_id, article_info, publication, word) %>%
+  mutate(word = lemmatize_words(word))
+
+# removing standard and custom stopwords 
+my_stop_words <- tibble(word = c(as.character(1:14), "[0-9]", 
+                                "rights", "reserved", "copyright", "elsevier"))
+
+tm_data <- tm_data %>% 
+  anti_join(stop_words) %>% 
+  anti_join(my_stop_words); rm(my_stop_words)
+
+word_counts <- tm_data %>% 
+  count(article_info, word, pub_id, sort = TRUE); word_counts
+
+pubs_dtm <- word_counts %>%
+  cast_dtm(pub_id, word, n) 
+
+```
+
+```{r, echo=FALSE, eval=FALSE}
+
+num_cores <- (detectCores() - 1)
+
+# in this snippet, we will be logging start/end times 
+mat_start <- data.frame(event="mat_start", time=now("EST"))
+
+finding_k <- FindTopicsNumber(
+  pubs_dtm,
+  topics = seq(from = 10, to = 200, by = 10),
+  metrics = c("Griffiths2004", "CaoJuan2009", "Arun2010", "Deveaud2014"),
+  method = "Gibbs",
+  control = list(seed = 77),
+  mc.cores = num_cores, 
+  verbose = TRUE)
+
+# logging the times and saving the work in RDS files 
+mat_end <- data.frame(event="mat_end", time=now("EST"))
+time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
+
+saveRDS(finding_k, "topic_number_030320.rds")
+saveRDS(time_log, "time_log_030320.rds")
+
+FindTopicsNumber_plot(finding_k)
+
+```
+
+```{r, fig.width=11.5, echo=FALSE, eval=FALSE}
+# in this snippet, we will be logging start/end times 
+mat_start <- data.frame(event="mat_start", time=now("EST"))
+
+pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234)) #2:30PM - 
+saveRDS(pubs_lda, "pubs_lda.rds")
+
+# logging the times and saving the work in RDS files 
+mat_end <- data.frame(event="mat_end", time=now("EST"))
+time_log <- rbind(mat_start, mat_end); rm(mat_start, mat_end)
+#saveRDS(bp_matrix, "bp_matrix.rds")
+saveRDS(time_log, "time_log.rds")
+
+```
+
+Next step is running this: 
+http://www.bernhardlearns.com/2017/05/topic-models-lda-and-ctm-in-r-with.html
+
+Determining the best model fit using perplexity:
+https://cfss.uchicago.edu/notes/topic-modeling/#perplexity
+
+And then visualize using the LDAvis package:
+https://cfss.uchicago.edu/notes/topic-modeling/#importing-our-own-lda-model
+
+other interesting stuff here:
+https://rpubs.com/ShilpaBhat/552451
+
+```{r}
+para <- tibble(k = c(2,3,9,12,50)) # change based on results 
+
+system.time(
+  lemma_tm <- para %>%
+    mutate(lda = map(k, 
+                   function(k) LDA(
+                     k=k, 
+                     x=dtm_lemma, 
+                     method="Gibbs", 
+                     control=control_list_gibbs
+                     )
+                   )
+         )
+)
+```
+
+
+```{r}
+
+pubs_lda <- readRDS("pubs_lda.rds")
+pubs_lda_td <- tidy(pubs_lda)
+
+all_terms <- pubs_lda_td %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms <- pubs_lda_td %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(10, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta)
+
+top_terms %>%
+  #filter(topic < 10) %>% 
+  #filter(topic > 9 & topic < 19) %>% 
+  #filter(topic > 18 & topic < 28) %>% 
+  #filter(topic > 27 & topic < 37) %>% 
+  #filter(topic > 36 & topic < 46) %>% 
+  #filter(topic > 45 & topic < 55) %>% 
+  #filter(topic > 54 & topic < 64) %>%
+  #filter(topic > 63) %>% 
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+
+```
+
+```{r}
+
+top_terms <- top_terms %>% 
+  mutate(general_class = recode(topic, 
+  "1"="population_science","2"="population_science","3"="population_science","4"="population_science","5"="bio_science",
+  "6"="population_science","7"="population_science","8"="bio_science","9"="bio_science","10"="population_science",
+  "11"="bio_science","12"="population_science","13"="bio_science","14"="bio_science","15"="population_science",
+  "16"="population_science","17"="bio_science","18"="bio_science","19"="bio_science","20"="population_science",
+  "21"="bio_science","22"="general_science","23"="bio_science","24"="population_science","25"="general_science",
+  "26"="population_science","27"="population_science","28"="population_science","29"="bio_science","30"="population_science",
+  "31"="population_science","32"="bio_science","33"="bio_science","34"="population_science","35"="bio_science",
+  "36"="bio_science","37"="population_science","38"="population_science","39"="population_science","40"="population_science",
+  "41"="population_science","42"="bio_science","43"="population_science","44"="bio_science","45"="population_science",
+  "46"="population_science","47"="bio_science","48"="bio_science","49"="bio_science","50"="population_science",
+  "51"="population_science","52"="population_science","53"="bio_science","54"="bio_science","55"="bio_science",
+  "56"="population_science","57"="population_science","58"="bio_science","59"="bio_science","60"="population_science",
+  "61"="population_science","62"="bio_science","63"="bio_science","64"="population_science","65"="bio_science",
+  "66"="bio_science","67"="population_science","68"="population_science","69"="population_science","70"="bio_science")) 
+
+# checking coding scheme for human_diversity / recoding specificity
+top_terms %>%
+  filter(general_class == "population_science") %>% 
+  #filter(topic < 16) %>% 
+  #filter(topic > 15 & topic < 35) %>%
+  filter(topic > 34 & topic < 51) %>%
+  #filter(topic > 54) %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+
+# checking coding scheme for biodiversity / recoding specificity
+top_terms %>%
+  filter(general_class == "bio_science") %>% 
+  #filter(topic < 20) %>% 
+  #filter(topic > 19 & topic < 45) %>%
+  filter(topic > 44 & topic < 63) %>%
+  #filter(topic > 62) %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+
+all_terms <- all_terms %>% 
+  mutate(general_class = recode(topic, 
+  "1"="population_science","2"="population_science","3"="population_science","4"="population_science","5"="bio_science",
+  "6"="population_science","7"="population_science","8"="bio_science","9"="bio_science","10"="population_science",
+  "11"="bio_science","12"="population_science","13"="bio_science","14"="bio_science","15"="population_science",
+  "16"="population_science","17"="bio_science","18"="bio_science","19"="bio_science","20"="population_science",
+  "21"="bio_science","22"="general_science","23"="bio_science","24"="population_science","25"="general_science",
+  "26"="population_science","27"="population_science","28"="population_science","29"="bio_science","30"="population_science",
+  "31"="population_science","32"="bio_science","33"="bio_science","34"="population_science","35"="bio_science",
+  "36"="bio_science","37"="population_science","38"="population_science","39"="population_science","40"="population_science",
+  "41"="population_science","42"="bio_science","43"="population_science","44"="bio_science","45"="population_science",
+  "46"="population_science","47"="bio_science","48"="bio_science","49"="bio_science","50"="population_science",
+  "51"="population_science","52"="population_science","53"="bio_science","54"="bio_science","55"="bio_science",
+  "56"="population_science","57"="population_science","58"="bio_science","59"="bio_science","60"="population_science",
+  "61"="population_science","62"="bio_science","63"="bio_science","64"="population_science","65"="bio_science",
+  "66"="bio_science","67"="population_science","68"="population_science","69"="population_science","70"="bio_science")) %>% 
+  mutate(defined_topic = recode(topic,
+  "1"="human_genetics", "2"="racial_diversity","3"="human_genetics", "4"="clinical","5"="hepatitis",
+  "6"="human_genetics", "7"="nutrition",       "8"="genetics",       "9"="genetics",         "10"="deafness_hearing",
+  "11"="cell_diversity","12"="human_genetics", "13"="cell_diversity","14"="cell_diversity",  "15"="human_genetics",
+  "16"="human_genetics","17"="hepatitis",      "18"="cell_diversity","19"="genetics",        "20"="mental_health",
+  "21"="genetics",      "22"="general_science","23"="tuberculosis",  "24"="racial_diversity","25"="general_science",
+  "26"="human_genetics","27"="human_genetics", "28"="clinical","29"="genetics",     "30"="research_ethics",
+  "31"="reproduction",  "32"="neuroscience",   "33"="cancer",        "34"="sex/gender",      "35"="microbiome",
+  "36"="malaria",       "37"="clinical","38"="healthcare",   "39"="surgerical","40"="mental_health",
+  "41"="environmental", "42"="pharmacology","43"="dental","44"="genetics","45"="human_genetics",
+  "46"="human_genetics","47"="immunology",     "48"="hiv",           "49"="bacteria",        "50"="education",
+  "51"="asthma","52"="healthcare",    "53"="clinical", "54"="cancer",      "55"="plants",
+  "56"="sexual_health", "57"="clinical","58"="neuroscience", "59"="cell_diversity", "60"="language",
+  "61"="human_genetics","62"="neuroscience","63"="vaccines","64"="healthcare","65"="pharmacology",
+  "66"="cancer",        "67"="human_genetics", "68"="clinical","69"="clinical","70"="cell_diversity"))
+
+all_terms %>% 
+  group_by(defined_topic) %>% 
+  count(defined_topic)
+
+top_terms <- all_terms %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) 
+
+length(unique(all_terms$general_class))
+length(unique(all_terms$defined_topic))
+
+bio_science_topics <- top_terms %>% filter(general_class == "bio_science")
+unique(bio_science_topics$defined_topic)
+
+pop_science_topics <- top_terms %>% filter(general_class == "population_science")
+unique(pop_science_topics$defined_topic)
+```
+
+```{r, fig.width=11.5}
+pop_science_topics %>% 
+  filter(defined_topic == "human_genetics") %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+12/37
+```
+```{r, fig.width=11.5}
+pop_science_topics %>% 
+  filter(defined_topic == "clinical" | defined_topic == "research_ethics") %>%
+  #filter(defined_topic == "racial_diversity" | defined_topic == "sex/gender") %>% 
+  #filter(defined_topic == "mental_health" | defined_topic == "healthcare") %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+7/37
+```
+```{r, fig.width=11.5}
+pop_science_topics %>% 
+  #filter(defined_topic == "racial_diversity" | defined_topic == "sex/gender") %>% 
+  filter(defined_topic == "mental_health" | defined_topic == "healthcare" |
+           defined_topic == "nutrition" | defined_topic == "dental" | defined_topic == "reproduction" |
+         defined_topic == "sexual_health" | defined_topic == "asthma" | defined_topic == "surgerical") %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x")
+11/37
+```
+```{r, fig.width=11.5}
+topic_names <- c("2" = "Racial", "10" = "Deafness/Hearing", 
+                 "24" = "Ethnic",  "34" = "Sex/Gender", 
+                 "50" = "Medical Education", "60" = "Age/Language",
+                 "30" = "Research Ethics", "52" = "Nursing",  "64" = "Nephrology",
+                 "1" = "Human Genetics", "6" = "Human Genetics", "61" = "Human Genetics"
+                 )
+
+#topic_names <- c("4" = "Racial", "8" = "Deafness/Hearing", 
+#                 "5" = "Ethnic",  "6" = "Sex/Gender", 
+#                 "10" = "Medical Education", "7" = "Age/Language",
+#                 "9" = "Research Ethics", "11" = "Nursing",  "12" = "Nephrology",
+#                 "1" = "Human Genetics", "2" = "Human Genetics", "3" = "Human Genetics"
+#                 )
+
+all_terms %>%
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(8, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  filter(topic == "2" | topic == "10" | topic == "24" | topic == "30"  | topic == "34" |
+         topic == "50" | topic == "52" | topic == "60" | topic == "64" | 
+         topic == "1" | topic == "6" | topic == "61" ) %>% 
+  #mutate(topic = recode(topic, 
+  #                      "1" = "1", "6" = "2", "61" = "3",
+  #                      "2" = "4", "24" = "5", "34" = "6",
+  #                      "60" = "7", "10" = "8", "30" = "9",
+  #                      "50" = "10", "52" = "11", "64" = "12")) %>% 
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(term, beta)) +
+  geom_bar(stat = "identity") +
+  scale_x_reordered() +
+  facet_wrap(~ topic, scales = "free_x", 
+             ncol = 3, nrow = 4,
+             labeller = as_labeller(topic_names)) +
+  theme_bw() +
+  theme(axis.title.x=element_blank(),
+        axis.text.y=element_text(size=6),
+        axis.text.x=element_text(size=6),
+        plot.title = element_text(hjust = 0.5)
+        ) + ggtitle("Figure 4. Select Topics Relating to Population Diversity using Latent Dirichlet Allocation")
+
+```
+
+```{r}
+#pubs_lda <- LDA(pubs_dtm, k = 70, control = list(seed = 1234)) 
+
+pubs_lda
+topics <- topicmodels::topics(pubs_lda, 1)
+?topics
+
+terms <- as.data.frame(topicmodels::terms(pubs_lda, 30), stringsAsFactors = FALSE)
+terms[1:10,]
+
+topicmodels2LDAvis <- function(x, ...){
+  post <- topicmodels::posterior(x)
+  if (ncol(post[["topics"]]) < 3) stop("The model must contain > 2 topics")
+  mat <- x@wordassignments
+  LDAvis::createJSON(
+    phi = post[["terms"]], 
+    theta = post[["topics"]],
+    vocab = colnames(post[["terms"]]),
+    doc.length = slam::row_sums(mat, na.rm = TRUE),
+    term.frequency = slam::col_sums(mat, na.rm = TRUE)
+  )
+}
+
+serVis(topicmodels2LDAvis(pubs_lda))
+
+```
+
+
+
+```{r}
+pubs_lda@alpha
+
+theta <- t(apply(pubs_lda$document_sums + alpha, 2, function(x) x/sum(x)))
+phi <- t(apply(t(pubs_lda$topics) + eta, 2, function(x) x/sum(x)))
+
+lda_list <- list(phi = phi,
+                 theta = theta,
+                 doc.length = doc.length,
+                 vocab = vocab, 
+                 term.frequency = term.frequency)
+
+json <- createJSON(phi = lda_list$phi, 
+                   theta = lda_list$theta, 
+                   doc.length = lda_list$doc.length, 
+                   vocab = lda_list$vocab, 
+                   term.frequency = lda_list$term.frequency)
+
+serVis(json, out.dir = 'vis', open.browser = FALSE)
+
+?createJSON
+
+data(TwentyNewsgroups, package="LDAvis")
+
+class(TwentyNewsgroups)
+# create the json object, start a local file server, open in default browser
+json <- with(TwentyNewsgroups,
+             createJSON(phi, theta, doc.length, vocab, term.frequency))
+serVis(json)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+prince_tidy %>%
+  filter(!year == "NA") %>% #remove songs without years
+  filter(word %in% c("music", "party", "dance")) %>%
+  group_by(year) %>%
+  mutate(topic_7_count = n()) %>%
+  select(year, topic_7_count) %>%
+  distinct() %>%
+  ggplot(aes(year, topic_7_count)) + geom_smooth(se = FALSE, col = "red")
+
+```
+
+```{r}
+pop_science_network <- all_terms %>% 
+  drop_na(term) %>% 
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  ungroup() %>%
+  arrange(topic, -beta) %>% 
+  filter(general_class == "population_science") %>% 
+  mutate(source = topic, target = term, weight = beta ) %>% 
+  select(source, target, weight )
+
+pop_science_network %>% 
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(edge_alpha = weight, edge_width = weight), edge_colour = "cyan4") +
+  geom_node_point(size = 3) +
+  geom_node_text(aes(label = name), repel = TRUE, 
+                 point.padding = unit(0.2, "lines")) + theme_void()
+
+
+```
+
+
+
+```{r}
+
+
+pubs_documents <- tidy(pubs_lda, matrix = "gamma")
+pubs_documents
+
+tidy(text_data) %>%
+  filter(document == 1) %>%
+  arrange(desc(count))
+
+
+```
+
+
+
+
+Citations 
+
+https://cran.r-project.org/web/packages/tidytext/vignettes/topic_modeling.html
+
+https://cran.r-project.org/web/packages/ldatuning/vignettes/topics.html 
+
+https://rpubs.com/MNidhi/NumberoftopicsLDA
+
+
+New Citations 
+
+Finding K with Cross validation:
+https://www.r-bloggers.com/cross-validation-of-topic-modelling/
+
+Video on Gibbs-Sampling in Topic Modeling:
+https://www.youtube.com/watch?v=u7l5hhmdc0M
+
+More on Gibbs-Sampling in Topic Modeling: 
+https://cs.brown.edu/courses/csci1460/assets/files/topicmod.pdf
+https://medium.com/analytics-vidhya/topic-modeling-using-lda-and-gibbs-sampling-explained-49d49b3d1045
+http://www.mit.edu/~ilkery/papers/GibbsSampling.pdf
+
+A Biterm Topic Model for Short Texts:
+http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.402.4032&rep=rep1&type=pdf
+
+Correlated Topic Modeling:
+http://www.cs.columbia.edu/~blei/papers/BleiLafferty2007.pdf
+http://www.bernhardlearns.com/2017/05/topic-models-lda-and-ctm-in-r-with.html  ***
+
+lda package:
+https://cran.r-project.org/web/packages/lda/lda.pdf
+https://www.rdocumentation.org/packages/lda/versions/1.4.2/topics/lda.collapsed.gibbs.sampler
+
+
+Coursera course on ML clustering:
+https://www.coursera.org/learn/ml-clustering-and-retrieval
+
+Running Gibbs-Sampling before LDAvis:
+https://ldavis.cpsievert.me/reviews/reviews.html
+https://rpubs.com/ShilpaBhat/552451
+https://github.com/cpsievert/LDAvis/
+https://nlp.stanford.edu/events/illvi2014/papers/sievert-illvi2014.pdf
+https://cfss.uchicago.edu/notes/topic-modeling/#importing-our-own-lda-model
+
+More on LDA:
+https://medium.com/@lettier/how-does-lda-work-ill-explain-using-emoji-108abf40fa7d
+
+Determining the best model fit using perplexity:
+https://cfss.uchicago.edu/notes/topic-modeling/#perplexity
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,133 @@
+---
+title: "Untitled"
+author: "Brandon"
+date: "8/13/2020"
+output: html_document
+---
+
+
+```{r prereqs_part1, message = FALSE, results = FALSE, echo=FALSE, warning=FALSE}
+rm(list = ls())
+
+for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", 
+              "grid", "gridExtra", "reshape2", "extrafont", "data.table", 
+              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+
+setwd("~/Documents/Diversity/Data")
+# loading the .csv file 
+biomed_text_data <- read_csv("biomedical_corpus.csv") %>% 
+  rowid_to_column(var = "id") %>% 
+  rename(authors = AU, title = TI, publication = SO, #author_keywords = DE,
+         abstract = AB, references = CR, year = PY, times_cited = TC, doi = DI, pubmed_id = UT) %>% 
+  select(id, authors, title, year, publication, abstract, references, year, times_cited, doi) %>% 
+  drop_na(abstract) %>% 
+# filtering 2018 articles because they seem to be incomplete 
+  filter(year != "2018") 
+
+setwd("~/Documents/Diversity/Data")
+divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
+diversity_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$diversity), "zqx)\\b"), collapse = "|")
+aging_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$aging), "zqx)\\b"), collapse = "|")
+cultural_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$cultural), "zqx)\\b"), collapse = "|")
+ses_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$social_class), "zqx)\\b"), collapse = "|")
+minority_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$minority), "zqx)\\b"), collapse = "|")
+population_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$population), "zqx)\\b"), collapse = "|")
+racial_ethnic_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$race_ethnicity), "zqx)\\b"), collapse = "|")
+sex_gender_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$sex_gender), "zqx)\\b"), collapse = "|")
+sexuality_terms <- paste(c("\\b(?i)(zqx", na.omit(divictionary$sexuality), "zqx)\\b"), collapse = "|")
+```
+
+```{r}
+# creates binary_vars for all of the relevant terms 
+testing_diversity_meaning <- biomed_text_data %>% 
+  mutate(abstract = tolower(abstract)) %>% 
+  mutate(diversity = ifelse(test = str_detect(string = abstract, 
+                       pattern = diversity_terms), yes = 1, no = 0)) %>% 
+  mutate(aging = ifelse(test = str_detect(string = abstract, 
+                       pattern = aging_terms), yes = 1, no = 0)) %>%
+  mutate(cultural = ifelse(test = str_detect(string = abstract, 
+                       pattern = cultural_terms), yes = 1, no = 0)) %>%
+  mutate(minority = ifelse(test = str_detect(string = abstract, 
+                       pattern = minority_terms), yes = 1, no = 0)) %>%
+  mutate(population = ifelse(test = str_detect(string = abstract, 
+                       pattern = population_terms), yes = 1, no = 0)) %>%
+  mutate(racial_ethnic = ifelse(test = str_detect(string = abstract, 
+                       pattern = racial_ethnic_terms), yes = 1, no = 0)) %>%
+  mutate(sex_gender = ifelse(test = str_detect(string = abstract, 
+                       pattern = sex_gender_terms), yes = 1, no = 0)) %>%
+  mutate(ses = ifelse(test = str_detect(string = abstract, 
+                       pattern = ses_terms), yes = 1, no = 0)) %>%
+  mutate(sexuality = ifelse(test = str_detect(string = abstract, 
+                       pattern = sexuality_terms), yes = 1, no = 0)) %>% 
+  mutate(term_total = aging + cultural + minority + population + racial_ethnic + sex_gender + ses + sexuality) %>% 
+  select(abstract, diversity, aging, cultural, minority, population, racial_ethnic, 
+         sex_gender, ses, sexuality, term_total, authors, title, year)
+```
+
+```{r}
+library(ggcorrplot)
+corr_matrix <- cor(testing_diversity_meaning %>% 
+                     select(-abstract, -term_total, -authors, -title, -year))
+ggcorrplot(corr_matrix, type = "lower", method = "circle")
+```
+
+```{r}
+diversity_set <- testing_diversity_meaning %>% 
+  filter(diversity == 1 & term_total > 0) 
+  
+non_diversity_set <- testing_diversity_meaning %>% 
+  filter(diversity == 1 & term_total == 0) 
+```
+
+```{r}
+diversity_set %>% 
+  count(term_total)
+```
+
+
+randomly sample 10% of the data from both sides 
+
+```{r}
+# 10% of the data from both sides
+1505 * 0.1
+(545+248+125+50+19+3) *.1
+
+set.seed(12345)
+random_diversity <- diversity_set %>% sample_n(99)
+random_non_diversity <- non_diversity_set %>% sample_n(151)
+combined <- random_diversity %>% bind_rows(random_non_diversity)
+
+rows <- sample(nrow(combined))
+diversity_qual_coding_all_data <- combined[rows, ]
+diversity_qual_coding_abstracts_only <- diversity_qual_coding_all_data %>% select(abstract)
+
+write_csv(diversity_qual_coding_all_data, "~/Documents/Diversity/Data/diversity_qual_coding_all_data.csv")
+write_csv(diversity_qual_coding_abstracts_only, "~/Documents/Diversity/Data/diversity_qual_coding_abstracts.csv")
+
+```
+
+
+```{r}
+write_csv(diversity_set, "~/Documents/Diversity/Data/testing_diversity_meaning.csv")
+write_csv(diversity_only, "~/Documents/Diversity/Data/testing_diversity_meaning_divonly.csv")
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

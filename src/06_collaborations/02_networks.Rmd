@@ -1,0 +1,181 @@
+---
+title: "Network Relations"
+author: "Brandon L. Kramer"
+date: "3/28/2020"
+output: html_document
+---
+
+```{r setup, include = FALSE}
+rm(list = ls())
+knitr::opts_knit$set(root.dir = "~/Documents/Diversity/Data")
+#knitr::opts_knit$set(root.dir = "C:/Users/bkram/CloudStation/Diversity/Data")
+```
+
+# Load Data and Create CSV 
+
+```{r load packages, message = FALSE, results = FALSE, echo=FALSE}
+# loading packages 
+for (pkg in c("igraph", "tidytext", "tidyverse", "ggplot2", "stringr", "bibliometrix", "sna")) {library(pkg, character.only = TRUE)}
+# loading the .csv file 
+
+#text_data <- read_csv("biomedical_corpus.csv") 
+#sci2_data <- read_csv("raw_data_from_sci2.csv") 
+
+# diversity corpus 
+<<<<<<< HEAD:src/02_collaboration-structure/02_citation-networks.Rmd
+setwd("/sfs/qumulo/qhome/kb7hp/diversity-data/test_data")
+=======
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Diversity Top Core Files")
+>>>>>>> 3683cb1c447849b1fb65fde516aa2adc4a84c19b:src/09_test-networks.Rmd
+files <- dir(pattern = "*.txt")
+files <- readFiles(files)
+diversity_raw <- convert2df(files, dbsource = "isi", format = "plaintext")
+write.csv(diversity_raw, "diversity_raw.csv")
+```
+
+# Create NodeID/Source and Output Data for [Table2Net](https://medialab.github.io/table2net)
+
+```{r}
+
+# import data 
+setwd("C:/Users/bkram/CloudStation/Diversity/Data")
+diversity_raw <- read_csv("diversity_raw.csv")
+
+# rename columns 
+diversity_select <- diversity_raw %>% 
+  rename(authors = AU, addresses = C1, year = PY, 
+         abstract = AB, title = TI, journal = SO, abb_journal = J9, 
+         volume = VL, issue = IS, page = PG, doi = DI, funding = FU, 
+         reference_list = CR, reference_count = NR, pubmed_id = PM) %>% 
+  select(authors, addresses, year, abstract, title, 
+<<<<<<< HEAD:src/02_collaboration-structure/02_citation-networks.Rmd
+         journal, volume, page, doi, 
+         reference_list, reference_count, pubmed_id) 
+=======
+         journal, abb_journal, volume, page, doi, 
+         reference_list, reference_count, pubmed_id) 
+
+diversity_select <- diversity_select %>% 
+  select(authors, year, abb_journal, volume, page, doi, reference_list) %>% 
+  mutate(source = gsub("\\;.*", "", authors)) %>% 
+  mutate(source = str_c(source, ", ", year, ", ", abb_journal, ", V", page, ", P", volume, ", DOI ", doi)) %>% 
+  select(source, everything())
+>>>>>>> 3683cb1c447849b1fb65fde516aa2adc4a84c19b:src/09_test-networks.Rmd
+
+write.csv(diversity_select, "diversity_select.csv")
+
+```
+
+```{r}
+
+# create edgelist 
+edgelist <- diversity_select %>% 
+  select(authors, year, volume, page, doi, reference_list) %>% 
+  drop_na(authors, reference_list) %>% 
+  mutate(source = gsub("\\;.*", "", authors)) %>% 
+  mutate(source = str_c(source, ", ", year, ", V", page, ", P", volume, ", DOI ", doi)) %>% 
+  unnest(target = strsplit(reference_list, ";")) %>% 
+  mutate(source = tolower(source), target = tolower(target)) %>% 
+  filter(!grepl("(^[0-9])", target)) %>% 
+  drop_na(source, target) %>% 
+  select(source, target)
+
+<<<<<<< HEAD:src/02_collaboration-structure/02_citation-networks.Rmd
+write.csv(edgelist, "/sfs/qumulo/qhome/kb7hp/diversity-data/test_data/edgelist.csv", row.names = FALSE)
+
+```
+```{r}
+
+network <- graph_from_data_frame(edgelist, directed = FALSE)
+=======
+edgelist %>% 
+  count(target) %>% 
+  arrange(-n)
+
+source <- unique(edgelist$source)
+target <- edgelist %>% rename(source = target) 
+target <- unique(target)
+double_check <- bind_rows(source, target)
+double_check <- unique(double_check)
+
+rbind(unique(edgelist$source), unique(edgelist$target))
+
+>>>>>>> 3683cb1c447849b1fb65fde516aa2adc4a84c19b:src/09_test-networks.Rmd
+
+plot(network)
+```
+
+
+<<<<<<< HEAD:src/02_collaboration-structure/02_citation-networks.Rmd
+
+=======
+>>>>>>> 3683cb1c447849b1fb65fde516aa2adc4a84c19b:src/09_test-networks.Rmd
+```{r}
+library(sna)
+sna_network <- network(edgelist, matrix.type="edgelist", directed=TRUE)
+
+summary(sna_network)
+
+
+
+
+```
+
+```{r}
+
+test_network <- graph_from_data_frame(edgelist, directed = TRUE)
+
+degree(test_network, mode = "in")
+
+
+
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+network <- read_graph("bipartite.graphml", format = "graphml")
+
+
+library(rgexf)
+# You have to create a file connection.
+g1.gexf <- igraph.to.gexf(g1)
+setwd("C:/Users/bkram/CloudStation/Diversity/Data/Test Data")
+gexf1   <- read.gexf("network.gexf")
+igraph1 <- gexf.to.igraph(gexf1)
+
+
+
+
+?read.graph
+
+?cocMatrix
+
+citation_network <- cocMatrix(test_corpus, Field = "CR", type = "sparse", sep = ";")
+
+
+
+test <- graph_from_adjacency_matrix(test, mode="undirected", weighted=NULL)
+
+?graph.adjacency
+
+
+
+# recreating the sci2 function for creating bipartite networks
+sci2_data %>% 
+  rename(authors = Authors, year = `Publication Year`) %>% 
+  select(authors, year, Volume, DOI) %>% 
+  mutate(CiteMeAs = gsub("\\|.*", "", authors)) %>% 
+  mutate(CiteMeAs = str_c(CiteMeAs, ", ", year, ", V ", Volume, ", Doi ", DOI)) %>% 
+  select(CiteMeAs)
+
+text_data %>% 
+  rename(authors = AU, year = PY) %>% 
+  mutate(authors = tolower(authors)) %>% 
+  select(authors, year, Volume, DOI) %>% 
+  mutate(CiteMeAs = gsub("\\|.*", "", authors)) %>% 
+  mutate(CiteMeAs = str_c(CiteMeAs, ", ", year, ", V ", Volume, ", Doi ", DOI)) %>% 
+  select(CiteMeAs)
+
+
+
+cite_me_as = first_author, year, __, Doi 
+mutate(new = substr(Authors, 1, regexpr("\\|", Authors)-1))
+
+```

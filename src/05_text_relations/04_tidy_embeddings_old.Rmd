@@ -1,0 +1,175 @@
+---
+title: "Word Embeddings"
+author: "Brandon L. Kramer"
+date: "12/22/2020"
+output: html_document
+---
+
+https://cbail.github.io/textasdata/word2vec/rmarkdown/word2vec.html 
+https://juliasilge.com/blog/tidy-word-vectors/ 
+https://www.pnas.org/content/115/16/E3635 
+
+```{r prereqs_part1, message = FALSE, results = FALSE, echo=FALSE, warning=FALSE}
+rm(list = ls())
+
+for (pkg in c("tidyverse",  "tidytext", "widyr", "irlba", "broom"
+              )) {library(pkg, character.only = TRUE)}
+
+analysis_timeframe = 1990
+install.packages()
+# connect to postgresql to get our data
+conn <- dbConnect(drv = PostgreSQL(), 
+                  dbname = "sdad", 
+                  host = "10.250.124.195", 
+                  port = 5432, 
+                  user = Sys.getenv("db_userid"), 
+                  password = Sys.getenv("db_pwd"))
+
+# query the users_gh data (table of all github users) 
+pubmed_data <- dbGetQuery(conn, str_c(
+                          "SELECT DISTINCT(fk_pmid), year, abstract  
+                          FROM pubmed_2021.biomedical_abstracts 
+                          WHERE year =", analysis_timeframe, ";"))
+
+# disconnect from postgresql database 
+dbDisconnect(conn)
+
+```
+
+```{r}
+#create context window with length 8
+tidy_skipgrams <- pubmed_data %>%
+    unnest_tokens(ngram, abstract, token = "ngrams", n = 8) %>%
+    mutate(ngramID = row_number()) %>% 
+    tidyr::unite(skipgramID, postID, ngramID) %>%
+    unnest_tokens(word, ngram)
+
+#calculate unigram probabilities (used to normalize skipgram probabilities later)
+unigram_probs <- biomed_text_data %>%
+    unnest_tokens(word, abstract) %>%
+    count(word, sort = TRUE) %>%
+    mutate(p = n / sum(n))
+
+#calculate probabilities
+skipgram_probs <- tidy_skipgrams %>%
+    pairwise_count(word, skipgramID, diag = TRUE, sort = TRUE) %>%
+    mutate(p = n / sum(n))
+
+#normalize probabilities
+normalized_prob <- skipgram_probs %>%
+    filter(n > 20) %>%
+    rename(word1 = item1, word2 = item2) %>%
+    left_join(unigram_probs %>%
+                select(word1 = word, p1 = p), by = "word1") %>%
+    left_join(unigram_probs %>%
+                  select(word2 = word, p2 = p), by = "word2") %>%
+    mutate(p_together = p / p1 / p2)
+
+normalized_prob[2005:2010,]
+```
+
+```{r}
+normalized_prob %>% 
+    filter(word1 == "ethnicity") %>%
+    arrange(-p_together)
+```
+```{r}
+pmi_matrix <- normalized_prob %>%
+    mutate(pmi = log10(p_together)) %>%
+    cast_sparse(word1, word2, pmi)
+
+#remove missing data
+pmi_matrix@x[is.na(pmi_matrix@x)] <- 0
+#run SVD
+pmi_svd <- irlba(pmi_matrix, 256, maxit = 500)
+#next we output the word vectors:
+word_vectors <- pmi_svd$u
+rownames(word_vectors) <- rownames(pmi_matrix)
+
+#setwd("~/git/diversity/data/word_embeddings/")
+setwd("~/Documents/Diversity/diversity/data/word_embeddings/")
+write_rds(pmi_matrix, "biomed_pmi_matrix.rds", "gz", compression = 9L)
+write_rds(pmi_svd, "biomed_pmi_svd.rds", "gz", compression = 9L)
+write_rds(word_vectors, "biomed_word_vectors.rds", "gz", compression = 9L)
+```
+
+```{r}
+search_synonyms <- function(word_vectors, selected_vector) {
+    
+    similarities <- word_vectors %*% selected_vector %>%
+        #tidy() %>%
+        as.data.frame() %>%
+        rownames_to_column(var = "token") %>% 
+        rename(similarity = V1)
+        #rename(token = .rownames,
+        #       similarity = unrowname.x.)
+
+    similarities %>%
+        arrange(-similarity)     
+}
+
+```
+
+```{r}
+ethnicity_synonym <- search_synonyms(word_vectors, word_vectors["ethnicity",])
+ethnicity_synonym
+
+gender_synonym <- search_synonyms(word_vectors, word_vectors["gender",])
+gender_synonym
+
+eth_df <- ethnicity_synonym %>% mutate(selected = "ethnicity") %>% 
+  top_n(15, similarity) 
+gen_df <- gender_synonym %>% mutate(selected = "gender") %>% 
+  top_n(15, similarity) 
+combined_df <- eth_df %>% bind_rows(gen_df)
+combined_df
+```
+
+```{r}
+#combined_df_ <- rowid_to_column(combined_df)
+
+combined_df %>% 
+    group_by(selected) %>%
+    mutate(token2 = reorder(token, similarity)) %>%
+    ggplot(aes(token2, similarity, fill = selected)) +
+    geom_col(show.legend = FALSE) +
+    facet_wrap(~selected, scales = "free") +
+    coord_flip() +
+    #theme(strip.text=element_text(hjust=0, family="Roboto-Bold", size=12)) +
+    scale_y_continuous(expand = c(0,0)) +
+    labs(x = NULL, title = "What word vectors are most similar to race and diversity?",
+         subtitle = "Full biomedical sample, calculated using counts and matrix factorization")
+```
+
+```{r}
+mystery_product <- word_vectors["minority",] - word_vectors["black",] + 
+                   word_vectors["asian",]
+search_synonyms(word_vectors, mystery_product)
+```
+
+```{r}
+pmi_svd_again <- irlba(pmi_matrix, 5, maxit = 500)
+
+#next we output the word vectors:
+word_vectors <- pmi_svd_again$u
+rownames(word_vectors) <- rownames(pmi_matrix)
+
+#grab 100 words
+forplot <- as.data.frame(word_vectors[200:300,])
+forplot$word <- rownames(forplot)
+
+#now plot
+library(ggplot2)
+ggplot(forplot, aes(x=V1, y=V2, label=word))+
+  geom_text(aes(label=word),hjust=0, vjust=0, color="blue")+
+  theme_minimal()+
+  xlab("First Dimension Created by SVD")+
+  ylab("Second Dimension Created by SVD")
+
+```
+
+
+
+
+
+

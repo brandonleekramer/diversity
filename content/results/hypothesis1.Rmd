@@ -1,6 +1,6 @@
 ---
 title: "Hypothesis 1"
-description: "The use of the term “diversity” and related terminology increased in biomedical abstracts from 1990-2020"
+description: "The use of the term “diversity” and related terminology increased in biomedical abstracts"
 output: html_document
 weight: 1
 ---
@@ -20,9 +20,13 @@ library("tidytext")
 library("plotly")
 library("DT")
 
-h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
-general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
 divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
+#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+#general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
+#subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
+subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
 ```
 
 Over the past several years, social scientists have noted that the discourse of "diversity" is expanding in use across various organizations (<ins>[Berrey 2015](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins>; <ins>[Ray 2019](https://journals.sagepub.com/doi/abs/10.1177/0003122418822335)</ins>). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research. Specifically, we are interested in eventually understand how diversity may or may not be replacing the discourse of race and ethinicity. First, we need to establish how often diversity is used within biomedical research. On this page, we are interested in measuring how often diversity and its various metonyms (i.e. related phrases) are used in biomedical research over the past three decades (1990-2020). Before getting started, we posed a working hypothesis to guide our work: 
@@ -39,21 +43,12 @@ Once these dictionaries were aggregated, we developed a strategy that (1) counte
 
 Importantly, as we document in our <ins>[methodology](/methods/)</ins>, measuring "diversity" is somewhat complicated by the fact that it is a polysemous concept - meaning that diversity itself has multiple, diverse meanings (<ins>[Abascal et al. 2021](https://advances.sciencemag.org/content/7/11/eabf2507)</ins>; <ins>[Mayorga-Gallo 2019](https://journals.sagepub.com/doi/abs/10.1177/0002764219842619?casa_token=HHfLLMyoQ7cAAAAA:nRfaKooM-oe1hF_iWjFVktrASiPtzCsmbl-Si-17kEA9Famn7rquX__wM4JxVZXLK1y_QV6WOs_QZQ)</ins>). Specifially, in biomedical research, diversity more commonly means heterogeneity than referring to a form of social representation or relating to a matter of addressing equity, inclusion, or justice. Thus, in the figure below, you will see two diversity lines: "diversity (all)" refers to all means of terms in the diversity category while "diversity (social)" refers to all mentions of diversity that co-occur with any of the other terms in the other 11 diversity categories mentioned above. For example, if diversity is mentioned alongside race or gender, diversity will be classified as a form of "social diversity." In this case, the term will be counted in both lines displayed in the graph. If diversity is not mentioned alongside any of the other diversity terms in our dictionaries, it will only be included in the "diversity (all)" line. 
 
-```{r figure 1a, fig.height=6.5, echo=FALSE}
+```{r figure 1a, fig.height=6.5, fig.align="center", echo=FALSE}
 `%notin%` <- Negate(`%in%`)
 
-figure_1A <- general_pop_terms %>% 
-  # recode terms 
-  select(-starts_with("prc_")) %>% 
-  pivot_longer(!year, names_to = "term", values_to = "n") %>%
-  mutate(term = str_replace(term, "cnt_", ""),
-         term = str_replace(term, "sexgender", "sex/gender"),
-         term = str_replace(term, "racial", "race/ethnicity"),
-         term = str_replace(term, "\\b(?i)(diversity)\\b", "diversity (all)"),
-         term = str_replace(term, "class", "socioeconomic"),
-         term = str_replace(term, "soc_diversity", "diversity (social)")) %>% 
-  # graphing terms over time 
-  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
+figure_1A <-  h1_all_set_counts_trends %>% 
+  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>%
+  rename(n = count) %>% 
   ggplot() + 
   geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
   theme_minimal() +
@@ -79,9 +74,9 @@ figure_1A <- general_pop_terms %>%
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
 ```
 
-Figure 1A shows the growth in the raw word frequencies of diversity-related terms from 1990-2020. The most obvious trends are the dramatic upward trends in the lifecourse and sex/gender categories - increasing by roughly 5-fold each. The terms are frequently mentioned refer to the age and sex of populations being tested in clinical trials. Next, we see the "diversity (all)" category in yellow, which grew over 15-fold. Surprisingly, this growth is small compared to the 23-fold rise in the use of "diversity (social)" over the same period - a trend that provides robust support of our first hypothesis. We also observe notable growth a fairly marked increased in socio-economic and race/ethnicity terms, which jump about 20- and 9-fold respectively. The cultural, minority, and sexuality all increase over time, but this is a bit more subdued given that they never surpass more than 1,500 mentions in a given year. 
+Figure 1A shows the growth in the raw word frequencies of diversity-related terms from 1990-2020. The most obvious trends are the dramatic upward trends in the lifecourse and sex/gender categories - increasing by 6-to-7-fold respectively. The terms are frequently mentioned refer to the age and sex of populations being tested in clinical trials. Next, we see the "diversity (all)" category in yellow, which grew over 18-fold. Surprisingly, this growth is smaller than the 23-fold rise in the use of "diversity (social)" over the same period - a trend that provides robust support of our first hypothesis. We also observe notable growth a fairly marked increased in socio-economic and race/ethnicity terms, which jump about 25- and 11-fold respectively. The cultural, minority, and sexuality all increase over time, but this is a bit more subdued given that they never surpass more than 5,000 mentions in a given year. 
 
-```{r figure 1b, fig.height=6.5, echo=FALSE}
+```{r figure 1b, fig.height=6.5, fig.align="center", echo=FALSE}
 # graphing terms over time 
 ggplotly(
 figure_1B <- general_pop_terms %>% 
@@ -110,7 +105,7 @@ figure_1B <- general_pop_terms %>%
                      values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
                                # l.green  # mustard  # purple  # d.green  # orange
                               "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")) +
-  #scale_y_log10() +
+  scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))) %>% 
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
@@ -150,7 +145,7 @@ DT::datatable(tree_data, rownames = FALSE)
 ```
 
 ```{r biomedical_wordfreqs, echo = FALSE}
-subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds") %>% 
+subset_counts <- subset_counts %>% 
   filter(!term %in% c("genetic", "population", "ancestry")) %>% 
   mutate(term = str_replace(term, "aging", "lifecourse")) %>% 
   rename(`term set` = term, `words in term set` = word, `count for all years` = count) %>% 

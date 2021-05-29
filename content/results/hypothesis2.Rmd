@@ -1,6 +1,6 @@
 ---
 title: "Hypothesis 2"
-description: "Change in US-specific racial and ethnic categories in biomedical abstracts from 1990-2020"
+description: "Change in US-specific racial and ethnic categories in biomedical abstracts"
 output: html_document
 weight: 2
 ---
@@ -15,13 +15,12 @@ h1, h2, h3, h4 {
 ```{r, include=FALSE}
 rm(list = ls())
 
-for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr",
-              "grid", "gridExtra", "reshape2", "extrafont", "data.table",
-              "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+for (pkg in c("tidyverse", "tidytext", "DT", "grid", "gridExtra", "extrafont", "data.table", "plotly")) {library(pkg, character.only = TRUE)}
 
-h2_omb_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_counts.rds") 
-h2_omb_prcs <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_prcs.rds") 
-
+#h2_omb_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_counts.rds") 
+#h2_omb_prcs <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_prcs.rds") 
+h2_omb_counts <- read_rds("~/git/diversity/data/final_data/h2_all_omb_counts.rds") 
+h2_omb_prcs <- read_rds("~/git/diversity/data/final_data/h2_all_omb_prcs.rds")
 ```
 
 Next, we wanted to examine the growth of <ins>[OMB Directive 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html)</ins> and <ins>[US Census](https://www.census.gov/topics/population/race/about.html)</ins> terms. Initially, we posed this hypothesis: 
@@ -86,7 +85,7 @@ figure_2B <- h2_omb_prcs %>%
   labs(title = "    Figure 2B. Proportional Growth of \n US-Specific Terms in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
-  ylab("Proportion of Articles") +
+  ylab("Proportion of Abstracts") +
   theme(axis.title.x = element_blank(), 
         #axis.title.y = element_blank(), 
         #legend.position = "none",
