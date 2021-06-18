@@ -29,10 +29,18 @@ age_gender_abstracts <- diversity_abstracts %>%
   select(fk_pmid, year, abstract, publication, lifecourse, sex_gender) %>% 
   filter(lifecourse > 1 | sex_gender > 1 )
 
+`%notin%` <- Negate(`%in%`)
+
+custom_stop_words = c("95", "1", "2", "3", "4", "5", "6", "10", "12", "ci")
+
 word_freqs <- age_gender_abstracts %>%
   unnest_tokens(word, abstract) %>%
   anti_join(stop_words, by = "word") %>% 
-  count(word, sort = TRUE)
+  count(word, sort = TRUE) %>% 
+  filter(word %notin% custom_stop_words)
+
+setwd("~/git/diversity/data/sensitivity_checks/")
+write_csv(word_freqs, "top_words_in_socdiv_abstracts.csv")
 
 ### second paragraph 
 # what percentage of all articles that mention "diversity" are social uses of that term? 
