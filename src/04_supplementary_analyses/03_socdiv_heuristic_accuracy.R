@@ -4,6 +4,7 @@
 library("tidyverse")
 library("tidytext")
 library("RPostgreSQL")
+library("naniar")
 
 # connect to postgresql to get our data
 conn <- dbConnect(drv = PostgreSQL(), 
@@ -14,7 +15,7 @@ conn <- dbConnect(drv = PostgreSQL(),
                   password = Sys.getenv("db_pwd"))
 
 # query the users_gh data (table of all github users) 
-all_diversity_abstracts <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.all_diversity_abstracts ;")
+test <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.all_diversity_abstracts ;")
 
 # disconnect from postgresql database 
 dbDisconnect(conn)
@@ -98,6 +99,23 @@ fp_bigrams <- false_positives %>%
 # looks like adult and women create false positives 
 # could keep working on animal exclusion model to improve this or build a BERT model 
 
+true_positives <- labeled_eda %>% 
+  filter(labels_match == TRUE & blk_code == 1 ) 
+
+true_positives_detailed <- true_positives %>% 
+  select(fk_pmid, blk_code, labels_match) %>% 
+  left_join(all_diversity_abstracts, by = "fk_pmid") 
+
+tp_correlations_prep <- true_positives_detailed %>% 
+  select(soc_div_terms:white)
+vis_miss(tp_correlations_prep)
+tp_correlations <- cor(tp_correlations_prep)
+
+all_diversity_prep <- all_diversity_abstracts %>% 
+  select(soc_div_terms:white)
+all_div_correlations <- data.frame(cor(all_diversity_prep))
+select_cut <- all_div_correlations %>% select(soc_div_terms, diversity, soc_diversity) %>% arrange(-soc_diversity)
 
 
-
+setwd("~/git/diversity/data/sensitivity_checks/")
+write_csv(true_positives_detailed, "true_positives.csv")

@@ -6,7 +6,8 @@ library("tidyverse")
 library("RPostgreSQL")
 
 # h1 ingest term matrices  
-setwd("~/git/diversity/data/text_results/h1_results")
+#setwd("~/git/diversity/data/text_results/h1_results")
+setwd("/project/class/bii_sdad_dspg/uva/ncses_oss/brandon_diversity_data/h1_results_0521/")
 h1_ids <- list.files(pattern="h1_diversity_terms_matrix_*") %>% 
   map_df(~read_rds(.)) %>% 
   arrange(year, fk_pmid) %>% 
@@ -18,7 +19,8 @@ h1_ids <- list.files(pattern="h1_diversity_terms_matrix_*") %>%
   select(-ancestry, -population)
 
 # h2 ingest and summarize 
-setwd("~/git/diversity/data/text_results/h2_results")
+#setwd("~/git/diversity/data/text_results/h2_results")
+setwd("/project/class/bii_sdad_dspg/uva/ncses_oss/brandon_diversity_data/h2_results_0521/")
 h2_ids <- list.files(pattern="h2_omb_ids_*") %>% 
   map_df(~read_rds(.)) %>% 
   select(-human_study:-term) %>% 
@@ -29,8 +31,10 @@ h2_ids <- list.files(pattern="h2_omb_ids_*") %>%
   select(fk_pmid, year, h2_totals, everything())
 
 # h3 ingest and summarize 
-setwd("~/git/diversity/data/text_results/h3_results")
-h3_ids <- read_rds("h3_all_population_ids.rds") %>% 
+#setwd("~/git/diversity/data/text_results/h3_results")
+setwd("/project/class/bii_sdad_dspg/uva/ncses_oss/brandon_diversity_data/h3_results_0521/")
+h3_ids <- list.files(pattern="h3_population_ids*") %>% 
+  map_df(~read_rds(.)) %>% 
   select(-race_ethnicity) %>% 
   rename(h3_totals = all_pop_terms) %>% 
   #mutate(h3_totals = rowSums(across(continental:omb_uscensus))) %>% 
