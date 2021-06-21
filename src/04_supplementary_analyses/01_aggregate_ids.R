@@ -84,6 +84,8 @@ dbWriteTable(conn, c("pubmed_2021", "bio_diversity_ids"),
              bio_diversity_ids, row.names = FALSE)
 dbDisconnect(conn)
 
+
+
   
   
   

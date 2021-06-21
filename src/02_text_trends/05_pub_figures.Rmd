@@ -11,7 +11,8 @@ rm(list = ls())
 
 for (pkg in c("tidyverse", "igraph", "tidytext", "ggplot2", "DT", "maditr", "RPostgreSQL",
               "grid", "gridExtra", "reshape2", "extrafont", "data.table", 
-              "datamodelr", "DiagrammeR", "plotly", "stringi", "networkD3")) {library(pkg, character.only = TRUE)}
+              #"datamodelr", "DiagrammeR", "networkD3",
+              "plotly", "stringi")) {library(pkg, character.only = TRUE)}
 
 ```
 
@@ -366,7 +367,7 @@ figure_3A <- h3_counts %>%
   ggplot() + 
   geom_line(aes(y = n, x = year, colour = term), size = 0.8, stat="identity") + 
   theme_minimal() +
-  labs(title = "     Figure 5A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+  labs(title = "     Figure 3A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   #scale_linetype_manual( values=linetype) +
   ylab("Term Count (in Thousands)") +
@@ -395,7 +396,7 @@ figure_3B <- all_pop_prc_counts %>%
               rename(percentage = n)) %>% 
   ggplot() + 
   geom_line(aes(y = percentage, x = year, colour = term), size = 0.8, stat="identity") +
-  labs(title = "    Figure 5B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+  labs(title = "    Figure 3B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Abstracts") +

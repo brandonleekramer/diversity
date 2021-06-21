@@ -1,0 +1,202 @@
+---
+title: "Social Diversity Regression Analyses"
+author: "Brandon Kramer"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+rm(list = ls())
+
+library("tidyverse")
+library("tidytext")
+library("RPostgreSQL")
+library("naniar")
+library("psych")
+library("ggcorrplot")
+library("aod")
+library("caret")
+library('pscl')
+library("ROCR")
+
+# load data (was cleaned in a previous file)
+regression_data <- read_rds("~/git/diversity/data/final_data/socdiv_regression_data.rds")
+# convert all of the variables to binary indicator vars 
+to_binary <- function(x, na.rm = FALSE) (if_else(x > 0, 1, 0))
+# convert the outcome to binary 
+regression_data <- regression_data %>% 
+  select(-fk_pmid, -diversity, -publication, -domain) %>% 
+  mutate_at(vars(soc_diversity), to_binary)
+
+# splitting our data 
+# first, we will split the dataset 
+set.seed(123)
+sample <- sample(c(TRUE, FALSE), nrow(regression_data), replace = T, prob = c(0.6,0.4))
+train <- regression_data[sample, ]
+test <- regression_data[!sample, ]
+```
+
+### Objective 
+
+In this report, we use logistic regression to predict the likelihood of "social diversity" being used in biomedical abstracts. Our dataset includes ~2.5 million abstracts from 250 top-ranked biomedical journals taken from the PubMed/MEDLINE database. For a summary of our methodology, see our [supplementary website](https://growthofdiversity.netlify.app/methods/). To understand the models below, you need to understand that our response/outcome variable is "social diversity," which is any mention of diversity (1/0) that co-occurs with one of the other 392 total terms from the other 11 diversity cateogories in H1. Our predictor variables will include year of publication, the categories from H1, H2, and H3 as well as control variables like whether human or animal terms were used in the abstracts. In the latter models, we also included journal information such as whether the abstracts derived from prominent biomedical franchises such as *Annual Reviews*, *Nature*, *Lancet*, and *Trends*. We also classified biomedical journals into 13 categories, including biotech/bioengineering, biological sciences, brain sciences, cancer research, cardiovascular sciences, general multidisciplinary science journals (Nature, Science, etc.), genomic/genetic sciences, immunology/infectious disease sciences, internal medicine, pharmaceutical sciences, public health, surgery, and other (i.e. combination of urology, gynecology, pediatrics, and nursing).
+
+NOTE: I've looked at the data to ensure that there is no missing data and looked the correlations to the outcome. Despite the outcome, in part, being defined by some of the predictors, those variables are not strongly correlated. 
+
+### Logistic Regression Models 
+
+The overall objective is to develop a model that has the lowest residual deviance score. After each model, I will run an ANOVA to test whether the most recent model is an improvement over the previous versions we ran. 
+
+#### H1-H3 Categories 
+
+Our first model evaluates the effect of the H1 categories (diversity) on our outcome.
+
+```{r}
+model1 <- glm(soc_diversity ~ year + cultural + disability + equity + lifecourse + migration + 
+               minority + race_ethnicity + sex_gender + sexuality + social_class, 
+               data = train, family = "binomial")
+summary(model1)
+``` 
+
+This model shows that each of the H1 categories has a significant and positive effect on social diversity being mentioned. Our second model looks at the H2 categories (OMB/Census categories). 
+
+```{r}
+model2 <- glm(soc_diversity ~ year + asian + black + ethnic + hispanic + 
+               native_american + pacific_islander + racial + white, 
+               data = train, family = "binomial")
+summary(model2) 
+anova(model1, model2, test = "Chisq")
+``` 
+
+This model shows that each of the H2 categories have a significant positive impact on social diversity other than the White and Native American categories. While the Native American cateogory has no effect, the White category has a significant negative effect. The ANOVA also shows that the H1 model is a better fit than the H2 model. Let's try the H3 categories (population terminology). 
+
+```{r}
+model3 <- glm(soc_diversity ~ year + continental + directional + national + 
+                 omb_uscensus + race_ethnicity + subcontinental + subnational, 
+               data = train, family = "binomial")
+summary(model3) 
+anova(model1, model3, test = "Chisq")
+anova(model2, model3, test = "Chisq")
+``` 
+
+This model shows that after bringing in the H3 categories, the OMB/Census categories are no longer significant in predicting the social diversity outcome. Instead, all of the other cateogories are significant and positive predictors. The ANOVAs also show that while model 3 does do better than model 2, model 1 is still the best overall model fit. Let's add all of those categories together (removing the ones with overlap such as racial and race/ethnicity).
+
+```{r}
+model7 <- glm(soc_diversity ~ year + human_study + animal_study + cultural + disability + equity + lifecourse + 
+                migration + minority + sex_gender + sexuality + social_class +
+                asian + black + ethnic + hispanic + native_american + pacific_islander + racial + white +
+                continental + directional + national + subcontinental + subnational, 
+              data = train, family = "binomial")
+summary(model7) 
+anova(model1, model7, test = "Chisq")
+anova(model3, model7, test = "Chisq")
+``` 
+
+Overall, this model confirms that the all of the H1 and H3 categories have a positive and significant impact on the use of social diversity in biomedical abstracts. In contrast, we see that only certain H2 categories have a significant positive effect, which helps to explain why the OMB/Census category was a non-siginificant predictor in the last model. Here, we see that terms like Black, Hispanic, Native American, racial and ethnic have positive effects while Asian and White have negative effects. While it makes sense why social diversity would be used less in conversations about White people, I suspect that diversity is not a discourse that would be used widely in biomedical studies conducted by Chinese scholars, which may be used terms within our Asian category to refer to Chinese populations more generally outside of population testing more specifically. This model also includes the human and animal indicator variables and the only thing that is notable here is that the animal studies have a positive effect, suggesting that we could spend more time working to build up our animal exclusion clause to remove false positives. Lastly, our model diagnostics show clearly that this is the best model we have so far. 
+
+#### Journal Information 
+
+Now, we can add in the four main publication franchises (*Annual Reviews*, *Nature*, *Lancet*, and *Trends*).
+
+```{r}
+model8 <- glm(soc_diversity ~ year + human_study + animal_study + cultural + disability + equity + lifecourse + 
+                migration + minority + sex_gender + sexuality + social_class +
+                asian + black + ethnic + hispanic + native_american + pacific_islander + racial + white +
+                continental + directional + national + subcontinental + subnational +
+                nature + annual_reviews + lancet + trends_in, 
+              data = train, family = "binomial")
+summary(model8) 
+anova(model7, model8, test = "Chisq")
+``` 
+
+This model shows little difference in the H1-H3 categories, which is a good indication those effects are robust. For those top jounals, we see that *Annual Reviews*, *Nature*, and *Trends* have positive impacts while *Lancet* has a negative impact. Next, we will add in all of the categories (using Other as our reference cateogory). 
+
+```{r}
+model10 <- glm(soc_diversity ~ year + human_study + animal_study + cultural + disability + equity + lifecourse + 
+                migration + minority + sex_gender + sexuality + social_class +
+                asian + black + ethnic + hispanic + native_american + pacific_islander + racial + white +
+                continental + directional + national + subcontinental + subnational +
+                nature + annual_reviews + lancet + trends_in + 
+                bio_tech + bio_sciences + brain_sciences + cancer_research + cardio_sciences + general_sciences +
+                genomic_sciences + immuno_infect + internal_medicine + pharma_sciences + public_health + surgery, 
+              data = train, family = "binomial")
+summary(model10) # AIC: 208081
+anova(model8, model10, test = "Chisq") 
+```
+
+This final model shows some suprising results. Most of our original effects stayed the same, but the animal (good!) and Native American (unsurprising) effects weakened. *Nature* and *Lancet* have negative effects while *Annual Reviews* and *Trends* have positive effects. Beyond that, we observe significant, positive effects for abstracts in general multidisciplinary journals, genomics journals, immunology/infectious disease journals, and public health journals. We see significant, negative effects for all the other journals (biotech, biological sciences, cancer research, heart research, internal medicine, pharmaceutical research, and surgery). Given that most of these categories do not really mention population differences that often, the only effects that are really surprising here are the cancer and pharmaceutical research have negative effects, especially given how much of existing STS research focuses on BiDil as a prominent case study in the field. Finally, as the ANOVA indicates, this final is the best fit of all the models so far. 
+
+### Model Diagnostics 
+
+One way to validate this and check the performance of these regression models is looking at the pseudo (McFadden's) R-squared statistics. We see that we improve over the models, but there McFadden's is still pretty low overall. 
+
+```{r}
+list(model1 = pscl::pR2(model1)["McFadden"], 
+     model2 = pscl::pR2(model2)["McFadden"], 
+     model3 = pscl::pR2(model3)["McFadden"], 
+     model7 = pscl::pR2(model7)["McFadden"], 
+     model8 = pscl::pR2(model8)["McFadden"], 
+     model10 = pscl::pR2(model10)["McFadden"])
+```
+
+We also want to see how good the model is at predicting the outcome on the rest of our testing data. 
+
+```{r}
+test_predicted_m1 <- predict(model1, newdata = test, type = "response")
+test_predicted_m2 <- predict(model2, newdata = test, type = "response")
+test_predicted_m3 <- predict(model3, newdata = test, type = "response")
+test_predicted_m7 <- predict(model7, newdata = test, type = "response")
+test_predicted_m8 <- predict(model8, newdata = test, type = "response")
+test_predicted_m10 <- predict(model10, newdata = test, type = "response")
+
+list(
+  model1 = table(test$soc_diversity, test_predicted_m1 > 0.5) %>% prop.table() %>% round(3),
+  model2 = table(test$soc_diversity, test_predicted_m2 > 0.5) %>% prop.table() %>% round(3),
+  model3 = table(test$soc_diversity, test_predicted_m3 > 0.5) %>% prop.table() %>% round(3),
+  model7 = table(test$soc_diversity, test_predicted_m7 > 0.5) %>% prop.table() %>% round(3),
+  model8 = table(test$soc_diversity, test_predicted_m8 > 0.5) %>% prop.table() %>% round(3),
+  model10 = table(test$soc_diversity, test_predicted_m10 > 0.5) %>% prop.table() %>% round(3)
+)
+```
+
+While the chance of Type-II errors is really low (0.8%), the model's capacity to actually predict social diversity is really poor (99% are false negatives). Additional analyses show we have a low error rate and that this is the case across all of our models. Given our McFadden's statistics, this is not all that surprising. 
+
+```{r}
+table(test$soc_diversity, test_predicted_m10 > 0.5)
+```
+
+When we look at our confusion matrix, we see more confirmation that this model could use some work: the sensitivity is really good (99%), but the precision is really bad (99%). The latter is a positive sign, but is likely just the case because there are so few abstracts that actually have "social diversity" mentioned relative to the overall sample. 
+
+```{r, fig.height=4, fig.width=8}
+par(mfrow=c(1, 2))
+
+prediction(test_predicted_m1, test$soc_diversity) %>%
+  performance(measure = "tpr", x.measure = "fpr") %>%
+  plot()
+
+prediction(test_predicted_m10, test$soc_diversity) %>%
+  performance(measure = "tpr", x.measure = "fpr") %>%
+  plot()
+```
+
+```{r}
+prediction(test_predicted_m1, test$soc_diversity) %>%
+  performance(measure = "auc") %>%
+  .@y.values 
+
+prediction(test_predicted_m10, test$soc_diversity) %>%
+  performance(measure = "auc") %>%
+  .@y.values
+```
+
+When we look at the ROC, we see that the model is fine (it improved from our original model), but is still under the 0.80 that is recommended to use. Taken together, this means that we really should spend some more time engineering some additional features to predict the outcomes. That is, we could do some additional text mining of the abstracts to pull out other predictors such as clinical research indicators, mention of specific biological entities, etc. We could also do some additional refinement of our exclusion clause to improve the accuracy of our original heuristic. That said, this all seems like a step we could take in a future project. 
+
+### References 
+
+[UC Business Analytics R Programming Guide for Logistic Regression](https://uc-r.github.io/logistic_regression)
+
+
+
+
+
+
+
