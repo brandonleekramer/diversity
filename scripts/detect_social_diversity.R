@@ -1,127 +1,6 @@
 
-# compoundR combines compound word sequences 
 
-compoundR <- function(df, input){
-  
-  # load required packages 
-  library("dplyr")
-  library("readr")
-  library("tidyr")
-  library("readr")
-  library("stringr")
-  library("data.table")
-  library("tidytable")
-  
-  # load dictionary 
-  setwd("~/git/diversity/data/dictionaries/")
-  compound_dictionary <- readr::read_csv("diversity_project - compoundR.csv") %>%
-    dplyr::select(original_string, new_string) %>% tibble::deframe()
-  
-  # load dictionary 
-  df <- df %>% 
-    tidytable::mutate.("{{input}}" := tolower({{ input }})) %>% 
-    tidytable::mutate.("{{input}}" := stringr::str_replace_all({{ input }}, compound_dictionary))
-  
-  df
-  
-}
 
-# humanizeR creates two binary indicator variables to detect whether the study is a non/human research study 
-
-humanizeR <- function(df, id, input){
-  
-  library("dplyr")
-  library("readr")
-  library("tidyr")
-  library("readr")
-  library("stringr")
-  library("data.table")
-  library("tidytext")
-  library("tidytable")
-  
-  setwd("~/git/diversity/data/dictionaries/")
-  dictionary <- readr::read_csv("diversity_project - humanizeR.csv", col_types = cols())
-  human <- dictionary %>% filter(category == "human")
-  nonhuman <- dictionary %>% filter(category == "nonhuman")
-  
-  id <- enquo(id)
-  input <- enquo(input)
-  
-  tmp_df <- df %>% 
-    as_tidytable() %>% 
-    tidytable::mutate.("{{input}}" := tolower({{ input }})) %>% 
-    tidytext::unnest_tokens(word, !!input) %>%
-    tidytable::filter.(word %in% human$terms) %>% 
-    tidytable::mutate.(human = 1, nonhuman = 0) %>% 
-    tidytable::select.(-word) 
-  
-  tmp_df <- df %>% 
-    tidytext::unnest_tokens(word, !!input) %>%
-    tidytable::filter.(word %in% nonhuman$terms) %>% 
-    tidytable::mutate.(human = 0, nonhuman = 1) %>% 
-    tidytable::select.(-word) %>% 
-    tidytable::bind_rows.(tmp_df) %>% 
-    tidytable::summarize.(human = sum(human),
-                          nonhuman = sum(nonhuman), 
-                          .by = !!id) %>% 
-    tidytable::arrange.(!!id)
-  
-  df <- df %>% 
-    tidytable::left_join.(tmp_df) %>% 
-    tidytable::mutate.(human = replace_na.(human, 0)) %>% 
-    tidytable::mutate.(nonhuman = replace_na.(nonhuman, 0))
-  
-  df
-  
-}
-
-######
-
-polysemeR <- function(df, id, input){
-  
-  # load required packages 
-  library("dplyr")
-  library("readr")
-  library("tidyr")
-  library("readr")
-  library("stringr")
-  library("data.table")
-  library("tidytable")
-  library("tidytext")
-  
-  # dictionary 
-  setwd("~/git/diversity/data/dictionaries/")
-  false_positives <- read_csv("diversity_project - polysemeR.csv", col_types = cols()) %>% arrange(heterogeneity)
-  false_positives <- na.omit(false_positives$heterogeneity)
-    
-  id <- enquo(id)
-  input <- enquo(input)
-  
-  bigrams <- df %>% 
-    tidytext::unnest_tokens(words, !!input, token = "ngrams", n = 2) %>% 
-    tidytable::filter.(words %in% false_positives) %>% 
-    tidytable::mutate.(heterogeneity = 1) %>% 
-    tidytable::select.(!!id, heterogeneity) %>% 
-    tidytable::summarize.(heterogeneity = sum(heterogeneity), .by = !!id)
-  
-  trigrams <- df %>% 
-    tidytext::unnest_tokens(words, !!input, token = "ngrams", n = 3) %>% 
-    tidytable::filter.(words %in% false_positives) %>% 
-    tidytable::mutate.(heterogeneity = 1) %>% 
-    tidytable::select.(!!id, heterogeneity) %>% 
-    tidytable::summarize.(heterogeneity = sum(heterogeneity), .by = !!id)
-  
-  ngrams <- bind_rows(bigrams, trigrams) %>% 
-    tidytable::summarize.(heterogeneity = sum(heterogeneity), .by = !!id)
-  
-  df <- df %>% 
-    tidytable::left_join.(ngrams) %>% 
-    tidytable::mutate.(heterogeneity = replace_na.(heterogeneity, 0)) %>% 
-    as.data.frame()
-  
-  df
-  
-}
 
 detect_social_diversity <- function(df, id, input){
   
@@ -205,7 +84,7 @@ detect_social_diversity <- function(df, id, input){
     # to classify soc_div_raw we basically count all mentions of diversity with one of the other terms in our cats 
     # in this version i will count both ancestry and population b/c divers* will be used in those contexts 
     tidytable::mutate.(total_cnt = ancestry_cnt + cultural_cnt + class_cnt + disability_cnt + diversity_cnt + equity_cnt + 
-                         lifecourse_cnt + minority_cnt + migration_cnt + population_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
+             lifecourse_cnt + minority_cnt + migration_cnt + population_cnt + racial_cnt + sexgender_cnt + sexuality_cnt) %>% 
     tidytable::select.(sentence_id, total_cnt, everything()) %>%
     tidytable::arrange.(-total_cnt) %>% ungroup() %>%
     # get the intial social_diversity count (before polysemeR correction)
@@ -234,19 +113,6 @@ detect_social_diversity <- function(df, id, input){
   df
   
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 

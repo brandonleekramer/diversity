@@ -21,12 +21,12 @@ library("plotly")
 library("DT")
 
 divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
-#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
-#general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
-#subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
-h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
-general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
-subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
+h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
+subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
+#general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
+#subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
 ```
 
 Over the past several years, social scientists have noted that the discourse of "diversity" is expanding in use across various organizations (<ins>[Berrey 2015](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins>; <ins>[Ray 2019](https://journals.sagepub.com/doi/abs/10.1177/0003122418822335)</ins>). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research. Specifically, we are interested in eventually understand how diversity may or may not be replacing the discourse of race and ethinicity. First, we need to establish how often diversity is used within biomedical research. On this page, we are interested in measuring how often diversity and its various metonyms (i.e. related phrases) are used in biomedical research over the past three decades (1990-2020). Before getting started, we posed a working hypothesis to guide our work: 
@@ -127,7 +127,8 @@ Here is a list of the terms in each category analyzed above. You can scroll thro
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
-tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1") 
+tree_data <- read_csv("diversity_project - tree_data.csv") %>% 
+  filter(hypothesis == "hypothesis1") %>% select(-viz_embeddings, -mean_embeddings)
 DT::datatable(tree_data, rownames = FALSE)
 ```
 
@@ -145,12 +146,14 @@ DT::datatable(tree_data, rownames = FALSE)
 ```
 
 ```{r biomedical_wordfreqs, echo = FALSE}
-subset_counts <- subset_counts %>% 
+subset_counts_table <- subset_counts %>% 
   filter(!term %in% c("genetic", "population", "ancestry")) %>% 
   mutate(term = str_replace(term, "aging", "lifecourse")) %>% 
   rename(`term set` = term, `words in term set` = word, `count for all years` = count) %>% 
-  select(`term set`, `words in term set`, `count for all years`)
-datatable(subset_counts, caption = 'Supplementary Table 1B: Frequency of Words Used in Each Term Set (1990-2020)', rownames = FALSE)
+  select(`term set`, `words in term set`, year, `count for all years`)
+datatable(subset_counts_table, 
+          caption = 'Supplementary Table 1B: Frequency of Words Used in Each Term Set (1990-2020)', 
+          rownames = FALSE)
 ```
 
 <br>

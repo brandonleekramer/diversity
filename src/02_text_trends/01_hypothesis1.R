@@ -97,16 +97,19 @@ str_c("Finishing data pull at: ", Sys.time())
 str_c("Started humanizeR & compoundR at: ", Sys.time())
 
 pubmed_data <- pubmed_data %>% 
-  mutate(abstract = tolower(abstract)) %>% 
+  mutate(abstract_raw = abstract, 
+         abstract = tolower(abstract)) %>% 
   humanizeR(fk_pmid, abstract) %>% 
   # exclusion criteria predicated on: 
   # any human words being included OR 
   # no human or no nonhuman words OR 
   # having less than 5x the nonhuman:human words 
-  filter(human > 0 | nonhuman == 0) %>% 
-  mutate(ex_ratio = round(nonhuman / human, 2),
-         ex_ratio = replace_na(ex_ratio, 0)) %>% 
-  filter(ex_ratio < 5) %>% 
+  #filter(human > 0 | nonhuman == 0) %>% 
+  #mutate(ex_ratio = round(nonhuman / human, 2),
+  #       ex_ratio = replace_na(ex_ratio, 0)) %>% 
+  #filter(ex_ratio < 5) %>% 
+  # different for diversity 
+  filter(nonhuman == 0) %>% 
   compoundR(abstract)
 
 str_c("Finished humanizeR & compoundR at: ", Sys.time())
