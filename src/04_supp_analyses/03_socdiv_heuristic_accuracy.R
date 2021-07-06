@@ -82,7 +82,20 @@ labeled_eda %>%
 # sensitivity 
 
 false_positives <- labeled_eda %>% 
-  filter(labels_match == FALSE & blk_code == 0 ) 
+  filter(labels_match == FALSE & blk_code == 0 ) #%>% 
+  #mutate(species = ifelse(test = str_detect(abstract, "\\b(?i)(species)\\b"), yes = 1, no = 0)) 
+
+false_positive_sentences <- labeled_eda %>% 
+  filter(labels_match == FALSE & blk_code == 0 ) %>% 
+  unnest_tokens(output = sentence, 
+                input = abstract, 
+                token = "sentences", 
+                drop = FALSE) %>% 
+  filter(grepl("diversity|diverse|diversified", sentence)) 
+
+false_positive_grams <- false_positive_sentences %>% 
+  unnest_tokens(five_grams, abstract, token = "ngrams", n = 5)  %>% 
+  filter(grepl("^diversity|^diverse|^diversified|diversity$|diverse$|diversified$", five_grams)) 
 
 data("stop_words")
 

@@ -20,7 +20,7 @@ library('pscl')
 library("ROCR")
 
 # load data (was cleaned in a previous file)
-regression_data <- read_rds("~/git/diversity/data/final_data/socdiv_regression_data.rds")
+regression_data <- read_rds("~/git/diversity/data/regression_analyses/socdiv_regression_data.rds")
 # convert all of the variables to binary indicator vars 
 to_binary <- function(x, na.rm = FALSE) (if_else(x > 0, 1, 0))
 # convert the outcome to binary 
@@ -41,6 +41,10 @@ test <- regression_data[!sample, ]
 In this report, we use logistic regression to predict the likelihood of "social diversity" being used in biomedical abstracts. Our dataset includes ~2.5 million abstracts from 250 top-ranked biomedical journals taken from the PubMed/MEDLINE database. For a summary of our methodology, see our [supplementary website](https://growthofdiversity.netlify.app/methods/). To understand the models below, you need to understand that our response/outcome variable is "social diversity," which is any mention of diversity (1/0) that co-occurs with one of the other 392 total terms from the other 11 diversity cateogories in H1. Our predictor variables will include year of publication, the categories from H1, H2, and H3 as well as control variables like whether human or animal terms were used in the abstracts. In the latter models, we also included journal information such as whether the abstracts derived from prominent biomedical franchises such as *Annual Reviews*, *Nature*, *Lancet*, and *Trends*. We also classified biomedical journals into 13 categories, including biotech/bioengineering, biological sciences, brain sciences, cancer research, cardiovascular sciences, general multidisciplinary science journals (Nature, Science, etc.), genomic/genetic sciences, immunology/infectious disease sciences, internal medicine, pharmaceutical sciences, public health, surgery, and other (i.e. combination of urology, gynecology, pediatrics, and nursing).
 
 NOTE: I've looked at the data to ensure that there is no missing data and looked the correlations to the outcome. Despite the outcome, in part, being defined by some of the predictors, those variables are not strongly correlated. 
+
+```{r,include=FALSE,echo=FALSE}
+cor(regression_data)
+```
 
 ### Logistic Regression Models 
 
