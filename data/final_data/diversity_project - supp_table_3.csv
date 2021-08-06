@@ -1,0 +1,11 @@
+Version,Co-Occurrence Window,Nonhuman Exclusion, Polysemy Adjustment,Sample,F1 Score
+Baseline,Abstract,Version 1,None,Sample 1,62.10%
+Version 1,Abstract,Version 2,None,Sample 2,80.40%
+Version 2,Abstract,Version 2,Version 1,Sample 2,82.50%
+Version 3,Abstract,Version 3,None,Sample 2,78.60%
+Version 4,Abstract,Version 3,Version 1,Sample 2,80.00%
+Version 5,Abstract,Version 4,None,Sample 2,79.30%
+Version 6,Abstract,Version 4,Version 1,Sample 2,80.60%
+Version 7,Sentence,Version 4,Version 2,Sample 2,57.00%
+Version 8,Sentence,Version 4,None,Sample 2,84.60%
+Version 9,Sentence,Version 4,Version 3,Sample 2,84.80%

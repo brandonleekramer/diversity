@@ -1,0 +1,1253 @@
+hyp_test,category,original_string,new_string,notes,date_added
+h1,ancestry,family lineage,familylineage,increases accuracy,06_2021
+h1,ancestry,family lineages,familylineages,increases accuracy,06_2021
+h1,cultural,cross culture,crosscultural,increases accuracy,02_2021
+h1,cultural,cross-culture,crosscultural,increases accuracy,02_2021
+h1,cultural,cross cultural,crosscultural,increases accuracy,02_2021
+h1,cultural,cross-cultural,crosscultural,increases accuracy,02_2021
+h1,cultural,cross culturally,crossculturally,increases accuracy,02_2021
+h1,cultural,cross-culturally,crossculturally,increases accuracy,02_2021
+h1,cultural,cross culturally,crossculturally,increases accuracy,02_2021
+h1,cultural,cross-culturally,crossculturally,increases accuracy,02_2021
+h1,cultural,inter-cultural,intercultural,increases accuracy,06_2021
+h1,cultural,inter-culturally,interculturally,increases accuracy,06_2021
+h1,cultural,intra-cultural,intracultural,increases accuracy,06_2021
+h1,cultural,intra-culturally,intraculturally,increases accuracy,06_2021
+h1,cultural,inter-linguistic,interlinguistic,increases accuracy,06_2021
+h1,cultural,inter-linguistically,interlinguistically,increases accuracy,06_2021
+h1,cultural,intra-linguistic,intralinguistic,increases accuracy,06_2021
+h1,cultural,intra-linguistic,intralinguistically,increases accuracy,06_2021
+h1,cultural,multi-culturally,multiculturally,increases accuracy,02_2021
+h1,cultural,multi-cultural,multicultural,increases accuracy,02_2021
+h1,cultural,socio-cultural,sociocultural,increases accuracy,06_2021
+h1,cultural,social-cultural,sociocultural,increases accuracy,06_2021
+h1,disability,able bodied,ablebodied,,02_2021
+h1,disability,able-bodied,ablebodied,,02_2021
+h1,disability,birth defect,birthdefect,,02_2021
+h1,disability,birth defects,birthdefect,,02_2021
+h1,disability,blind tested,blind_testing,lowers false positive rate,02_2021
+h1,disability,blind testing,blind_testing,lowers false positive rate,02_2021
+h1,disability,blind-tested,blind_testing,lowers false positive rate,02_2021
+h1,disability,blind-testing,blind_testing,lowers false positive rate,02_2021
+h1,disability,cognitive delay,cognitivedelay,,02_2021
+h1,disability,cognitively delay,cognitivelydelayed,,02_2021
+h1,disability,congenital defect,congenitaldefect,,02_2021
+h1,disability,deaf blind,deafblind,,02_2021
+h1,disability,deaf-blind,deafblind,,02_2021
+h1,disability,deaf-mute,deafmute,,02_2021
+h1,disability,developmental delay,developmentaldelay,,02_2021
+h1,disability,developmental impairment,developmentalimpairment,,02_2021
+h1,disability,developmentally delayed,developmentallydelayed,,02_2021
+h1,disability,developmentally impaired,developmentallyimpaired,,02_2021
+h1,disability,differently abled,differentlyabled,,02_2021
+h1,disability,differently-abled,differentlyabled,,02_2021
+h1,disability,double blind,double_blind,lowers false positive rate,02_2021
+h1,disability,double-blind,double_blind,lowers false positive rate,02_2021
+h1,disability,hard-of-hearing,hardofhearing,,02_2021
+h1,disability,hard of hearing,hardofhearing,,02_2021
+h1,disability,hearing impaired,hearingimpaired,,02_2021
+h1,disability,hearing impairment,hearingimpairment,,02_2021
+h1,disability,hearing-impaired,hearingimpaired,,02_2021
+h1,disability,limited vision,limitedvision,,02_2021
+h1,disability,limited-vision,limitedvision,,02_2021
+h1,disability,low vision,lowvision,,02_2021
+h1,disability,mental retardation,mentalretardation,,02_2021
+h1,disability,mentally retarded,mentallyretarded,,02_2021
+h1,disability,neuro-diverse,neurodiverse,,02_2021
+h1,disability,neurological disorder,neurological_disorder,,02_2021
+h1,disability,physician blind,physician_blind,lowers false positive rate,02_2021
+h1,disability,physician-blind,physician_blind,lowers false positive rate,02_2021
+h1,disability,single blind,single_blind,,02_2021
+h1,disability,single-blind,single_blind,,02_2021
+h1,disability,special needs,specialneeds,,02_2021
+h1,disability,substance abuse,substance_abuse,,02_2021
+h1,disability,substance abuser,substance_abuser,,02_2021
+h1,disability,visual impairment,visualimpairment,,02_2021
+h1,disability,visually impaired,visuallyimpaired,,02_2021
+h1,disability,visually-impaired,visuallyimpaired,,02_2021
+h1,equity,percieveddiscrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,racialdiscrimination,racial socialdiscrimination,increases accuracy,06_2021
+h1,equity,ethnicdiscrimination,ethnic socialdiscrimination,increases accuracy,06_2021
+h1,equity,systemicdiscrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,structuraldiscrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,reporteddiscrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,experienceddiscrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,genderdiscrimination,gender socialdiscrimination,increases accuracy,06_2021
+h1,equity,percieved bias,socialbiases,increases accuracy,06_2021
+h1,equity,racial bias,racial socialbiases,increases accuracy,06_2021
+h1,equity,ethnic bias,ethnic socialbiases,increases accuracy,06_2021
+h1,equity,systemic bias,socialbiases,increases accuracy,06_2021
+h1,equity,structural bias,socialbiases,increases accuracy,06_2021
+h1,equity,reported bias,socialbiases,increases accuracy,06_2021
+h1,equity,experienced bias,socialbiases,increases accuracy,06_2021
+h1,equity,gender bias,gender socialbiases,increases accuracy,06_2021
+h1,equity,percieved biases,socialbiases,increases accuracy,06_2021
+h1,equity,racial biases,racial socialbiases,increases accuracy,06_2021
+h1,equity,ethnic biases,ethnic socialbiases,increases accuracy,06_2021
+h1,equity,systemic biases,socialbiases,increases accuracy,06_2021
+h1,equity,structural biases,socialbiases,increases accuracy,06_2021
+h1,equity,reported biases,socialbiases,increases accuracy,06_2021
+h1,equity,experienced biases,socialbiases,increases accuracy,06_2021
+h1,equity,gender biases,gender socialbiases,increases accuracy,06_2021
+h1,equity,percieved biased,socialbiases,increases accuracy,06_2021
+h1,equity,racial biased,racial socialbiases,increases accuracy,06_2021
+h1,equity,ethnic biased,ethnic socialbiases,increases accuracy,06_2021
+h1,equity,systemic biased,socialbiases,increases accuracy,06_2021
+h1,equity,structural biased,socialbiases,increases accuracy,06_2021
+h1,equity,reported biased,socialbiases,increases accuracy,06_2021
+h1,equity,experienced biased,socialbiases,increases accuracy,06_2021
+h1,equity,gender biased,gender socialbiases,increases accuracy,06_2021
+h1,equity,social discrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,cultural discrimination,socialdiscrimination,increases accuracy,06_2021
+h1,equity,social bias,socialbiases,increases accuracy,06_2021
+h1,equity,social biases,socialbiases,increases accuracy,06_2021
+h1,equity,socially biased,socialbiases,increases accuracy,06_2021
+h1,equity,socially-biased,socialbiases,increases accuracy,06_2021
+h1,equity,cultural bias,socialbiases,increases accuracy,06_2021
+h1,equity,cultural biases,socialbiases,increases accuracy,06_2021
+h1,equity,culturally biased,socialbiases,increases accuracy,06_2021
+h1,equity,culturally-biased,socialbiases,increases accuracy,06_2021
+h1,equity,micro-aggression,microaggression,increases accuracy,06_2021
+h1,equity,micro-aggressions,microaggressions,increases accuracy,06_2021
+h1,lifecourse,age-related,agerelated,,02_2021
+h1,lifecourse,age-specific,agespecific,,02_2021
+h1,lifecourse,middle age,middleage,,02_2021
+h1,lifecourse,middle aged,middleaged,,02_2021
+h1,lifecourse,middle-age,middleage,,02_2021
+h1,lifecourse,middle-aged,middleaged,,02_2021
+h1,lifecourse,pre-adolescence,preadolescence,,02_2021
+h1,lifecourse,pre-adolescent,preadolescent,,02_2021
+h1,lifecourse,pre-adolescents,preadolescents,,02_2021
+h1,lifecourse,pre-pubescence,prepubescence,,02_2021
+h1,lifecourse,pre-pubescent,prepubescent,,02_2021
+h1,lifecourse,pre-pubescents,prepubescents,,02_2021
+h1,lifecourse,year old,yearsold,,02_2021
+h1,lifecourse,years of age,yearsofage,,02_2021
+h1,lifecourse,years old,yearsold,,02_2021
+h1,lifecourse,years old,yearsold,,02_2021
+h1,migration,cell migration,cell_migration,,06_2021
+h1,migration,cellular migration,cellular_migration,,06_2021
+h1,migration,asylum seeker,asylumseeker,,02_2021
+h1,migration,asylum seekers,asylumseekers,,02_2021
+h1,migration,foreign-born,foreignborn,,02_2021
+h1,migration,foreign born,foreignborn,,02_2021
+h1,migration,native born,nativeborn,,06_2021
+h1,migration,native-born,nativeborn,,06_2021
+h1,migration,non-native,nonnative,,06_2021
+h1,migration,im/migrant,immigrant,,06_2021
+h1,migration,non native,nonnative,,06_2021
+h1,migration,non citizen,noncitizen,,06_2021
+h1,migration,non-citizen,noncitizen,,06_2021
+h1,migration,non citizens,noncitizens,,06_2021
+h1,migration,non-citizens,noncitizens,,06_2021
+h1,minority,a minority,a_minority,lowers false positive rate,02_2021
+h1,minority,minority group,minoritygroup,,02_2021
+h1,minority,minority groups,minoritygroups,,02_2021
+h1,minority,minority of,minority_of,lowers false positive rate,02_2021
+h1,minority,minority population,minoritypopulation,,02_2021
+h1,minority,minority populations,minoritypopulations,,02_2021
+h1,minority,under-represented,underrepresented,,02_2021
+h1,population,socio-demographic,sociodemographic,,06_2021
+h1,population,socio-demographics,sociodemographics,,06_2021
+h1,population,sub-group,subgroup,,
+h1,population,sub-groups,subgroups,,
+h1,race/ethnicity,bi-ethnic,biethnic,,06_2021
+h1,race/ethnicity,bi-ethnically,biethnically,,06_2021
+h1,race/ethnicity,bi-racial,biracial,,06_2021
+h1,race/ethnicity,bi-racially,biracially,,06_2021
+h1,race/ethnicity,multi-ethnic,multiethnic,,06_2021
+h1,race/ethnicity,multi-ethnically,multiethnically,,06_2021
+h1,race/ethnicity,multi-racial,multiracial,,06_2021
+h1,race/ethnicity,multi-racially,multiracially,,06_2021
+h1,race/ethnicity,racism-related,racism related,,06_2021
+h1,race/ethnicity,race-related,race related,,06_2021
+h1,race/ethnicity,racially-related,racially related,,06_2021
+h1,race/ethnicity,ethnic-related,ethnic related,,06_2021
+h1,race/ethnicity,ethnically-related,ethnically related,,06_2021
+h1,sex/gender,bi-gender,bigender,,02_2021
+h1,sex/gender,cis-gender,cisgender,,02_2021
+h1,sex/gender,cis-normative,cisnormative,,02_2021
+h1,sex/gender,cis-people,cispeople,,02_2021
+h1,sex/gender,cis-person,cisperson,,02_2021
+h1,sex/gender,double-sex,doublesex,,02_2021
+h1,sex/gender,f2m,femaletomale,,02_2021
+h1,sex/gender,female assigned at birth,femaleassignedatbirth,,02_2021
+h1,sex/gender,female sex,femalesex,,02_2021
+h1,sex/gender,female presenting,femalepresenting,,06_2021
+h1,sex/gender,female-presenting,femalepresenting,,06_2021
+h1,sex/gender,female to male,femaletomale,,02_2021
+h1,sex/gender,female-assigned-at-birth,femaleassignedatbirth,,02_2021
+h1,sex/gender,female-to-male,femaletomale,,02_2021
+h1,sex/gender,femaletomale,femaletomale,,02_2021
+h1,sex/gender,feminine of center,feminineofcenter,,02_2021
+h1,sex/gender,feminine presenting,femininepresenting,,02_2021
+h1,sex/gender,feminine-of-center,feminineofcenter,,02_2021
+h1,sex/gender,feminine-presenting,femininepresenting,,02_2021
+h1,sex/gender,fluid gender,genderfluid,,02_2021
+h1,sex/gender,fluid-gender,genderfluid,,02_2021
+h1,sex/gender,ftm,femaletomale,,02_2021
+h1,sex/gender,gender binary,genderbinary,,02_2021
+h1,sex/gender,gender fluid,genderfluid,,02_2021
+h1,sex/gender,gender neutrois,genderneutrois,,02_2021
+h1,sex/gender,gender non conforming,gendernonconforming,,02_2021
+h1,sex/gender,gender non-conforming,gendernonconforming,,02_2021
+h1,sex/gender,gender nonconforming,gendernonconforming,,02_2021
+h1,sex/gender,gender normative,gendernormative,,02_2021
+h1,sex/gender,gender queer,genderqueer,,02_2021
+h1,sex/gender,gender variance,gendervariant,,02_2021
+h1,sex/gender,gender variant,gendervariant,,02_2021
+h1,sex/gender,gender-binary,genderbinary,,02_2021
+h1,sex/gender,gender-fluid,genderfluid,,02_2021
+h1,sex/gender,gender-normative,gendernormative,,02_2021
+h1,sex/gender,gender-queer,genderqueer,,02_2021
+h1,sex/gender,gender-variance,gendervariant,,02_2021
+h1,sex/gender,gender-variant,gendervariant,,02_2021
+h1,sex/gender,inter-sex,intersex,,02_2021
+h1,sex/gender,inter-sexual,intersex,,02_2021
+h1,sex/gender,intersexual,intersex,,02_2021
+h1,sex/gender,m2f,maletofemale,,02_2021
+h1,sex/gender,male assigned at birth,maleassignedatbirth,,02_2021
+h1,sex/gender,male sex,malesex,,02_2021
+h1,sex/gender,male to female,maletofemale,,02_2021
+h1,sex/gender,male-assigned-at-birth,maleassignedatbirth,,02_2021
+h1,sex/gender,male-to-female,maletofemale,,02_2021
+h1,sex/gender,maletofemale,maletofemale,,02_2021
+h1,sex/gender,masculine of center,masculineofcenter,,02_2021
+h1,sex/gender,masculine presenting,masculinepresenting,,02_2021
+h1,sex/gender,masculine-of-center,masculineofcenter,,02_2021
+h1,sex/gender,masculine-presenting,masculinepresenting,,02_2021
+h1,sex/gender,mtf,maletofemale,,02_2021
+h1,sex/gender,non-binary,nonbinary,,02_2021
+h1,sex/gender,poly gender,polygender,,02_2021
+h1,sex/gender,poly-gender,polygender,,02_2021
+h1,sex/gender,polygendered,polygender,,02_2021
+h1,sex/gender,sex adjusted,sexadjusted,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex assigned at birth,sexassignedatbirth,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex chromosome,sexchromosome,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex chromosomes,sexchromosomes,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex determination,sexdetermination,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex determining,sexdetermining,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex difference,sexdifference,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex gene,sexgene,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex genes,sexgenes,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex hormone,sexhormone,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex hormones,sexhormones,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-hormone,sexhormone,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-hormones,sexhormones,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex matched,sexmatched,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex ratio,sexratio,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex linked,sexlinked,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex specific,sexspecific,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex steroid,sexsteroid,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex steroids,sexsteroids,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex stratified,sexstratified,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-adjusted,sexadjusted,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-assigned-at-birth,sexassignedatbirth,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-gene,sexgene,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-genes,sexgenes,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-linked,sexlinked,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-matched,sexmatched,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-ratio,sexratio,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-specific,sexspecific,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-steroid,sexsteroid,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-steroids,sexsteroids,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sex-stratified,sexstratified,"increases accuracy, decrease confidence margin",02_2021
+h1,sex/gender,sexual differentiation,sexualdifferentiation,,02_2021
+h1,sex/gender,sexual dimorphism,sexualdimorphism,,02_2021
+h1,sex/gender,sexual dimorphisms,sexualdimorphism,,02_2021
+h1,sex/gender,sexually dimorphic,sexuallydimorphic,,02_2021
+h1,sex/gender,sexually transmitted,sexuallytransmitted,,02_2021
+h1,sex/gender,sexually-transmitted,sexuallytransmitted,,02_2021
+h1,sex/gender,trans-gender,transgender,,02_2021
+h1,sex/gender,trans-gendered,transgender,,02_2021
+h1,sex/gender,trans-man,transman,,02_2021
+h1,sex/gender,trans-men,transmen,,02_2021
+h1,sex/gender,trans-phobic,transphobic,,02_2021
+h1,sex/gender,trans-sexual,transsexual,,02_2021
+h1,sex/gender,trans-sexuals,transsexuals,,02_2021
+h1,sex/gender,trans-woman,transwoman,,02_2021
+h1,sex/gender,trans-women,transwomen,,02_2021
+h1,sex/gender,femalesexworker,female sex worker,increases accuracy,06_2021
+h1,sex/gender,femalesexworker,female sex workers,increases accuracy,06_2021
+h1,sexuality,andro-phile,androphile,,02_2021
+h1,sexuality,andro-philes,androphiles,,02_2021
+h1,sexuality,andro-philic,androphilic,,02_2021
+h1,sexuality,andro-sexual,androsexual,,02_2021
+h1,sexuality,andro-sexuals,androsexuals,,02_2021
+h1,sexuality,bi-curious,bicurious,,02_2021
+h1,sexuality,bi-phobic,biphobic,,02_2021
+h1,sexuality,bi-sexual,bisexual,,02_2021
+h1,sexuality,bi-sexual,bisexual,,02_2021
+h1,sexuality,bi-sexuals,bisexuals,,02_2021
+h1,sexuality,bi-sexuals,bisexuals,,02_2021
+h1,sexuality,commercial sex,commercialsex,,02_2021
+h1,sexuality,demi-romantic,demiromantic,,02_2021
+h1,sexuality,demi-romantics,demiromantics,,02_2021
+h1,sexuality,hetero-normative,heteronormative,,02_2021
+h1,sexuality,hetero-sexist,heterosexist,,02_2021
+h1,sexuality,hetero-sexual,heterosexual,,02_2021
+h1,sexuality,hetero-sexuals,heterosexuals,,02_2021
+h1,sexuality,homo-sexual,homosexual,,02_2021
+h1,sexuality,homo-sexuals,homosexuals,,02_2021
+h1,sexuality,mono-gamous,monogamous,,02_2021
+h1,sexuality,pan-sexual,pansexual,,02_2021
+h1,sexuality,poly-amorous,polyamorous,,02_2021
+h1,sexuality,safe sex,safesex,,02_2021
+h1,sexuality,safer sex,safersex,,02_2021
+h1,sexuality,sex-education,sexeducation,,02_2021
+h1,sexuality,sex education,sexeducation,,02_2021
+h1,sexuality,sex life,sexlife,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sex partner,sexpartner,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sex partners,sexpartners,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual partner,sexualpartner,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual partners,sexualpartners,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sex worker,sexworker,lowers false positive rate,02_2021
+h1,sexuality,sex workers,sexworkers,lowers false positive rate,02_2021
+h1,sexuality,sexual activity,sexualactivity,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual attraction,sexualattraction,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual development,sexualdevelopment,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual dysfunction,sexualdysfunction,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual function,sexualfunction,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual intercourse,sexualintercourse,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual orientation,sexualorientation,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual preference,sexualpreference,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,sexual reproduction,sexualreproduction,"increases accuracy, decrease confidence margin",02_2021
+h1,sexuality,skolio-sexual,skoliosexual,,02_2021
+h1,sexuality,skolio-sexuals,skoliosexuals,,02_2021
+h1,sexuality,unprotected sex,unprotectedsex,,02_2021
+h1,social_class,at-risk,atrisk,,02_2021
+h1,social_class,blue-collar,bluecollar,,02_2021
+h1,social_class,college educated,collegeeducated,,02_2021
+h1,social_class,college-educated,collegeeducated,,02_2021
+h1,social_class,economic instability,economicinstability,,02_2021
+h1,social_class,economically deprived,economicallydeprived,,02_2021
+h1,social_class,economically stable,economicallystable,,02_2021
+h1,social_class,economically unstable,economicallyunstable,,02_2021
+h1,social_class,economically vulnerable,economicallyvulnerable,,02_2021
+h1,social_class,economically-deprived,economicallydeprived,,02_2021
+h1,social_class,economically-stable,economicallystable,,02_2021
+h1,social_class,economically-unstable,economicallyunstable,,02_2021
+h1,social_class,economically-vulnerable,economicallyvulnerable,,02_2021
+h1,social_class,high income,highincome,,02_2021
+h1,social_class,high-income,highincome,,02_2021
+h1,social_class,high-ses,highses,,02_2021
+h1,social_class,higher educated,highereducated,,02_2021
+h1,social_class,higher income,higherincome,,02_2021
+h1,social_class,higher-educated,highereducated,,02_2021
+h1,social_class,higher-income,higherincome,,02_2021
+h1,social_class,highest income,highestincome,,02_2021
+h1,social_class,highest-income,highestincome,,02_2021
+h1,social_class,highly educated,highlyeducated,,02_2021
+h1,social_class,highly-educated,highlyeducated,,02_2021
+h1,social_class,less educated,lesseducated,,02_2021
+h1,social_class,less-educated,lesseducated,,02_2021
+h1,social_class,less-fortunate,lessfortunate,,02_2021
+h1,social_class,low-class,lowclass,,02_2021
+h1,social_class,low-income,lowincome,,02_2021
+h1,social_class,low-ses,lowses,,02_2021
+h1,social_class,lower class,lowerclass,,02_2021
+h1,social_class,lower educated,lowereducated,,02_2021
+h1,social_class,lower income,lowerincome,,02_2021
+h1,social_class,lower-class,lowerclass,,02_2021
+h1,social_class,lower-educated,lowereducated,,02_2021
+h1,social_class,lower-income,lowerincome,,02_2021
+h1,social_class,lowest income,lowestincome,,02_2021
+h1,social_class,lowest-income,lowestincome,,02_2021
+h1,social_class,middle class,middleclass,,02_2021
+h1,social_class,middle-class,middleclass,,02_2021
+h1,social_class,middle-income,middleincome,,02_2021
+h1,social_class,more-educated,moreeducated,,02_2021
+h1,social_class,more educated,moreeducated,,02_2021
+h1,social_class,ruling-class,rulingclass,,02_2021
+h1,social_class,rural/urban,rural urban,,06_2021
+h1,social_class,urban/rural,urban rural,,06_2021
+h1,social_class,rural-urban,rural urban,,06_2021
+h1,social_class,urban-rural,urban rural,,06_2021
+h1,social_class,social class,socialclass,,06_2021
+h1,social_class,socio-economic,socioeconomic,,02_2021
+h1,social_class,socio-economically,socioeconomically,,02_2021
+h1,social_class,under educated,undereducated,,02_2021
+h1,social_class,under-educated,undereducated,,02_2021
+h1,social_class,under-educated,undereducated,,02_2021
+h1,social_class,under-privileged,underprivileged,,02_2021
+h1,social_class,under-resourced,underresourced,,02_2021
+h1,social_class,under-served,underserved,,02_2021
+h1,social_class,upper income,upperincome,,02_2021
+h1,social_class,upper-class,upperclass,,02_2021
+h1,social_class,upper-income,upperincome,,02_2021
+h1,social_class,well educated,welleducated,,02_2021
+h1,social_class,well-educated,welleducated,,02_2021
+h1,social_class,well off,welloff,,02_2021
+h1,social_class,well-off,welloff,,02_2021
+h1,social_class,well to do,welltodo,,02_2021
+h1,social_class,well-to-do,welltodo,,02_2021
+h1,social_class,white-collar,whitecollar,,02_2021
+h1,social_class,working class,workingclass,,02_2021
+h1,social_class,working-class,workingclass,,02_2021
+h2,omb_census,african american,africanamerican,,02_2021
+h2,omb_census,african americans,africanamericans,,02_2021
+h2,omb_census,african-american,africanamerican,,02_2021
+h2,omb_census,african-americans,africanamericans,,02_2021
+h2,omb_census,afro american,africanamerican,,02_2021
+h2,omb_census,afro americans,africanamericans,,02_2021
+h2,omb_census,afro-american,africanamerican,,02_2021
+h2,omb_census,afro-americans,africanamericans,,02_2021
+h2,omb_census,alaska native,alaskanative,,02_2021
+h2,omb_census,alaska natives,alaskanatives,,02_2021
+h2,omb_census,alaska-native,alaskanative,,02_2021
+h2,omb_census,alaska-natives,alaskanatives,,02_2021
+h2,omb_census,alaskan native,alaskanative,,02_2021
+h2,omb_census,alaskan natives,alaskanatives,,02_2021
+h2,omb_census,alaskan-native,alaskanative,,02_2021
+h2,omb_census,alaskan-natives,alaskanatives,,02_2021
+h2,omb_census,american indian,americanindian,,02_2021
+h2,omb_census,american indians,americanindians,,02_2021
+h2,omb_census,american-indian,americanindian,,02_2021
+h2,omb_census,american-indians,americanindians,,02_2021
+h2,omb_census,native american,nativeamerican,,02_2021
+h2,omb_census,native americans,nativeamericans,,02_2021
+h2,omb_census,native-american,nativeamerican,,02_2021
+h2,omb_census,native-americans,nativeamericans,,02_2021
+h2,omb_census,native hawaiian,nativehawaiian,,02_2021
+h2,omb_census,native hawaiians,nativehawaiians,,02_2021
+h2,omb_census,native-hawaiian,nativehawaiian,,02_2021
+h2,omb_census,native-hawaiians,nativehawaiians,,02_2021
+h2,omb_census,pacific islander,pacificislander,,02_2021
+h2,omb_census,pacific islanders,pacificislanders,,02_2021
+h2,omb_census,pacific-islander,pacificislander,,02_2021
+h2,omb_census,pacific-islanders,pacificislanders,,02_2021
+h2,omb_census,hispanic american,hispanicamerican,,02_2021
+h2,omb_census,hispanic americans,hispanicamericans,,02_2021
+h2,omb_census,hispanic-american,hispanicamerican,,02_2021
+h2,omb_census,hispanic-americans,hispanicamericans,,02_2021
+h2,omb_census,asian american,asianamerican,,02_2021
+h2,omb_census,asian-american,asianamerican,,02_2021
+h2,omb_census,asian americans,asianamericans,,02_2021
+h2,omb_census,asian-americans,asianamericans,,02_2021
+h2,omb_census,caucasian-american,caucasianamerican,,02_2021
+h2,omb_census,caucasian-americans,caucasianamericans,,02_2021
+h2,omb_census,white american,whiteamerican,,02_2021
+h2,omb_census,white americans,whiteamericans,,02_2021
+h2,omb_census,white-matter,white_matter,lowers false positive rate,02_2021
+h2,omb_census,white matter,white_matter,lowers false positive rate,02_2021
+h2,omb_census,white and gray matter,white_and_gray_matter,lowers false positive rate,02_2021
+h2,omb_census,new zealand white,new_zealand_white,lowers false positive rate,02_2021
+h2,omb_census,white blood cell,white_blood_cell,lowers false positive rate,02_2021
+h2,omb_census,white blood cells,white_blood_cells,lowers false positive rate,02_2021
+h2,omb_census,white-cell,white_cell,lowers false positive rate,02_2021
+h2,omb_census,white cell,white_cell,lowers false positive rate,02_2021
+h2,omb_census,white cells,white_cells,lowers false positive rate,02_2021
+h2,omb_census,white adipose,white_adipose,lowers false positive rate,02_2021
+h2,omb_census,egg white,egg_white,lowers false positive rate,02_2021
+h2,omb_census,white pulp,white_pulp,lowers false positive rate,02_2021
+h2,omb_census,white noise,white_noise,lowers false positive rate,02_2021
+h2,omb_census,white light,white_light,lowers false positive rate,02_2021
+h2,omb_census,white dwarf,white_dwarf,lowers false positive rate,02_2021
+h2,omb_census,white dwarfs,white_dwarfs,lowers false positive rate,02_2021
+h2,omb_census,white rabbits,white_rabbits,lowers false positive rate,02_2021
+h2,omb_census,white coat,white_coat,lowers false positive rate,02_2021
+h2,omb_census,white clover,white_clover,lowers false positive rate,02_2021
+h2,omb_census,white dairy,white_dairy,lowers false positive rate,02_2021
+h2,omb_census,white gene,white_gene,lowers false positive rate,02_2021
+h2,omb_census,white lead,white_lead,lowers false positive rate,02_2021
+h2,omb_census,white spotting,white_spotting,lowers false positive rate,02_2021
+h2,omb_census,white grape juice,white_grape_juice,lowers false positive rate,02_2021
+h2,omb_census,non-hispanic white,nonhispanicwhite,increases accuracy,02_2021
+h2,omb_census,non-hispanic whites,nonhispanicwhites,increases accuracy,02_2021
+h2,omb_census,non-hispanic black,nonhispanicblack,increases accuracy,02_2021
+h2,omb_census,non-hispanic blacks,nonhispanicblacks,increases accuracy,02_2021
+h2,omb_census,non-hispanic,nonhispanic,increases accuracy,02_2021
+h2,omb_census,non-black,nonblack,lowers false positive rate,02_2021
+h2,omb_census,non-blacks,nonblacks,lowers false positive rate,02_2021
+h2,omb_census,non-white,nonwhite,lowers false positive rate,02_2021
+h2,omb_census,non-whites,nonwhites,lowers false positive rate,02_2021
+h2,omb_census,non-asian,nonasian,lowers false positive rate,06_2021
+h2,omb_census,non-asians,nonasians,lowers false positive rate,06_2021
+h2,omb_census,non-racial,nonracial,lowers false positive rate,06_2021
+h2,omb_census,non-ethnic,nonethnic,lowers false positive rate,06_2021
+h2,omb_census,non racial,nonracial,lowers false positive rate,06_2021
+h2,omb_census,non ethnic,nonethnic,lowers false positive rate,06_2021
+h2,omb_census,non-racially,nonracially,lowers false positive rate,06_2021
+h2,omb_census,non-ethnically,nonethnically,lowers false positive rate,06_2021
+h2,omb_census,non racially,nonracially,lowers false positive rate,06_2021
+h2,omb_census,non ethnically,nonethnically,lowers false positive rate,06_2021
+h2,omb_census,non-caucasian,noncaucasian,lowers false positive rate,06_2021
+h2,omb_census,non-caucasians,noncaucasians,lowers false positive rate,06_2021
+h2,omb_census,ethnically/racially,racially ethnically,increases accuracy,06_2021
+h2,omb_census,ethnicity/race,ethnicity race,increases accuracy,06_2021
+h2,omb_census,race/ethnicity,race ethnicity,increases accuracy,06_2021
+h2,omb_census,race/ethnic,race ethnic,increases accuracy,06_2021
+h2,omb_census,ethnic/race,ethnic race,increases accuracy,06_2021
+h2,omb_census,ethnic/racial,ethnic racial,increases accuracy,06_2021
+h2,omb_census,racially/ethnically,ethnically racially,increases accuracy,06_2021
+h2,omb_census,racial/ethnic,racial ethnic,increases accuracy,06_2021
+h2,omb_census,black tea,black_tea,lowers false positive rate,02_2021
+h2,omb_census,black hole,black_hole,lowers false positive rate,02_2021
+h2,omb_census,black holes,black_holes,lowers false positive rate,02_2021
+h2,omb_census,black sea,black_sea,lowers false positive rate,02_2021
+h2,omb_census,carbon black,carbon_black,lowers false positive rate,02_2021
+h2,omb_census,black spruce,black_spruce,lowers false positive rate,02_2021
+h2,omb_census,black swallowtails,black_swallowtails,lowers false positive rate,02_2021
+h2,omb_census,black box,black_box,lowers false positive rate,02_2021
+h2,omb_census,black carp,black_carp,lowers false positive rate,02_2021
+h2,omb_census,black death,black_death,lowers false positive rate,02_2021
+h2,omb_census,latino/a,latinx,lowers false positive rate,02_2021
+h2,omb_census,latinos/as,latinxs,lowers false positive rate,02_2021
+h3,all_pop_terms,afro-eurasia,afroeurasia,,02_2021
+h3,all_pop_terms,afro-eurasian,afroeurasian,,02_2021
+h3,all_pop_terms,afro-eurasians,afroeurasians,,02_2021
+h3,continental,north america,north_america,,02_2021
+h3,continental,north american,north_american,,02_2021
+h3,continental,north americans,north_americans,,02_2021
+h3,continental,south america,south_america,,02_2021
+h3,continental,south american,south_american,,02_2021
+h3,continental,south americans,south_americans,,02_2021
+h3,national,burkinabé,burkinabe,,02_2021
+h3,national,burkinabè,burkinabe,,02_2021
+h3,national,cabo verde,cabo_verde,,02_2021
+h3,national,cabo verdean,cabo_verdean,,02_2021
+h3,national,cabo verdeans,cabo_verdeans,,02_2021
+h3,national,bissau guinean,bissau_guinean,,02_2021
+h3,national,bissau guineans,bissau_guineans,,02_2021
+h3,national,guinea bissau,guinea_bissau,,02_2021
+h3,national,guinea-bissau,guinea_bissau,,02_2021
+h3,national,bissau-guinean,bissau_guinean,,02_2021
+h3,national,bissau-guineans,bissau_guineans,,02_2021
+h3,national,côte d'ivoire,ivory_coast,,02_2021
+h3,national,cote d'ivoire,ivory_coast,,02_2021
+h3,national,cote divoire,ivory_coast,,02_2021
+h3,national,ivory coast,ivory_coast,,02_2021
+h3,national,hong kong,hong_kong,,02_2021
+h3,national,hong konger,hongkonger,,02_2021
+h3,national,hong kongers,hongkongers,,02_2021
+h3,national,saudi arabia,saudi_arabia,,02_2021
+h3,national,saudi arabian,saudi_arabian,,02_2021
+h3,national,saudi arabians,saudi_arabians,,02_2021
+h3,national,saudi-arabian,saudi_arabian,,02_2021
+h3,national,saudi-arabians,saudi_arabians,,02_2021
+h3,national,saudiarabian,saudi_arabian,,02_2021
+h3,national,saudiarabians,saudi_arabians,,02_2021
+h3,national,sri lanka,sri_lanka,,02_2021
+h3,national,sri lankan,sri_lankan,,02_2021
+h3,national,sri lankans,sri_lankans,,02_2021
+h3,national,barthélemois,barthelemois,,02_2021
+h3,national,curaçaoan,curacaoan,,02_2021
+h3,national,curaçaoans,curacaoans,,02_2021
+h3,national,czech republic,czech_republic,,02_2021
+h3,national,jan meyen,jan_meyen,,02_2021
+h3,national,monégasque,monegasque,,02_2021
+h3,national,monégasques,monegasques,,02_2021
+h3,national,new caledonia,new_caledonia,,02_2021
+h3,national,new caledonian,new_caledonian,,02_2021
+h3,national,new caledonians,new_caledonians,,02_2021
+h3,national,saint-martinois,saint_martinois,,02_2021
+h3,national,saint-pierrais,saint_pierrais,,02_2021
+h3,national,burkina faso,burkina_faso,,02_2021
+h3,national,sierra leone,seirra_leone,,02_2021
+h3,national,sierra leonean,sierra_leonean,,02_2021
+h3,national,sierra leoneans,sierra_leoneans,,02_2021
+h3,national,são tomé and príncipe,sao_tome_and_principe,,02_2021
+h3,national,sao tome and principe,sao_tome_and_principe,,02_2021
+h3,national,são toméan,sao_tomean,,02_2021
+h3,national,são toméans,sao_tomeans,,02_2021
+h3,national,sao tomean,sao_tomean,,02_2021
+h3,national,sao tomeans,sao_tomeans,,02_2021
+h3,national,costa rica,costa_rica,,02_2021
+h3,national,costa rican,costa_rican,,02_2021
+h3,national,costa ricans,costa_ricans,,02_2021
+h3,national,costa-rica,costa_rica,,02_2021
+h3,national,costa-rican,costa_rican,,02_2021
+h3,national,costa-ricans,costa_ricans,,02_2021
+h3,national,costarican,costa_rica,,02_2021
+h3,national,costaricans,costa_rican,,02_2021
+h3,national,ascension_island,ascension_island,,02_2021
+h3,national,tristan_da_cunha,tristan_da_cunha,,02_2021
+h3,national,saint kitts and nevis,saint_kitts_and_nevis,,02_2021
+h3,national,saint kitts,saint_kitts,,02_2021
+h3,national,saint lucia,saint_lucia,,02_2021
+h3,national,saint martin,saint_martin,,02_2021
+h3,national,saint pierre and miquelon,saint_pierre_and_miquelon,,02_2021
+h3,national,saint vincent and the grenadines,saint_vincent_and_the_grenadines,,02_2021
+h3,national,sahrawi arab democratic republic,sahrawi_arab_democratic_republic,,02_2021
+h3,national,saint helenian,saint_helenian,,02_2021
+h3,national,saint helenians,saint_helenians,,02_2021
+h3,national,saint lucian,saint_lucian,,02_2021
+h3,national,saint lucians,saint_lucians,,02_2021
+h3,national,saint-martinoise,saint_martinoise,,02_2021
+h3,national,saint-martinois,saint_martinois,,02_2021
+h3,national,saint-martinoises,saint_martinoises,,02_2021
+h3,national,saint-pierrais,saint_pierrais,,02_2021
+h3,national,saint-pierrais,saint_pierrais,,02_2021
+h3,national,saint-pierraises,saint_pierraises,,02_2021
+h3,national,miquelonnais,miquelonnais,,02_2021
+h3,national,miquelonnaises,miquelonnaises,,02_2021
+h3,national,saint vincentian,saint_vincentian,,02_2021
+h3,national,saint vincentians,saint_vincentians,,02_2021
+h3,national,san marino,san_marino,,02_2021
+h3,national,south georgia and the south sandwich islands,south_georgia_and_the_south_sandwich_islands,,02_2021
+h3,national,south georgia island,south_georgia_island,,02_2021
+h3,national,south sandwich islands,south_sandwich_islands,,02_2021
+h3,national,south sandwich islander,south_sandwich_islander,,02_2021
+h3,national,south sandwich islander,south_sandwich_islander,,02_2021
+h3,national,south sandwich islanders,south_sandwich_islanders,,02_2021
+h3,national,south ossetia,south_ossetia,,02_2021
+h3,national,south ossetian,south_ossetian,,02_2021
+h3,national,south ossetians,south_ossetians,,02_2021
+h3,national,south sudan,south_sudan,,02_2021
+h3,national,south sudanese,south_sudanese,,02_2021
+h3,national,south sudanese,south_sudanese,,02_2021
+h3,national,åland islands,aland_islands,,02_2021
+h3,national,åland islander,aland_islander,,02_2021
+h3,national,åland islanders,aland_islanders,,02_2021
+h3,national,american samoa,american_samoa,,02_2021
+h3,national,american samoan,american_samoan,,02_2021
+h3,national,american samoans,american_samoans,,02_2021
+h3,national,bosnia and herzegovina,bosnia_and_herzegovina,,02_2021
+h3,national,bouvet island,bouvet_island,,02_2021
+h3,national,bouvet islander,bouvet_islander,,02_2021
+h3,national,bouvet islanders,bouvet_islanders,,02_2021
+h3,national,british indian ocean territory,british_indian_ocean_territory,,02_2021
+h3,national,cayman islands,cayman_islands,,02_2021
+h3,national,christmas island,christmas_island,,02_2021
+h3,national,christmas islander,christmas_islander,,02_2021
+h3,national,christmas islanders,christmas_islanders,,02_2021
+h3,national,cook islands,cook_islands,,02_2021
+h3,national,cook islanders,cook_islanders,,02_2021
+h3,national,dominican republic,dominican_republic,,02_2021
+h3,national,east timor,east_timor,,02_2021
+h3,national,equatorial guinea,equatorial_guinea,,02_2021
+h3,national,equatorial guinean,equatorial_guinean,,02_2021
+h3,national,equatorial guineans,equatorial_guineans,,02_2021
+h3,national,european union,european_union,,02_2021
+h3,national,faroe islands,faroe_islands,,02_2021
+h3,national,french guiana,french_guiana,,02_2021
+h3,national,french guianese,french_guianese,,02_2021
+h3,national,french guianese,french_guianese,,02_2021
+h3,national,french polynesia,french_polynesia,,02_2021
+h3,national,french polynesian,french_polynesian,,02_2021
+h3,national,french polynesians,french_polynesians,,02_2021
+h3,national,french southern territories,french_southern_territories,,02_2021
+h3,national,french southern territories,french_southern_territories,,02_2021
+h3,national,heard island and mcdonald islands,heard_island_and_mcdonald_islands,,02_2021
+h3,national,heard islander,heard_islander,,02_2021
+h3,national,heard islanders,heard_islanders,,02_2021
+h3,national,mcdonald islander,mcdonald_islander,,02_2021
+h3,national,mcdonald islanders,mcdonald_islanders,,02_2021
+h3,national,hong kongese,hong_kongese,,02_2021
+h3,national,channel island,channel_island,,02_2021
+h3,national,channel islanders,channel_islanders,,02_2021
+h3,national,north korean,north_korean,,02_2021
+h3,national,north koreans,north_koreans,,02_2021
+h3,national,south korean,south_korean,,02_2021
+h3,national,north korea,north_korea,,02_2021
+h3,national,south korea,south_korea,,02_2021
+h3,national,south koreans,south_koreans,,02_2021
+h3,national,marshall islands,marshall_islands,,02_2021
+h3,national,norfolk island,norfolk_island,,02_2021
+h3,national,norfolk islander,norfolk_islander,,02_2021
+h3,national,norfolk islanders,norfolk_islanders,,02_2021
+h3,national,northern ireland,northern_ireland,,02_2021
+h3,national,northern irish,northern_irish,,02_2021
+h3,national,northern irishmen,northern_irishmen,,02_2021
+h3,national,northern irishwomen,northern_irishwomen,,02_2021
+h3,national,northern mariana islands,northern_mariana_islands,,02_2021
+h3,national,northern marianan,northern_marianan,,02_2021
+h3,national,northern marianans,northern_marianans,,02_2021
+h3,national,papua new guinea,papua_new_guinea,,02_2021
+h3,national,papua new guinean,papua_new_guinean,,02_2021
+h3,national,papua new guineans,papua_new_guineans,,02_2021
+h3,national,south africa,south_africa,,02_2021
+h3,national,south african,south_african,,02_2021
+h3,national,south africans,south_africans,,02_2021
+h3,national,timor-leste,timor_leste,,02_2021
+h3,national,trinidad and tobago,trinidad_and_tobago,,02_2021
+h3,national,united arab emirates,united_arab_emirates,,02_2021
+h3,national,united kingdom,united_kingdom,,02_2021
+h3,national,great britian,great_britian,,02_2021
+h3,national,northern ireland,northern_ireland,,02_2021
+h3,national,usa,usa,,02_2021
+h3,national,vatican city,vatican_city,,02_2021
+h3,national,ni-vanuatu,ni_vanuatu,,02_2021
+h3,national,virgin islands,virgin_islands,,02_2021
+h3,national,british virgin island,british_virgin_island,,02_2021
+h3,national,british virgin islander,british_virgin_islander,,02_2021
+h3,national,british virgin islanders,british_virgin_islanders,,02_2021
+h3,national,u.s. virgin islanders,us_virgin_islanders,,02_2021
+h3,national,u.s. virgin islander,us_virgin_islander,,02_2021
+h3,national,us virgin islanders,us_virgin_islanders,,02_2021
+h3,national,us virgin islander,us_virgin_islander,,02_2021
+h3,national,wallis and futuna,wallis_and_futuna,,02_2021
+h3,national,wallis and futuna islanders,wallis_and_futuna_islanders,,02_2021
+h3,national,el salvador,el_salvador,,02_2021
+h3,subnational,gaúcho,gaucho,,02_2021
+h3,subnational,gaúchos,gauchos,,02_2021
+h3,subnational,barriga-verde,barriga_verde,,02_2021
+h3,subnational,barrigas-verdes,barrigas_verdes,,02_2021
+h3,subnational,pacific islands,pacific_islands,,02_2021
+h3,subnational,west indian,west_indian,,02_2021
+h3,subnational,west indians,west_indians,,02_2021
+h3,subnational,west indies,west_indies,,02_2021
+h3,subnational,sul-rio-grandense,sul_rio_grandense,,02_2021
+h3,subnational,central america,central_america,,02_2021
+h3,subnational,central american,central_american,,02_2021
+h3,subnational,central americans,central_americans,,02_2021
+h3,subnational,provençal,provencal,,02_2021
+h3,subnational,po river,po_river,,02_2021
+h3,subnational,león,leon,,02_2021
+h3,subnational,middle east,middle_east,,02_2021
+h3,subnational,middle eastern,middle_eastern,,02_2021
+h3,subnational,middle easterners,middle_easterners,,02_2021
+h3,subnational,nile river,nile_river,,02_2021
+h3,subnational,danube river,danube_river,,02_2021
+h3,subnational,saint barthélemy,saint_barthelemy,,02_2021
+h3,subnational,saint helena,saint_helena,,02_2021
+h3,subnational,saint maartener,saint_maartener,,02_2021
+h3,subnational,saint maarteners,saint_maarteners,,02_2021
+h3,subnational,st maartener,saint_maartener,,02_2021
+h3,subnational,st maarteners,saint_maarteners,,02_2021
+h3,subnational,st. maartener,saint_maartener,,02_2021
+h3,subnational,st. maarteners,saint_maarteners,,02_2021
+h3,subnational,b'nai moshe,b'nai_moshe,,02_2021
+h3,subnational,bene isreal,bene_isreal,,02_2021
+h3,subnational,bnei Menashe,bnei_menashe,,02_2021
+h3,subnational,vannikula-kshatriya,vannikula_kshatriya,,02_2021
+h3,subnational,valmiki boya,valmiki_boya,,02_2021
+h3,subnational,vamsha raj,vamsha_raj,,02_2021
+h3,subnational,vaishya vani,vaishya_vani,,02_2021
+h3,subnational,vaishya vanis,vaishya_vanis,,02_2021
+h3,subnational,vadde raju,vadde_raju,,02_2021
+h3,subnational,turi barot,turi_barot,,02_2021
+h3,subnational,turupu kapu,turupu_kapu,,02_2021
+h3,subnational,tuluva hebbars,tuluva_hebbars,,02_2021
+h3,subnational,tuluva vellala,tuluva_vellala,,02_2021
+h3,subnational,the chitrapur,the_chitrapur,,02_2021
+h3,subnational,thogata sali,thogata_sali,,02_2021
+h3,subnational,thogata veerakshatriya,thogata_veerakshatriya,,02_2021
+h3,subnational,surya balija,surya_balija,,02_2021
+h3,subnational,suryavanshi aare katika,suryavanshi_aare_katika,,02_2021
+h3,subnational,sai suthar,sai_suthar,,02_2021
+h3,subnational,ramnami samaj,ramnami_samaj,,02_2021
+h3,subnational,puragiri kshatriya,puragiri_kshatriya,,02_2021
+h3,subnational,perike balija,perike_balija,,02_2021
+h3,subnational,pedda boya,pedda_boya,,02_2021
+h3,subnational,pathare prabhu,pathare_prabhu,,02_2021
+h3,subnational,pariki muggula,pariki_muggula,,02_2021
+h3,subnational,pardeshi chamar,pardeshi_chamar,,02_2021
+h3,subnational,pandiri kalinga,pandiri_kalinga,,02_2021
+h3,subnational,pancha-dravida,pancha_dravida,,02_2021
+h3,subnational,pancha-gauda,pancha_gauda,,02_2021
+h3,subnational,pala-ekari,pala_ekari,,02_2021
+h3,subnational,odde oddilu vaddi vaddelu,odde_oddilu_vaddi_vaddelu,,02_2021
+h3,subnational,nayi-brahmin,nayi_brahmin,,02_2021
+h3,subnational,natrayat rajputs,natrayat_rajputs,,02_2021
+h3,subnational,nattathi nadar,nattathi_nadar,,02_2021
+h3,subnational,muslim dhobi,muslim_dhobi,,02_2021
+h3,subnational,mutrasi tenugollu,mutrasi_tenugollu,,02_2021
+h3,subnational,mondivaru mondibanda banda,mondivaru_mondibanda_banda,,02_2021
+h3,subnational,mondepatta mondipatta,mondepatta_mondipatta,,02_2021
+h3,subnational,maulika kayastha,maulika_kayastha,,02_2021
+h3,subnational,mang-garudi,mang_garudi,,02_2021
+h3,subnational,barthélemois,barthelemois,,02_2021
+h3,subnational,puerto ricans,puerto_ricans,,02_2021
+h3,subnational,puerto rican,puerto_rican,,02_2021
+h3,subnational,puerto rico,puerto_rico,,02_2021
+h3,subnational,espírito santo,espírito_santo,,02_2021
+h3,subnational,mato grosso,mato_grosso,,02_2021
+h3,subnational,mato grosso do sul,mato_grosso_do_sul,,02_2021
+h3,subnational,minas gerais,minas_gerais,,02_2021
+h3,subnational,norte-riograndense,norte_riograndense,,02_2021
+h3,subnational,rio de janeiro,rio_de_janeiro,,02_2021
+h3,subnational,rio grande do norte,rio_grande_do_norte,,02_2021
+h3,subnational,rio grande do sul,rio_grande_do_sul,,02_2021
+h3,subnational,são paulo,são_paulo,,02_2021
+h3,subnational,sul-matogrossense,sul_matogrossense,,02_2021
+h3,subnational,sul-riograndense,sul_riograndense,,02_2021
+h3,subnational,néo-brunswickois,néo_brunswickois,,02_2021
+h3,subnational,néo-écossais,néo_écossais,,02_2021
+h3,subnational,nova scotia,nova_scotia,,02_2021
+h3,subnational,nova scotian,nova_scotian,,02_2021
+h3,subnational,nova scotians,nova_scotians,,02_2021
+h3,subnational,prince edward island,prince_edward_island,,02_2021
+h3,subnational,prince edward islander,prince_edward_islander,,02_2021
+h3,subnational,prince edward islanders,prince_edward_islanders,,02_2021
+h3,subnational,prince-édouardien,prince_édouardien,,02_2021
+h3,subnational,baden-württemberg,baden_württemberg,,02_2021
+h3,subnational,uttar pradesh,uttar_pradesh,,02_2021
+h3,subnational,uttar pradeshi,uttar_pradeshi,,02_2021
+h3,subnational,uttar pradeshis,uttar_pradeshis,,02_2021
+h3,subnational,west bengal,west_bengal,,02_2021
+h3,subnational,rapa nui,rapa_nui,,02_2021
+h3,subnational,wai-wai,wai_wai,,02_2021
+h3,subnational,waimiri-atroarí,waimiri_atroarí,,02_2021
+h3,subnational,tingui-botó,tingui_botó,,02_2021
+h3,subnational,mecklenburg-western pomerania,mecklenburg_western pomerania,,02_2021
+h3,subnational,north rhine-westphalia,north rhine_westphalia,,02_2021
+h3,subnational,rhineland-palatinate,rhineland_palatinate,,02_2021
+h3,subnational,saxony-anhalt,saxony_anhalt,,02_2021
+h3,subnational,schleswig-holstein,schleswig_holstein,,02_2021
+h3,subnational,manawatu-wanganui,manawatu_wanganui,,02_2021
+h3,subnational,manawatu-wanganuian,manawatu_wanganuian,,02_2021
+h3,subnational,manawatu-wanganuians,manawatu_wanganuians,,02_2021
+h3,subnational,taga-maynila,taga_maynila,,02_2021
+h3,subnational,tawi-tawi,tawi_tawi,,02_2021
+h3,subnational,tawi-tawian,tawi_tawian,,02_2021
+h3,subnational,na-dené,na_dené,,02_2021
+h3,subnational,oji-cree,oji_cree,,02_2021
+h3,subnational,dane-zaa,dane_zaa,,02_2021
+h3,subnational,wasco-wishram,wasco_wishram,,02_2021
+h3,subnational,in-shuck-ch,in_shuck_ch,,02_2021
+h3,subnational,sinkiuse-columbia,sinkiuse_columbia,,02_2021
+h3,subnational,laich-kwil-tach,laich_kwil_tach,,02_2021
+h3,subnational,nuu-chah-nulth,nuu_chah_nulth,,02_2021
+h3,subnational,sauk-suiattle,sauk_suiattle,,02_2021
+h3,subnational,tolowa-tututni,tolowa_tututni,,02_2021
+h3,subnational,tsleil-waututh,tsleil_waututh,,02_2021
+h3,subnational,tzouk-e,tzouk_e,,02_2021
+h3,subnational,tsuut-ina,tsuut_ina,,02_2021
+h3,subnational,tsuut-ina,tsuut_ina,,02_2021
+h3,subnational,ho-chunk,ho_chunk,,02_2021
+h3,subnational,pak-ká-na,pak_ká_na,,02_2021
+h3,subnational,dene-thah,dene_thah,,02_2021
+h3,subnational,dunne-za,dunne_za,,02_2021
+h3,subnational,huu-ay-aht,huu_ay_aht,,02_2021
+h3,subnational,kwaw-kwaw-apilt,kwaw_kwaw_apilt,,02_2021
+h3,subnational,laich-kwil-tach,laich_kwil_tach,,02_2021
+h3,subnational,mowachaht-muchalaht,mowachaht_muchalaht,,02_2021
+h3,subnational,nuu-chah-nulth,nuu_chah_nulth,,02_2021
+h3,subnational,oji-cree,oji_cree,,02_2021
+h3,subnational,plains-ojibwa,plains_ojibwa,,02_2021
+h3,subnational,ska-ruh-reh,ska_ruh_reh,,02_2021
+h3,subnational,tla-o-qui-aht,tla_o_qui_aht,,02_2021
+h3,subnational,tsleil-waututh,tsleil_waututh,,02_2021
+h3,subnational,me-wuk,me_wuk,,02_2021
+h3,subnational,wai-lakki,wai_lakki,,02_2021
+h3,subnational,yak-tityu-tityu-yak-tilhini,yak_tityu_tityu_yak_tilhini,,02_2021
+h3,subnational,hopi-tewa,hopi_tewa,,02_2021
+h3,subnational,embera-wounaan,embera_wounaan,,02_2021
+h3,subnational,wai-wai,wai_wai,,02_2021
+h3,subnational,awa-kwaiker,awa_kwaiker,,02_2021
+h3,subnational,jama-coaque,jama_coaque,,02_2021
+h3,subnational,manteño-huancavilca,manteño_huancavilca,,02_2021
+h3,subnational,tuza-piartal,tuza_piartal,,02_2021
+h3,subnational,uru-murato,uru_murato,,02_2021
+h3,subnational,candoshi-shapra,candoshi_shapra,,02_2021
+h3,subnational,canelos-quichua,canelos_quichua,,02_2021
+h3,subnational,kugapakori-nahua,kugapakori_nahua,,02_2021
+h3,subnational,mura-pirarrã,mura_pirarrã,,02_2021
+h3,subnational,napo-quichua,napo_quichua,,02_2021
+h3,subnational,nukak-makú,nukak_makú,,02_2021
+h3,subnational,quijos-quichua,quijos_quichua,,02_2021
+h3,subnational,uaimiri-atroari,uaimiri_atroari,,02_2021
+h3,subnational,waimiri-atroari,waimiri_atroari,,02_2021
+h3,subnational,sateré-mawé,sateré_mawé,,02_2021
+h3,subnational,uru-eu-wau-wau,uru_eu_wau_wau,,02_2021
+h3,subnational,hi-merimã,hi_merimã,,02_2021
+h3,subnational,mashco-piro,mashco_piro,,02_2021
+h3,subnational,shipibo-conibo,shipibo_conibo,,02_2021
+h3,subnational,henia-camiare,henia_camiare,,02_2021
+h3,subnational,künün-a-güna,künün_a_güna,,02_2021
+h3,subnational,küwach-a-güna,küwach_a_güna,,02_2021
+h3,subnational,avá-guaraní,avá_guaraní,,02_2021
+h3,subnational,diaguita-calchaquí,diaguita_calchaquí,,02_2021
+h3,subnational,mbya-guaraní,mbya_guaraní,,02_2021
+h3,subnational,guarayu-ta,guarayu_ta,,02_2021
+h3,subnational,iru-itu,iru_itu,,02_2021
+h3,subnational,pauserna-guarasugwé,pauserna_guarasugwé,,02_2021
+h3,subnational,avá-canoeiro,avá_canoeiro,,02_2021
+h3,subnational,caiapós-xicrin,caiapós_xicrin,,02_2021
+h3,subnational,guarani-kaiowá/pai tavytera,guarani_kaiowá/pai tavytera,,02_2021
+h3,subnational,jenipapo-kanindé,jenipapo_kanindé,,02_2021
+h3,subnational,karirí-xocó,karirí_xocó,,02_2021
+h3,subnational,mirity-tapuya,mirity_tapuya,,02_2021
+h3,subnational,oro-uin,oro_uin,,02_2021
+h3,subnational,pira-tapuya,pira_tapuya,,02_2021
+h3,subnational,pai-tavyter,pai_tavyter,,02_2021
+h3,subnational,canelos-quichua,canelos_quichua,,02_2021
+h3,subnational,mashco-piro,mashco_piro,,02_2021
+h3,subnational,quijos-quichua,quijos_quichua,,02_2021
+h3,subnational,shipibo-conibo,shipibo_conibo,,02_2021
+h3,subnational,timoto-cuicas,timoto_cuicas,,02_2021
+h3,subnational,ga-adangbe,ga_adangbe,,02_2021
+h3,subnational,beti-pahuin‎,beti_pahuin‎,,02_2021
+h3,subnational,sotho-tswana,sotho_tswana,,02_2021
+h3,subnational,beti-pahuin‎,beti_pahuin‎,,02_2021
+h3,subnational,sotho-tswana,sotho_tswana,,02_2021
+h3,subnational,kadazan-dusun,kadazan_dusun,,02_2021
+h3,subnational,ni-vanuatu,ni_vanuatu,,02_2021
+h3,subnational,sama-bajau,sama_bajau,,02_2021
+h3,subnational,vaeakau-taumako,vaeakau_taumako,,02_2021
+h3,subnational,kaluli-kasua,kaluli_kasua,,02_2021
+h3,subnational,ni-vanuatu,ni_vanuatu,,02_2021
+h3,subnational,afro-iraqis,afro_iraqis,,02_2021
+h3,subnational,afro-jordanians,afro_jordanians,,02_2021
+h3,subnational,indo-european,indo_european,,02_2021
+h3,subnational,sub-saharan,sub_saharan,,02_2021
+h3,subnational,altay-kishi,altay_kishi,,02_2021
+h3,subnational,finno-ugric,finno_ugric,,02_2021
+h3,subnational,a-hmao,a_hmao,,02_2021
+h3,subnational,altay-kishi,altay_kishi,,02_2021
+h3,subnational,anglo-burmese,anglo_burmese,,02_2021
+h3,subnational,anglo-indian,anglo_indian,,02_2021
+h3,subnational,austro-asiatic,austro_asiatic,,02_2021
+h3,subnational,bangladeshi-armenians,bangladeshi_armenians,,02_2021
+h3,subnational,bodo-kachari,bodo_kachari,,02_2021
+h3,subnational,finno-ugric,finno_ugric,,02_2021
+h3,subnational,french-indian,french_indian,,02_2021
+h3,subnational,gha-mu,gha_mu,,02_2021
+h3,subnational,indo-kiwi,indo_kiwi,,02_2021
+h3,subnational,indo-aryan,indo_aryan,,02_2021
+h3,subnational,indo-canadian,indo_canadian,,02_2021
+h3,subnational,indo-caribbean,indo_caribbean,,02_2021
+h3,subnational,indo-fijian,indo_fijian,,02_2021
+h3,subnational,indo-grenadians,indo_grenadians,,02_2021
+h3,subnational,indo-guyanese,indo_guyanese,,02_2021
+h3,subnational,indo-haitians,indo_haitians,,02_2021
+h3,subnational,indo-jamaican,indo_jamaican,,02_2021
+h3,subnational,indo-martiniquais,indo_martiniquais,,02_2021
+h3,subnational,indo-mauritian,indo_mauritian,,02_2021
+h3,subnational,indo-réunionnaise,indo_réunionnaise,,02_2021
+h3,subnational,indo-saint lucian,indo_saint lucian,,02_2021
+h3,subnational,indo-seychellois,indo_seychellois,,02_2021
+h3,subnational,indo-surinamese,indo_surinamese,,02_2021
+h3,subnational,indo-trinidadian,indo_trinidadian,,02_2021
+h3,subnational,indo-vincentian,indo_vincentian,,02_2021
+h3,subnational,kankana-ey,kankana_ey,,02_2021
+h3,subnational,luso-indian,luso_indian,,02_2021
+h3,subnational,say-siyat,say_siyat,,02_2021
+h3,subnational,sino-burmese,sino_burmese,,02_2021
+h3,subnational,tibeto-burman,tibeto_burman,,02_2021
+h3,subnational,zaza-gorani,zaza_gorani,,02_2021
+h3,subnational,anglo-burmese,anglo_burmese,,02_2021
+h3,subnational,anglo-indian,anglo_indian,,02_2021
+h3,subnational,bangladeshi-armenians,bangladeshi_armenians,,02_2021
+h3,subnational,bodo-kachari,bodo_kachari,,02_2021
+h3,subnational,indo-canadian,indo_canadian,,02_2021
+h3,subnational,indo-caribbean,indo_caribbean,,02_2021
+h3,subnational,indo-fijian,indo_fijian,,02_2021
+h3,subnational,indo-grenadians,indo_grenadians,,02_2021
+h3,subnational,indo-guyanese,indo_guyanese,,02_2021
+h3,subnational,indo-haitians,indo_haitians,,02_2021
+h3,subnational,indo-jamaican,indo_jamaican,,02_2021
+h3,subnational,indo-martiniquais,indo_martiniquais,,02_2021
+h3,subnational,indo-mauritian,indo_mauritian,,02_2021
+h3,subnational,indo-réunionnaise,indo_réunionnaise,,02_2021
+h3,subnational,indo-saint lucian,indo_saint lucian,,02_2021
+h3,subnational,indo-seychellois,indo_seychellois,,02_2021
+h3,subnational,indo-surinamese,indo_surinamese,,02_2021
+h3,subnational,indo-trinidadian,indo_trinidadian,,02_2021
+h3,subnational,indo-vincentian,indo_vincentian,,02_2021
+h3,subnational,luso-indian,luso_indian,,02_2021
+h3,subnational,a-hmao,a_hmao,,02_2021
+h3,subnational,anglo-burmese,anglo_burmese,,02_2021
+h3,subnational,austro-asiatic,austro_asiatic,,02_2021
+h3,subnational,gha-mu,gha_mu,,02_2021
+h3,subnational,indo-aryan,indo_aryan,,02_2021
+h3,subnational,kankana-ey,kankana_ey,,02_2021
+h3,subnational,sino-burmese,sino_burmese,,02_2021
+h3,subnational,tibeto-burman,tibeto_burman,,02_2021
+h3,subnational,say-siyat,say_siyat,,02_2021
+h3,subnational,ad-dharmi,ad_dharmi,,02_2021
+h3,subnational,jhalo-malo,jhalo_malo,,02_2021
+h3,subnational,kanjara-bhatta,kanjara_bhatta,,02_2021
+h3,subnational,lower saxon,lower_saxon,,02_2021
+h3,subnational,lower saxons,lower_saxons,,02_2021
+h3,subnational,lower saxons,lower_saxons,,02_2021
+h3,subnational,lower saxony,lower_saxony,,02_2021
+h3,subnational,north rhine,north_rhine,,02_2021
+h3,subnational,north rhine_westphalia,north_rhine_westphalia,,02_2021
+h3,subnational,andaman islands,andaman_islands,,02_2021
+h3,subnational,andhra pradesh,andhra_pradesh,,02_2021
+h3,subnational,arunachal pradesh,arunachal_pradesh,,02_2021
+h3,subnational,kuala lumpur,kuala_lumpur,,02_2021
+h3,subnational,kuala lumpurian,kuala_lumpurian,,02_2021
+h3,subnational,kuala lumpurians,kuala_lumpurians,,02_2021
+h3,subnational,negeri sembilan,negeri_sembilan,,02_2021
+h3,subnational,negeri sembilanese,negeri_sembilanese,,02_2021
+h3,subnational,negeri sembilanese,negeri_sembilanese,,02_2021
+h3,subnational,baja california,baja_california,,02_2021
+h3,subnational,baja california sur,baja_california_sur,,02_2021
+h3,subnational,ciudad de méxico,ciudad_de_méxico,,02_2021
+h3,subnational,coahuila de zaragoza,coahuila_de_zaragoza,,02_2021
+h3,subnational,lower californian,lower_californian,,02_2021
+h3,subnational,new leonese,new_leonese,,02_2021
+h3,subnational,nuevo león,nuevo_león,,02_2021
+h3,subnational,san luis potosí,san_luis_potosí,,02_2021
+h3,subnational,pilage toba,pilage_toba,,02_2021
+h3,subnational,mbia chee,mbia_chee,,02_2021
+h3,subnational,san borjano,san_borjano,,02_2021
+h3,subnational,apolima arara,apolima_arara,,02_2021
+h3,subnational,arara do rio branco,arara_do_rio_branco,,02_2021
+h3,subnational,arara shawãdawa,arara_shawãdawa,,02_2021
+h3,subnational,assurini do tocantins,assurini_do_tocantins,,02_2021
+h3,subnational,assurini do xingu,assurini_do_xingu,,02_2021
+h3,subnational,cinta larga,cinta_larga,,02_2021
+h3,subnational,enawene nawe,enawene_nawe,,02_2021
+h3,subnational,karipuna do amapá,karipuna_do_amapá,,02_2021
+h3,subnational,katukina do rio biá,katukina_do_rio_biá,,02_2021
+h3,subnational,sateré mawé,sateré_mawé,,02_2021
+h3,subnational,suruí do pará,suruí_do_pará,,02_2021
+h3,subnational,kulina madihá,kulina_madihá,,02_2021
+h3,subnational,kulina pano,kulina_pano,,02_2021
+h3,subnational,menky manoki,menky_manoki,,02_2021
+h3,subnational,siona–secoya,siona_secoya,,02_2021
+h3,subnational,siona-secoya,siona_secoya,,02_2021
+h3,subnational,ese ejja,ese_ejja,,02_2021
+h3,subnational,norte chico,norte_chico,,02_2021
+h3,subnational,mongo twa,mongo_twa,,02_2021
+h3,subnational,somali bantu‎,somali_bantu‎,,02_2021
+h3,subnational,echuya batwa,echuya_batwa,,02_2021
+h3,subnational,great lakes twa,great_lakes_twa,,02_2021
+h3,subnational,kafwe twa,kafwe_twa,,02_2021
+h3,subnational,lukanga twa,lukanga_twa,,02_2021
+h3,subnational,mongo twa,mongo_twa,,02_2021
+h3,subnational,ota benga,ota_benga,,02_2021
+h3,subnational,somali bantu‎,somali_bantu‎,,02_2021
+h3,subnational,siberian tatars,siberian_tatars,,02_2021
+h3,subnational,sirenik eskimos,sirenik_eskimos,,02_2021
+h3,subnational,volga finns,volga_finns,,02_2021
+h3,subnational,baltic finns,baltic_finns,,02_2021
+h3,subnational,bene ephraim,bene_ephraim,,02_2021
+h3,subnational,bene israel,bene_israel,,02_2021
+h3,subnational,bihari mauritian,bihari_mauritian,,02_2021
+h3,subnational,bnei menashe,bnei_menashe,,02_2021
+h3,subnational,cambodian hokkien,cambodian_hokkien,,02_2021
+h3,subnational,chughtai tartars,chughtai_tartars,,02_2021
+h3,subnational,dongria kondha,dongria_kondha,,02_2021
+h3,subnational,great andamanese,great_andamanese,,02_2021
+h3,subnational,hmong–mien,hmong_mien,,02_2021
+h3,subnational,hmong-mien,hmong_mien,,02_2021
+h3,subnational,jawi peranakan,jawi_peranakan,,02_2021
+h3,subnational,kiang si,kiang_si,,02_2021
+h3,subnational,pa then,pa_then,,02_2021
+h3,subnational,san diu,san_diu,,02_2021
+h3,subnational,sauria paharia,sauria_paharia,,02_2021
+h3,subnational,sirenik eskimos,sirenik_eskimos,,02_2021
+h3,subnational,tai aiton,tai_aiton,,02_2021
+h3,subnational,tai khamti,tai_khamti,,02_2021
+h3,subnational,tai khamyang,tai_khamyang,,02_2021
+h3,subnational,tai phake,tai_phake,,02_2021
+h3,subnational,tai phakial,tai_phakial,,02_2021
+h3,subnational,tai turung,tai_turung,,02_2021
+h3,subnational,tibetan ladakhis,tibetan_ladakhis,,02_2021
+h3,subnational,tibetan muslim,tibetan_muslim,,02_2021
+h3,subnational,uttarakhandi bhotiya,uttarakhandi_bhotiya,,02_2021
+h3,subnational,volga finns,volga_finns,,02_2021
+h3,subnational,bihari mauritian,bihari_mauritian,,02_2021
+h3,subnational,bnei menashe,bnei_menashe,,02_2021
+h3,subnational,chughtai tartars,chughtai_tartars,,02_2021
+h3,subnational,dongria kondha,dongria_kondha,,02_2021
+h3,subnational,great andamanese,great_andamanese,,02_2021
+h3,subnational,indo kiwi,indo_kiwi,,02_2021
+h3,subnational,iraqi biradri,iraqi_biradri,,02_2021
+h3,subnational,malabar nasrani,malabar_nasrani,,02_2021
+h3,subnational,sauria paharia,sauria_paharia,,02_2021
+h3,subnational,cambodian hokkien,cambodian_hokkien,,02_2021
+h3,subnational,chin haw,chin_haw,,02_2021
+h3,subnational,filipino mestizo,filipino_mestizo,,02_2021
+h3,subnational,jiang zhe,jiang_zhe,,02_2021
+h3,subnational,kam–sui,kam_sui,,02_2021
+h3,subnational,kam-sui,kam_sui,,02_2021
+h3,subnational,new hampshire,new_hampshire,,02_2021
+h3,subnational,new hampshirite,new_hampshirite,,02_2021
+h3,subnational,new jersey,new_jersey,,02_2021
+h3,subnational,new jerseyan,new_jerseyan,,02_2021
+h3,subnational,new mexican,new_mexican,,02_2021
+h3,subnational,new mexicans,new_mexicans,,02_2021
+h3,subnational,new mexico,new_mexico,,02_2021
+h3,subnational,new york,new_york,,02_2021
+h3,subnational,new yorker,new_yorker,,02_2021
+h3,subnational,nez perce,nez_perce,,02_2021
+h3,subnational,two kettles,two_kettles,,02_2021
+h3,subnational,burned thighs,burned_thighs,,02_2021
+h3,subnational,scatters their own,scatters_their_own,,02_2021
+h3,subnational,alafaya costas,alafaya_costas,,02_2021
+h3,subnational,cape fear indians,cape_fear_indians,,02_2021
+h3,subnational,costas alafeyes,costas_alafeyes,,02_2021
+h3,subnational,pee dee,pee_dee,,02_2021
+h3,subnational,nicola athapaskans,nicola_athapaskans,,02_2021
+h3,subnational,buffalo berry eaters,buffalo_berry_eaters,,02_2021
+h3,subnational,buffalo eaters,buffalo_eaters,,02_2021
+h3,subnational,krum bay,krum_bay,,02_2021
+h3,subnational,kirataka nishadi,kirataka_nishadi,,02_2021
+h3,subnational,kerala mukkuvar,kerala_mukkuvar,,02_2021
+h3,subnational,mahawar vaishya,mahawar_vaishya,,02_2021
+h3,subnational,lakkamari kapu,lakkamari_kapu,,02_2021
+h3,subnational,kuthaliya bora,kuthaliya_bora,,02_2021
+h3,subnational,bay of plentiers,bay_of_plentiers,,02_2021
+h3,subnational,bay of plenty,bay_of_plenty,,02_2021
+h3,subnational,chatham islanders,chatham_islanders,,02_2021
+h3,subnational,chatham islands,chatham_islands,,02_2021
+h3,subnational,nelson region,nelson_region,,02_2021
+h3,subnational,north islander,north_islander,,02_2021
+h3,subnational,north islanders,north_islanders,,02_2021
+h3,subnational,northland region,northland_region,,02_2021
+h3,subnational,south islander,south_islander,,02_2021
+h3,subnational,south islanders,south_islanders,,02_2021
+h3,subnational,southland region,southland_region,,02_2021
+h3,subnational,stewart island,stewart_island,,02_2021
+h3,subnational,stewart islander,stewart_islander,,02_2021
+h3,subnational,stewart islanders,stewart_islanders,,02_2021
+h3,subnational,agusan del norte,agusan_del_norte,,02_2021
+h3,subnational,agusan del sur,agusan_del_sur,,02_2021
+h3,subnational,puerto rican,puerto_rican,,02_2021
+h3,subnational,puerto rico,puerto_rico,,02_2021
+h3,subnational,rhode island,rhode_island,,02_2021
+h3,subnational,rhode islander,rhode_islander,,02_2021
+h3,subnational,rhode islanders,rhode_islanders,,02_2021
+h3,subnational,west virginia,west_virginia,,02_2021
+h3,subnational,west virginian,west_virginian,,02_2021
+h3,subnational,deg hit’an,deg_hit’an,,02_2021
+h3,subnational,deg xinag,deg_xinag,,02_2021
+h3,subnational,deh cho,deh_cho,,02_2021
+h3,subnational,deh gah got'ine,deh_gah_got'ine,,02_2021
+h3,subnational,tli cho,tli_cho,,02_2021
+h3,subnational,inland tlingit,inland_tlingit,,02_2021
+h3,subnational,fish eaters,fish_eaters,,02_2021
+h3,subnational,groundhog eaters,groundhog_eaters,,02_2021
+h3,subnational,jack rabbit eaters,jack_rabbit_eaters,,02_2021
+h3,subnational,mentzelia seed eaters,mentzelia_seed_eaters,,02_2021
+h3,subnational,pinenut eaters,pinenut_eaters,,02_2021
+h3,subnational,porcupine grass seed eaters,porcupine_grass_seed_eaters,,02_2021
+h3,subnational,redtop grass eaters,redtop_grass_eaters,,02_2021
+h3,subnational,ricegrass eaters,ricegrass_eaters,,02_2021
+h3,subnational,ryegrass seed eaters,ryegrass_seed_eaters,,02_2021
+h3,subnational,sage grass,sage_grass,,02_2021
+h3,subnational,salmon eaters,salmon_eaters,,02_2021
+h3,subnational,san pitch,san_pitch,,02_2021
+h3,subnational,sheep eaters,sheep_eaters,,02_2021
+h3,subnational,tule eaters,tule_eaters,,02_2021
+h3,subnational,white river utes,white_river_utes,,02_2021
+h3,subnational,wild wheat eaters,wild_wheat_eaters,,02_2021
+h3,subnational,alliklik–castac,alliklik_castac,,02_2021
+h3,subnational,alliklik–castac,alliklik_castac,,02_2021
+h3,subnational,foothill yokuts,foothill_yokuts,,02_2021
+h3,subnational,san clemente,san_clemente,,02_2021
+h3,subnational,sierra miwok,sierra_miwok,,02_2021
+h3,subnational,vanyume mohineyam,vanyume_mohineyam,,02_2021
+h3,subnational,yuhaviatam morongo,yuhaviatam_morongo,,02_2021
+h3,subnational,isleta pueblo,isleta_pueblo,,02_2021
+h3,subnational,jemez pueblo,jemez_pueblo,,02_2021
+h3,subnational,ohkay owingeh,ohkay_owingeh,,02_2021
+h3,subnational,pima bajo,pima_bajo,,02_2021
+h3,subnational,san carlos,san_carlos,,02_2021
+h3,subnational,san felipe,san_felipe,,02_2021
+h3,subnational,santa clara,santa_clara,,02_2021
+h3,subnational,tohono o'odham,tohono_o'odham,,02_2021
+h3,subnational,white mountain,white_mountain,,02_2021
+h3,subnational,pai pai,pai_pai,,02_2021
+h3,subnational,pima bajo,pima_bajo,,02_2021
+h3,subnational,kashmiri pandit,kashmiri_pandit,,02_2021
+h3,subnational,kasi kapadi,kasi_kapadi,,02_2021
+h3,subnational,kannadiya naidu,kannadiya_naidu,,02_2021
+h3,subnational,kalari panicker,kalari_panicker,,02_2021
+h3,subnational,kadava patidar,kadava_patidar,,02_2021
+h3,subnational,jogi faqir,jogi_faqir,,02_2021
+h3,subnational,goud saraswat,goud_saraswat,,02_2021
+h3,subnational,hindu burud,hindu_burud,,02_2021
+h3,subnational,holaya dasar,holaya_dasar,,02_2021
+h3,subnational,holeya dasari,holeya_dasari,,02_2021
+h3,subnational,hoysala karnataka,hoysala_karnataka,,02_2021
+h3,subnational,isai vellalar,isai_vellalar,,02_2021
+h3,subnational,jalia kaibarta,jalia_kaibarta,,02_2021
+h3,subnational,jatia chamar,jatia_chamar,,02_2021
+h3,subnational,lun bawang,lun_bawang,,02_2021
+h3,subnational,minh hương,minh_hương,,02_2021
+h3,subnational,sam kiang,sam_kiang,,02_2021
+h3,subnational,white tai,white_tai,,02_2021
+h3,subnational,aadi gour,aadi_gour,,02_2021
+h3,subnational,adi andhra,adi_andhra,,02_2021
+h3,subnational,adi dravida,adi_dravida,,02_2021
+h3,subnational,anjana chaudhari,anjana_chaudhari,,02_2021
+h3,subnational,aray mala,aray_mala,,02_2021
+h3,subnational,balawalikar saraswat,balawalikar_saraswat,,02_2021
+h3,subnational,bawa—sadhu,bawa_sadhu,,02_2021
+h3,subnational,bawa-sadhu,bawa_sadhu,,02_2021
+h3,subnational,beda jangam,beda_jangam,,02_2021
+h3,subnational,bhavasara kshatriya,bhavasara_kshatriya,,02_2021
+h3,subnational,bhil gametia,bhil_gametia,,02_2021
+h3,subnational,bhil mama,bhil_mama,,02_2021
+h3,subnational,boya bedar,boya_bedar,,02_2021
+h3,subnational,brittial bania,brittial_bania,,02_2021
+h3,subnational,budga jangam,budga_jangam,,02_2021
+h3,subnational,bukka ayavar,bukka_ayavar,,02_2021
+h3,subnational,buragam kalinga,buragam_kalinga,,02_2021
+h3,subnational,buragana kalinga,buragana_kalinga,,02_2021
+h3,subnational,chenna dasar,chenna_dasar,,02_2021
+h3,subnational,devendrakula velalar,devendrakula_velalar,,02_2021
+h3,subnational,dhegu megu,dhegu_megu,,02_2021
+h3,subnational,ediga gowda,ediga_gowda,,02_2021
+h3,subnational,elur chetty,elur_chetty,,02_2021
+h3,subnational,gajula balija,gajula_balija,,02_2021
+h3,subnational,gajula kapu,gajula_kapu,,02_2021
+h3,subnational,guaraní ñandéva,guaraní_ñandéva,,02_2021
+h3,subnational,wuy jugu,wuy_jugu,,02_2021
+h3,subnational,cinta larga,cinta_larga,,02_2021
+h3,subnational,enawene nawe,enawene_nawe,,02_2021
+h3,subnational,gavião of rondônia,gavião_of_rondônia,,02_2021
+h3,subnational,assuriní do toncantins,assuriní_do_toncantins,,02_2021
+h3,subnational,suruí do pará,suruí_do_pará,,02_2021
+h3,subnational,tsohom djapá,tsohom_djapá,,02_2021
+h3,subnational,sarayacu kichua,sarayacu_kichua,,02_2021
+h3,subnational,chimborazo kichua,chimborazo_kichua,,02_2021
+h3,subnational,cholos cuencanos,cholos_cuencanos,,02_2021
+h3,subnational,cañari kichua,cañari_kichua,,02_2021
+h3,subnational,norte chico,norte_chico,,02_2021
+h3,subnational,likan antaí,likan_antaí,,02_2021
+h3,subnational,la tolita,la_tolita,,02_2021
+h3,subnational,cerro narrio,cerro_narrio,,02_2021
+h3,subnational,carijo guarani,carijo_guarani,,02_2021
+h3,subnational,apinaye caroyo,apinaye_caroyo,,02_2021
+h3,subnational,woun meu,woun_meu,,02_2021
+h3,subnational,tu'un savi,tu'un_savi,,02_2021
+h3,subnational,tsa jujmí,tsa_jujmí,,02_2021
+h3,subnational,tohono o'odham,tohono_o'odham,,02_2021
+h3,subnational,slijuala sihanuk,slijuala_sihanuk,,02_2021
+h3,subnational,runixa ngiigua,runixa_ngiigua,,02_2021
+h3,subnational,nduudu yu,nduudu_yu,,02_2021
+h3,subnational,k'op o winik atel,k'op_o_winik_atel,,02_2021
+h3,subnational,es péi,es_péi,,02_2021
+h3,subnational,ha shuta enima,ha_shuta_enima,,02_2021
+h3,subnational,hach t'an,hach_t'an,,02_2021
+h3,subnational,chichimeca jonaz,chichimeca_jonaz,,02_2021
+h3,subnational,tjër di,tjër_di,,02_2021
+h3,subnational,tawira miskito,tawira_miskito,,02_2021
+h3,subnational,ngöbe buglé,ngöbe_buglé,,02_2021
+h3,subnational,miskito sambu,miskito_sambu,,02_2021
+h3,subnational,pai 1,pai_1,lowers false positive rate,02_2021
+h3,subnational,pai-1,pai_1,lowers false positive rate,02_2021
+h3,subnational,pai 2,pai_2,lowers false positive rate,02_2021
+h3,subnational,pai-2,pai_2,lowers false positive rate,02_2021
+h3,subnational,pai-2r,pai_2r,lowers false positive rate,02_2021
+h3,subnational,single pai,single_pai,lowers false positive rate,02_2021
+h3,subnational,dose pai,dose_pai,lowers false positive rate,02_2021
+h3,subnational,e3::ho,e3_ho,lowers false positive rate,02_2021
+h3,subnational,ho 1,ho_1,lowers false positive rate,02_2021
+h3,subnational,ho-1,ho_1,lowers false positive rate,02_2021
+h3,subnational,ho 2,ho_2,lowers false positive rate,02_2021
+h3,subnational,ho-2,ho_2,lowers false positive rate,02_2021
+h3,subnational,1 ho,1_ho,lowers false positive rate,02_2021
+h3,subnational,1-ho,1_ho,lowers false positive rate,02_2021
+h3,subnational,ho site,ho_site,lowers false positive rate,02_2021
+h3,subnational,ais people,ais_people,lowers false positive rate,02_2021
+h3,subnational,ge people,ge_people,lowers false positive rate,02_2021
+h3,subnational,eno people,eno_people,lowers false positive rate,02_2021
+h3,subnational,het people,het_people,lowers false positive rate,02_2021
+h3,subnational,ho people,ho_people,lowers false positive rate,02_2021
+h3,subnational,bia people,bia_people,lowers false positive rate,02_2021
+h3,subnational,wa people,wa_people,lowers false positive rate,02_2021
+h3,subnational,nat people,nat_people,lowers false positive rate,02_2021
+h3,subnational,lu people,lu_people,lowers false positive rate,02_2021
+h3,subnational,lak people,lak_people,lowers false positive rate,02_2021
+h3,subnational,ava people,ava_people,lowers false positive rate,02_2021
+h3,subnational,zo people,zo_people,lowers false positive rate,02_2021
+h3,subnational,nasa people,nasa_people,lowers false positive rate,02_2021
+h3,subnational,sumo people,sumo_people,lowers false positive rate,02_2021
+h3,subnational,ree people,ree_people,lowers false positive rate,02_2021
+h3,subnational,apache i,apache_i,lowers false positive rate,02_2021
+h3,subnational,apache ii,apache_ii,lowers false positive rate,02_2021
+h3,subnational,ho poh,ho_poh,lowers false positive rate,02_2021
+h3,subnational,mono people,mono_people,lowers false positive rate,02_2021
+h3,subnational,mayo people,mayo_people,lowers false positive rate,02_2021
+h3,subnational,tunica albuginea,tunica_albuginea,lowers false positive rate,02_2021
+h3,subnational,tunica vaginalis,tunica_vaginalis,lowers false positive rate,02_2021
+h3,subnational,lun bawang,lun_bawang,lowers false positive rate,02_2021

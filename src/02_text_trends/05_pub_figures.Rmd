@@ -122,6 +122,9 @@ write_csv(top_journals_cleaned, "top_journals_biomed_humans_only.csv")
 #h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
 general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
 h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+
+
 
 custom_variables <- c("prc_ancestry", "prc_cultural", "prc_diversity", 
                       "prc_genetic", "prc_population", "prc_racial", "prc_sexgender", "prc_sexuality")
@@ -132,22 +135,25 @@ custom_linetype <- c("solid", "solid",  "solid", "twodash", "dotted", "dashed")
 figure_1A <- h1_all_set_counts_trends %>% 
   rename(n = count) %>% 
   # graphing terms over time 
-  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>% 
+  filter(term %notin% c("total", "population", "genetic")) %>% 
   pivot_wider(names_from = term, values_from = n) %>% 
   ggplot() + 
   #geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
   geom_line(aes(y = lifecourse, x = year, colour = "lifecourse"), size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = ancestry, x = year, colour = "ancestry"), size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = `sex/gender`, x = year, colour = "sex/gender"), size = 0.8, stat="identity", linetype = "solid") +
-  geom_line(aes(y = `diversity (all)`, x = year, colour = "diversity (all)"), size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = `diversity (all)`, x = year, colour = "diversity (all)"), 
+            size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = socioeconomic, x = year, colour = "socioeconomic"), size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = disability, x = year, colour = "disability"), size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = `race/ethnicity`, x = year, colour = "race/ethnicity"), size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = cultural, x = year, colour = "cultural"), size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = equity, x = year, colour = "equity"), size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = sexuality, x = year, colour = "sexuality"), size = 0.8, stat="identity", linetype = "solid") +
-  geom_line(aes(y = `diversity (social)`, x = year, colour = "diversity (social)"), size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = `diversity (social)`, x = year, colour = "diversity (social)"), 
+            size = 0.8, stat="identity", linetype = "solid") +
   geom_line(aes(y = minority, x = year, colour = "minority"), size = 0.8, stat="identity", linetype = "solid") +
-  geom_line(aes(y = minority, x = year, colour = "migration"), size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = migration, x = year, colour = "migration"), size = 0.8, stat="identity", linetype = "solid") +
   theme_minimal() + 
   labs(title = "        Figure 1A. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", 
        color =  "Term") + ylab("Term Count") +
@@ -155,13 +161,14 @@ figure_1A <- h1_all_set_counts_trends %>%
         legend.position = "none",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("cultural", "disability", "diversity (all)","diversity (social)", "equity", "lifecourse",
-                              "migration", "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
-                              "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")
-                     #values=c("#D3D3D3",  "#D3D3D3",    "#696969",        "#696969",            "#000000",  "#000000", 
-                    #          "#D3D3D3", "#000000",   "#000000",    "#D3D3D3",  "#696969", "#696969")
-                     ) +
+  scale_color_manual(labels=c("ancestry", "cultural", "disability", 
+                              "diversity (all)","diversity (social)", "equity", 
+                              "lifecourse", "migration", "minority",
+                              "race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396","#B7D100",  "#61B329",    
+                              "#1b7524", "#C0C0C0", "#9a009a",  
+                              "#CC0000", "#005BB7", "#000000",   
+                              "#3B9AB2", "#E86F00", "#b19cd9", "#f2be00")) +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) 
   #scale_y_continuous(limits = c(0, 105000),
@@ -171,42 +178,59 @@ figure_1A_log <- figure_1A +
   ylab("Term Count (Log Scale)")  +
   scale_y_log10() +
   labs(title = "        Figure 1B. Total Growth of Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", 
-       color =  "Term") + ylab("Term Count") 
+       color =  "Term") + ylab("Term Count") +
+  scale_y_log10(breaks = c(0, 10, 100, 1000, 10000, 100000, 1000000),
+                labels = c("0", "10", "100", "1000", "10000", "100000", "1000000"))
 
 # graphing terms over time 
 figure_1B_pre <- general_pop_terms %>% 
   select(-starts_with("cnt_")) %>% 
   ggplot() + 
-  geom_line(aes(y = prc_lifecourse, x = year, colour = "lifecourse"), size = 0.8, stat="identity", linetype = "solid") + #dotted
-  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), size = 0.8, stat="identity", linetype = "solid") + #dotted
-  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 0.8, stat="identity", linetype = "solid") + #dotted
-  geom_line(aes(y = prc_class, x = year, colour = "socioeconomic"), size = 0.8, stat="identity", linetype = "solid") + #longdash
-  geom_line(aes(y = prc_disability, x = year, colour = "disability"), size = 0.8, stat="identity", linetype = "solid") + #longdash
-  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), size = 0.8, stat="identity", linetype = "solid") + #longdash
-  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 0.8, stat="identity", linetype = "solid") +
-  geom_line(aes(y = prc_equity, x = year, colour = "equity"), size = 0.8, stat="identity", linetype = "solid") +
-  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), size = 0.8, stat="identity", linetype = "solid") +
-  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), size = 0.8, stat="identity", linetype = "solid") + #dotdash
-  geom_line(aes(y = prc_minority, x = year, colour = "minority"), size = 0.8, stat="identity", linetype = "solid") + #dotdash
-  geom_line(aes(y = prc_migration, x = year, colour = "migration"), size = 0.8, stat="identity", linetype = "solid") + #dotdash
+  geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), 
+            size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_lifecourse, x = year, colour = "lifecourse"), 
+            size = 0.8, stat="identity", linetype = "solid") + #dotted
+  geom_line(aes(y = prc_sexgender, x = year, colour = "sex/gender"), 
+            size = 0.8, stat="identity", linetype = "solid") + #dotted
+  geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), 
+            size = 0.8, stat="identity", linetype = "solid") + #dotted
+  geom_line(aes(y = prc_class, x = year, colour = "socioeconomic"), 
+            size = 0.8, stat="identity", linetype = "solid") + #longdash
+  geom_line(aes(y = prc_disability, x = year, colour = "disability"), 
+            size = 0.8, stat="identity", linetype = "solid") + #longdash
+  geom_line(aes(y = prc_racial, x = year, colour = "race/ethnicity"), 
+            size = 0.8, stat="identity", linetype = "solid") + #longdash
+  geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), 
+            size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_equity, x = year, colour = "equity"), 
+            size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_sexuality, x = year, colour = "sexuality"), 
+            size = 0.8, stat="identity", linetype = "solid") +
+  geom_line(aes(y = prc_soc_diversity, x = year, colour = "diversity (social)"), 
+            size = 0.8, stat="identity", linetype = "solid") + #dotdash
+  geom_line(aes(y = prc_minority, x = year, colour = "minority"), 
+            size = 0.8, stat="identity", linetype = "solid") + #dotdash
+  geom_line(aes(y = prc_migration, x = year, colour = "migration"), 
+            size = 0.8, stat="identity", linetype = "solid") + #dotdash
   labs(title = "        Figure 1C. Proportional Growth Diversity-Related \n Terminology in PubMed/MEDLINE Abstracts (1990-2020)", color =  "Term") + 
   theme_minimal() + 
-  scale_color_manual(labels=c("cultural", "disability", "diversity (all)","diversity (social)", "equity", "lifecourse",
-                              "migration", "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
-                               "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")
-                     #values=c("#D3D3D3",  "#D3D3D3",    "#696969",        "#696969",            "#000000",  "#000000", 
-                     #         "#D3D3D3", "#000000",   "#000000",    "#D3D3D3",  "#696969", "#696969")
-                     ) +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) +
-  scale_y_continuous(breaks = c(0, 5, 10, 15, 20, 25, 30))
+  scale_color_manual(labels=c("ancestry", "cultural", "disability", 
+                              "diversity (all)","diversity (social)", "equity", 
+                              "lifecourse", "migration", "minority",
+                              "race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396","#B7D100",  "#61B329",    
+                              "#1b7524", "#C0C0C0", "#9a009a",  
+                              "#CC0000", "#005BB7", "#000000",   
+                              "#3B9AB2", "#E86F00", "#b19cd9", "#f2be00"))  
 
 figure_1B <- figure_1B_pre +
   ylab("Proportion of Abstracts") +
   theme(axis.title.x = element_blank(), 
         legend.position = "none",
-        plot.title = element_text(size=12, hjust = 0.5)) 
+        plot.title = element_text(size=12, hjust = 0.5)) +
+  scale_x_continuous(limits = c(1990, 2020),
+                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) +
+  scale_y_continuous(breaks = c(0, 5, 10, 15, 20, 25, 30))
 
 # graphing terms over time 
 figure_1B_log <- figure_1B + 
@@ -228,7 +252,7 @@ legend <- cowplot::get_legend(legend)
 
 grid.arrange(figure_1A, figure_1A_log,
              figure_1B, figure_1B_log, 
-             legend, 
+             legend,
              nrow = 3, ncol=2,
              layout_matrix = rbind(c(1,2), c(3,4), c(5,5)),
              #widths = c(2.7, 2.7), 
@@ -239,6 +263,7 @@ grid.arrange(figure_1A, figure_1A_log,
 
 ```{r epa_figure_1ab, eval=FALSE, echo=FALSE}
 ggplotly(figure_1A)
+ggplotly(figure_1A_log)
 ggplotly(figure_1B)
 
 # raw count growth 

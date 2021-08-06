@@ -1,0 +1,7 @@
+create materialized view pubmed_2021.human_only_0721 as (
+	select A.fk_pmid, A.year, B.abstract, B.publication, soc_div_terms, h1_totals, h2_totals, h3_totals 
+	from pubmed_2021.soc_diversity_ids_0721 A 
+	left join pubmed_2021.biomedical_abstracts B 
+	ON A.fk_pmid = B.fk_pmid
+	ORDER BY soc_div_terms desc 
+); 

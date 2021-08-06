@@ -10,8 +10,8 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
     post = "/:year/:month/:day/:slug/"
 
 [params]
-    author = "Brandon Kramer"
-    description = "Brandon Kramer & Catherine Lee"
+    author = "Anonymized for Review"
+    description = ""
     logo = "favicon/network-labels-new.png"
     accent = "#000000" # dark colors do best
     backgroundColor = "#ffffff"
@@ -51,11 +51,11 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 #    weight = 1
 
 [[menu.icon]]
-    url = "https://github.com/brandonleekramer/diversity"
+    url = "https://anonymous.4open.science/status/diversity-4EA7"
     name = "fab fa-github"
     weight = 2
     
 [[menu.icon]]
-    url = "mailto:brandonleekramer@gmail.com"
+    url = "mailto:"
     name = "far fa-envelope"
     weight = 3

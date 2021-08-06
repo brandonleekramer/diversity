@@ -17,10 +17,10 @@ rm(list = ls())
 
 for (pkg in c("tidyverse", "tidytext", "DT", "grid", "gridExtra", "extrafont", "data.table", "plotly")) {library(pkg, character.only = TRUE)}
 
-#h2_omb_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_counts.rds") 
-#h2_omb_prcs <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_prcs.rds") 
-h2_omb_counts <- read_rds("~/git/diversity/data/final_data/h2_all_omb_counts.rds") 
-h2_omb_prcs <- read_rds("~/git/diversity/data/final_data/h2_all_omb_prcs.rds")
+h2_omb_counts <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_counts.rds") 
+h2_omb_prcs <- read_rds("~/git/diversity/data/text_results/h2_results/h2_all_omb_prcs.rds") 
+#h2_omb_counts <- read_rds("~/git/diversity/data/final_data/h2_all_omb_counts.rds") 
+#h2_omb_prcs <- read_rds("~/git/diversity/data/final_data/h2_all_omb_prcs.rds")
 ```
 
 Next, we wanted to examine the growth of <ins>[OMB Directive 15](https://wonder.cdc.gov/wonder/help/populations/bridged-race/Directive15.html)</ins> and <ins>[US Census](https://www.census.gov/topics/population/race/about.html)</ins> terms. Initially, we posed this hypothesis: 
@@ -67,7 +67,7 @@ figure_2A <- h2_omb_counts %>%
 # "#000000", # dark green  "#005BB7", # dark blue   "#CC0000", # red "#ff8396", # pinkish "#3B9AB2" # light blue 
 ```
 
-Figure 2A shows the OMB US Census terms are growing over time, but this growth is quite subdued compared to our previous results. For example, no category exceeds more than 3,000 uses in a given year. Of these category sets, race and ethnicity grow the most followed by White, Black, Asian and Hispanic/Latinx. Notably, uses of "social diversity" end up around the same total as Hispanic/Latinx, but are much lower than the other terms just mentioned. 
+Figure 2A shows the OMB US Census terms are growing over time, but this growth is quite subdued compared to our previous results. For example, no category exceeds more than 3,100 uses in a given year. Of these category sets, race and ethnicity grow the most followed by Black, White, Asian and Hispanic/Latinx. Notably, uses of "social diversity" ends up between Hispanic/Latinx and Native American, but are much lower than the other terms just mentioned. 
 
 ```{r figure_3D, message = FALSE, warning=FALSE, echo=FALSE}
 # graphing terms over time 
@@ -104,7 +104,7 @@ figure_2B <- h2_omb_prcs %>%
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
 ```
 
-Figure 2B shows proportional variation in OMB/Census terms over time. While almost all of the categories rise gradually until the late-2000's, the terms white, black, race and ethnicity all taper off and, in some cases, decline thereafter. In contrast, we see that the "diversity (social)" category continues to rise, though does not eclipse most of the racial/ethnic categories. This suggests that racial/ethnic terms are less commonly used that a decade ago, and interest in diversity is on the rise. Therefore, it seems that Berrey <ins>[(2015)](https://press.uchicago.edu/ucp/books/book/chicago/E/bo19910067.html)</ins> may be right about diversity becoming more prominent than racial/ethnic terms. However, this method cannot tell us with certainty that diversity is replacing racial/ethnic terms. While we plan to explore this more through computational methods like <ins>[Word2Vec](https://github.com/brandonleekramer/diversity/blob/master/src/04_word_embeddings/04_eda_word2vec.ipynb)</ins> and BERT, qualitative researchers may want to supplement this research by questioning biomedical researchers about how they conceptualize diversity relative to more traditional racial/ethnic terms, especially given that most STS scholarship has assume that these types of terms are still on the rise. We now know that this is not necessarily the case.
+Figure 2B shows proportional variation in OMB/Census terms over time. While almost all of the categories rise gradually until the late-2000's, the terms white, black, race and ethnicity all taper off and, in some cases, decline thereafter. In contrast, we see that the "diversity (social)" category continues to rise, though does not eclipse most of the racial/ethnic categories. This suggests that racial/ethnic terms are less commonly used that a decade ago, and interest in diversity is on the rise. Therefore, it seems that Berrey <ins>[(2015)](https://press.uchicago.edu/ucp/books/book/chicago/E/bo19910067.html)</ins> may be right about diversity becoming more prominent than racial/ethnic terms. However, this method cannot tell us with certainty that diversity is replacing racial/ethnic terms. While we eventually plan to explore this more through computational methods like Word2Vec and BERT, qualitative researchers may want to supplement this research by questioning biomedical researchers about how they conceptualize diversity relative to more traditional racial/ethnic terms, especially given that most STS scholarship has assume that these types of terms are still on the rise. We now know that this is not necessarily the case.
 
 ### Appendix 
 
@@ -113,21 +113,10 @@ Here is a list of the terms that were used to classify the OMB/US Census terms i
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
 tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis2") 
-DT::datatable(tree_data, rownames = FALSE)
+DT::datatable(tree_data, 
+          caption = 'Supplementary Table H2A: Terms Used in the Hypothesis 2 Dictionary', 
+          rownames = FALSE)
 ```
 
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
-#setwd("~/git/diversity/data/dictionaries")
-#terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
-#terms_table <- terms_table %>% select(asian, black, hispanic_latinx)
-#terms_table[is.na(terms_table)] <- ""
-#DT::datatable(terms_table, rownames = FALSE)
-```
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
-#setwd("~/git/diversity/data/dictionaries")
-#terms_table <- read_csv("diversity_project - h2_dictionary.csv") 
-#terms_table <- terms_table %>% select(native_american,	pacific_islander,white)
-#terms_table[is.na(terms_table)] <- ""
-#DT::datatable(terms_table, rownames = FALSE)
-```
+
 

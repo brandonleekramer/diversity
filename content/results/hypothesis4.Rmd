@@ -1,8 +1,10 @@
 ---
 title: "Hypothesis 4"
-description: "Changes in the use of population terminology in biomedical abstracts"
-output: html_document
-weight: 3
+description: "Comparing semantic similarity of diversity-related terminology"
+output: 
+  html_document: 
+    self_contained: no
+weight: 4
 ---
 
 ```{css, echo=FALSE}
@@ -12,107 +14,36 @@ h1, h2, h3, h4 {
 }
 ```
 
-While our first set of analyses established that "diversity" is increasing in the biomedical literature, we also wanted to account for how terminology related to population testing has changed over time. For example, Panofsky and Bliss <ins>[(2017)](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=ONTaswwjG9kAAAAA:zyJZCoDHuqmsuTVVUncKX8WqRWSDrhU_adG-ZzBawFV_mwVI6JgXNoLfdo0EAfNMuDmePVo8DteOJg)</ins> have found that racial and ethnic terms (including those within the US Census and OMB Directive 15 labeling schema) have been replaced by more general biogeographic terms such continental, national, and directional terminology. Below, we test how these sets of terms vary over time using computational text analysis. We started by posing this hypothesis: 
+After discovering that diversity and its many analougues are rising, but race/ethnicity are stagnating or declining, we began to wonder whether there was a way to test whether diversity was replacing race/ethnicity in biomedical abstracts. Drawing on <ins>[Berrey's (2015)](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins> argument that diversity acts as a mechanism to whitewash attempts to materially address racial inequality in other contexts, we thought there was a possibility that something similar is happening in biomedicine. Below, we test whether is race, ethnicity and diversity are becoming more or less semantically similar over time. Moreover, we examine whether these terms are becoming more or less semantically similar to other diversity-related terminology over time as well. Understanding these trends should help us better contextualize how diversity is used and what the political implications of such shifts mean for diversity in biomedical research. 
 
 <br>
 <center> 
-<span style="color:black"> H4: The use of population terminology has increased in biomedical abstracts since 1990. </span>
+<span style="color:black"> H4: Diversity is replacing racial and ethnic terms in the context of <br> human population research spanning from 1990-2020. </span>
 </center>
 <br>
 
-To carry out this analysis, we <ins>[created a dictionary](/methods/)</ins> with various sets of terms corresponding to the existing literature. This dictionary includes a comprehensive, though not necessarily exhaustive, list of around 2,000 continental, subcontinental, national, directional, ancestry, and OMB/US Census terms. Additionally, we compiled a list of an additional ~4,500 ethnic, tribal, and caste terms that we umbrella under the category of "subnational." In addition to an <ins>[interactive tree diagram](/methods/)</ins> that visualizes these term categories, we have also included a searchable table to explore which terms are included in each category set. While future work will need to explore how these categories overlap and intertwine, the forthcoming analyses simply demonstrate how these categories vary over time in our sample. 
+To do this, we used Word2Vec - a popular word embedding algorithm that quantifies semantic similarities by creating distributional properties of words based on how often they arise in shared contexts of a text corpus (Mikolev et al. 2013). In such a model, all words are represented as numeric vectors within a n-dimensional embedding space. Essentially, each word has a set of numeric coordinates that allow us to compare all words in this embedding space to one another; words that are closer in the vector space are assumed to have more similar meanings. For more on the specifics of the model, see our paper's methods section.
 
-```{r, include=FALSE}
-rm(list = ls())
+<center> 
 
-for (pkg in c("tidyverse", "tidytext", "DT", "grid", "gridExtra", "extrafont", "data.table", "plotly")) {library(pkg, character.only = TRUE)}
+![](/results/hypothesis4_files/w2v_race_diversity.png)
 
-#h3_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_counts.rds")
-#all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_prcs.rds")
-h3_counts <- read_rds("~/git/diversity/data/final_data/h3_all_counts.rds")
-all_pop_prc_counts <- read_rds("~/git/diversity/data/final_data/h3_all_prcs.rds")
-```
+Supplementary Figures 2A and 2B visualize the top-10 terms in the race, racial, ethnic, ethnicity, diverse and diversity word vectors for the 1990-2000 and 2010-2020 Word2Vec models. To visualize these vectors, we used the t-Distributed Stochastic Neighbor Embedding function from Python’s scikit-learn package (Pedregosa et al. 2011), which is an algorithm used to decompose the model into 2 dimensions for plotting. This process allows us to evaluate the vectors relative to one another in a 2-dimensional scatterplot. Above, we find that diversity moves further away from the racial and ethnic vectors over time.
 
-```{r figure 2a, echo=FALSE, warning=FALSE, message=FALSE}
-figure_3A <- h3_counts %>% 
-  group_by(term, year) %>% 
-  summarise(n = sum(n)) %>% 
-  ggplot() + 
-  geom_line(aes(y = n, x = year, colour = term), size = 1.3, stat="identity") + 
-  theme_minimal() +
-  labs(title = "     Figure 5A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
-       color =  "Term") + 
-  #scale_linetype_manual( values=linetype) +
-  ylab("Term Count") +
-  theme(axis.title.x = element_blank(), 
-        #axis.title.y = element_blank(), 
-        #legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("all population terms", "continental", 
-                              "directional", "national", 
-                              "omb/us-census", "race/ethnicity", 
-                              "subcontinental", "subnational"),
-                     values=c("#E21F00", "#f2be00",
-                              "#005BB7", "#E86F00",
-                              "#3B9AB2", "#ff8396", 
-                              "#9a009a", "#61B329")) +
-  #scale_y_log10() +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) 
-  #scale_y_continuous(limits = c(0, 110000),
-  #                   breaks = c(0, 10000, 20000, 30000, 40000, 50000, 60000, 70000, 80000, 90000, 100000, 110000),
-  #                   labels = c("0", "10", "20", "30", "40", "50", "60", "70", "80", "90", "100", "110"));
-  ggplotly() %>% 
-  layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
-```
+Supplementary Figure 3A: Visual Comparison of Top-10 Terms in <br>
+Race, Ethnicity and Diversity Vectors from 1990-2000 Word2Vec Model
 
-In Figure 5A, we see that the raw growth trends in the use of population terminology have grown tremendously over time in the PubMed/MEDLINE sample. In the top red line, we see that when all 6,500+ population terms are combined together into one set, the growth trends increase from just around 8,000 in 1990 to more than 100,000 mentions in 2020. As we can see in the orange and yellow lines, the majority of population terminology is a result of national and continental terms being used more often. While subnational, continental, subcontinental, directional, racial/ethnic, and OMB/US Census terms do rise, these trends never top more than 15,000 instances in a given year. 
+![](/results/hypothesis4_files/w2v_tsne_19902000.png)
 
-```{r figure_2B, echo=FALSE}
-figure_2B <- all_pop_prc_counts %>% 
-  filter(term != "ancestry") %>%
-  ggplot() + 
-  geom_line(aes(y = percentage, x = year, colour = term), size = 1.3, stat="identity") +
-  labs(title = "    Figure 5B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
-       color =  "Term") + 
-  theme_minimal() +
-  ylab("Proportion of Abstracts") +
-  theme(axis.title.x = element_blank(), 
-        legend.box = "vertical", 
-        #legend.position = "none",
-        legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
-        plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("all population terms", "continental", 
-                              "directional", "national", 
-                              "omb/us-census", "race/ethnicity", 
-                              "subcontinental", "subnational"),
-                     values=c("#E21F00", "#f2be00",
-                              "#005BB7", "#E86F00",
-                              "#3B9AB2", "#ff8396", 
-                              "#9a009a", "#61B329")) +
-  scale_y_log10() +
-  scale_x_continuous(limits = c(1990, 2020),
-                     breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)) 
-  #scale_y_continuous(limits = c(0, 80),
-  #                   breaks = c(0, 10, 20, 30, 40, 50, 60, 70, 80)); 
-  ggplotly() %>% 
-  layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
-```
+Supplementary Figure 3B: Visual Comparison of Top-10 Terms in <br>
+Race, Ethnicity and Diversity Vectors from 2010-2020 Word2Vec Model
 
-Looking at these trends as proportions, Figure 5B again demonstrates that the overall growth of all population terms (19.5% in 1990 to 67.4% in 2020) is mostly the result of growth in national and continental terms, which increase from 6.9% to 36.2% and from 2.1% to 9.49% respectively. Most of the subcontinental, subnational, directional, racial/ethnic, and OMB/US Census categories have exhibited more subtle increases over time. These results suggests that the use of population terms is increasing over time, and that this mostly due to national and continental terms. This is consistent with the Panofsky and Bliss <ins>[(2017)](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=ONTaswwjG9kAAAAA:zyJZCoDHuqmsuTVVUncKX8WqRWSDrhU_adG-ZzBawFV_mwVI6JgXNoLfdo0EAfNMuDmePVo8DteOJg)</ins> who, in a much smaller sample of publications from *Nature Genetics*, also find that national and continental terms are becoming the vernacular of choice among leading biomedical scholars when conducting population difference testing.
+![](/results/hypothesis4_files/w2v_tsne_20102020.png)
 
-### Appendix 
+</center>
 
-Here is a list of the 4,500+ distinct terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. If you have suggestions about what to add and/or reclassify, please send an <ins>[email to the authors](brandonleekramer@gmail.com)</ins>.
+Discussion 
 
-```{r, warning=FALSE, message=FALSE, echo = FALSE}
-setwd("~/git/diversity/data/dictionaries")
-all_pop_terms_table <- read_csv("diversity_project - h3_dictionary.csv")
-all_pop_terms_table <- all_pop_terms_table %>% select(-source, -date_added, -subclass, -regional, -str_type)
-all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
-DT::datatable(all_pop_terms_table)
-```
 
 
 

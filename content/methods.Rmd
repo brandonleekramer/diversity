@@ -13,19 +13,20 @@ h1, h2, h3, h4 {
 rm(list = ls())
 for (pkg in c("tidyverse", "collapsibleTree", "DT", "RPostgreSQL")) {library(pkg, character.only = TRUE)}
 setwd("~/git/diversity/data/dictionaries")
-h1_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1")
-h2_dictionary <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis2")
+h1_dictionary <- read_csv("diversity_project - tree_data.csv") %>% 
+  filter(hypothesis == "hypothesis1")
+h2_dictionary <- read_csv("diversity_project - tree_data.csv") %>% 
+  filter(hypothesis == "hypothesis2")
 h3_dictionary <- read.csv("diversity_project - h3_dictionary.csv", colClasses=c("regional"="character")) 
 ```
 
 ### The Rise of Diversity and Population <br/> Terminology in Biomedical Research
-#### Brandon Kramer & Catherine Lee
 
 This website was designed to serve as supplement to a paper in progress on the rise of diversity in biomedical research. While the motivation and methods are outlined below, our findings can be found by clicking the <ins>[Results](/results/)</ins> tab above.
 
 ### Overview
 
-While existing research on race and affirmative action have detailed the growth of diversity projects in education and employment that obfuscate the language of race and racism, the field of science & technology studies have documented scientists persistent attempts to molecularize race in biomedical research. In this paper, we employ computational text analysis to examine quantitative trends in the use of diversity terms, OMB/Census terms, and other population labels in a sample of 2.6+ million biomedical abstracts spanning the last 30 years. These analyses demonstrate that while racial, ethnic, and OMB/Census terms have mostly stagnated during the past 15 years, the use of “diversity” continues to rise, suggesting that biomedical researchers increasingly use a different grammar to construct population differences. We also observe that some population labels have grown dramatically with specific kinds of population terms outpacing others. Most notably, we find that the use of national and continental terms rose exponentially while terms like race and OMB/Census labels have actually dropped over the past decade. Together, our work points to a potential shift in the way that biomedical researchers enact population distinctions, relying more on biogeographical distinctions rather than racial or ethnic classifiers. Overall, this work not only informs science studies and bioethics scholars’ research on the politics of diversity in biomedical research, but also shares a novel set of methodological tools, including open source software and a new public dataset, to research this topic.  
+Recent scholarship has highlighted the rise of “diversity projects” across various educational and business contexts, but few studies have detailed what the discourse of diversity does within biomedical research. In this paper, we employ computational text analysis to examine quantitative trends in the use of various forms of diversity and population terminology in a sample of ~2.5 million biomedical abstracts spanning a 30-year period. Our analyses demonstrate marked growth in terms relating to sex/gender, lifecourse, and socio-economic while racial/ethnic terms have largely plateaued or, in some cases, even declined in usage since the mid-2000s. On the other hand, the use of diversity as well as national, continental, and subcontinental population labels have grown dramatically over the same period. Together, these analyses point to a shift in the way that biomedical researchers enact population differences, relying more on geographical distinctions rather than racial or ethnic classifiers. To better understand how the discourse of diversity relates to this shift in practice, we use word embeddings to study the semantic similarity between these discourses. Our results reveal that diversity becomes less similar to racial/ethnic terms while becoming more similar to sex/gender, lifecourse, and terms used to reference countries in Africa, Oceania and South America. Taken together, this work shows that diversity in biomedical research, rather than addressing racial/ethnic inequity and social justice, is more about the description of the age and sex/gender of research subjects and populations located outside of the major biomedical research hubs in Asia, Europe, and North America. Our findings suggest that the use of diversity, like diversity projects in higher education or employment, are championed as means and goal of doing good science. Such efforts may hinder efforts to address racial inequities that exist in health and science. 
 
 ### Data/Methodology
 
@@ -38,29 +39,26 @@ While existing research on race and affirmative action have detailed the growth 
 #                  port = 5432, 
 #                  user = Sys.getenv("db_userid"), 
 #                  password = Sys.getenv("db_pwd"))
-
-# query the users_gh data (table of all github users) 
 #by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.articles_per_year")
-#filtered_by_year <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.biomedical_human_per_year")
-
-# disconnect from postgresql database 
+#human_abstracts <- dbGetQuery(conn, "SELECT * FROM pubmed_2021.human_abstracts_0721")
 #dbDisconnect(conn)
 
-#by_year <- by_year %>% 
+#joined_data <- human_abstracts %>% 
+#  group_by(year) %>% 
+#  count() %>% 
+#  rename(human_only = n) %>% 
+#  left_join(by_year, by = "year") %>% 
 #  rename(all_pubmed = count) %>% 
-#  left_join(filtered_by_year, by = "year") %>% 
-#  rename(human_only = count) %>% 
-#  select(year, human_only, all_pubmed) %>% 
 #  pivot_longer(!year, names_to = "group", values_to = "count")
 
-#by_year
+#saveRDS(joined_data, "~/git/diversity/data/final_data/articles_by_year_0721.rds")
 
-by_year <- read_rds("~/git/diversity/data/final_data/articles_by_year.rds")
+joined_data <- read_rds("~/git/diversity/data/final_data/articles_by_year_0721.rds")
 ```
 
 
 ```{r, fig.width=7, fig.height=4, fig.align="center", echo=FALSE}
-supp_figure <- ggplot(data = by_year, aes(fill = group, x = year, y = count)) + 
+supp_figure <- ggplot(data = joined_data, aes(fill = group, x = year, y = count)) + 
   geom_bar(stat="identity", position="dodge") +
   labs(title = "Number of Publication Abstracts in PubMed/MEDLINE dataset (1990-2020)") + 
   theme(axis.title.x = element_blank(),
@@ -72,18 +70,19 @@ supp_figure <- ggplot(data = by_year, aes(fill = group, x = year, y = count)) +
   scale_y_continuous(breaks = c(0, 100000, 200000, 300000, 400000, 
                                 500000, 600000, 700000, 800000, 900000, 
                                 1000000, 1100000, 1200000, 1300000), 
-                     labels = c("0", "100K", "200K", "300K", "400K", "500K", "600K", "700K", "800K", "900K", "1.0M", "1.1M", "1.2M", "1.3M")) +
+                     labels = c("0", "100K", "200K", "300K", "400K", "500K", "600K", 
+                                "700K", "800K", "900K", "1.0M", "1.1M", "1.2M", "1.3M")) +
   scale_fill_manual(values=c("grey","black"),
                     labels=c("Available PubMed Abstracts (All)", "Biomedical, Human-Only Abstracts (Sample)")) +
   guides(fill=guide_legend(title=""))
 supp_figure
 ```
 
-Our dataset derives from the <ins>[PubMed/MEDLINE database](https://www.nlm.nih.gov/databases/download/pubmed_medline.html)</ins> -- a free, publicly-available collection of more than 27 million scientific abstracts provided by the U.S. National Library of Medicine. After downloading the entirety of these data and building them up into a PostgreSQL database with the <ins>[PubMed Portable package in Python](https://github.com/KerstenDoering/PubMedPortable/wiki#build-up-a-relational-database-in-postgresql)</ins>, we narrowed our focus on the top journals in the field of biomedicine ranging from the years 1990 to 2020. To do this, we filtered our data to only include human-only researcin in 250 prominent biomedical journals <ins>[based on Elseveir’s 2019 CiteScore rankings](https://www.kaggle.com/umairnasir14/impact-factor-of-top-1000-journals)</ins>, leaving us with ~2.5 million abstracts. After aggregating these data, we conducted several pre-processing steps to standardize the data, including converting text to lower case, removing special characters and numbers, and transforming select compound and hyphenated terms. 
+Our dataset derives from the <ins>[PubMed/MEDLINE database](https://www.nlm.nih.gov/databases/download/pubmed_medline.html)</ins> -- a free, publicly-available collection of more than 27 million scientific abstracts provided by the U.S. National Library of Medicine. After downloading the entirety of these data and building them up into a PostgreSQL database with the <ins>[PubMed Portable package in Python](https://github.com/KerstenDoering/PubMedPortable/wiki#build-up-a-relational-database-in-postgresql)</ins>, we narrowed our focus on the top journals in the field of biomedicine ranging from the years 1990 to 2020. To do this, we filtered our data to only include human-only research in 250 prominent biomedical journals <ins>[based on Elseveir’s 2019 CiteScore rankings](https://www.kaggle.com/umairnasir14/impact-factor-of-top-1000-journals)</ins>, leaving us with ~2.5 million abstracts. After aggregating these data, we conducted several pre-processing steps to standardize the data, including converting text to lower case, removing special characters and numbers, and transforming select compound and hyphenated terms to minimze false positive results on the terms we aimed to match. 
 
-While the specifics of each hypothesis test are detailed below, our overall analysis strategy depends on a "nested dictionary" approach to supervised text mining. This basically means that we created "dictionaries" with a number of "terms" that fall into "categories" for each hypothesis. We then used those dictionaries to count how often the terms in each category are mentioned within our corpus of abstracts. Although the magnitude of the data and reproducibility of the algorithms are useful for future research, we believe the potential utility of the dictionaries is what might help motivate future research on this topic. The dictionaries are by no means comprehensive, despite being predicated on past work, and could certainly benefit from continued scholarly debate, including from bioethics and AI ethics scholars. To make these dictionaries as transparent as possible, we have detailed their construction below in addition to visualizing their hierarchical relations and providing searchable tables. We encourage any and all feedback about the best way to improve these dictionaries for future research, which can be shared via <ins>[email here](brandonleekramer@gmail.com)</ins>. 
+While the specifics of each hypothesis test are detailed below, our overall analysis strategy depends on a "nested dictionary" approach to supervised text mining. This means that we created "dictionaries" with a number of "terms" that fall into "categories" for each hypothesis. We then used those dictionaries to count how often the terms in each category are mentioned within our corpus of abstracts. Although the magnitude of the data and reproducibility of the algorithms are useful for future research, we believe the potential utility of the dictionaries is what might help motivate future research on this topic. The dictionaries are by no means comprehensive, despite being predicated on past work, and could certainly benefit from continued scholarly debate, including from sociologists, bioethicists, and AI ethics scholars. To make these dictionaries as transparent as possible, we have detailed their construction below in addition to visualizing their hierarchical relations and providing searchable tables. We encourage any and all feedback about the best way to improve these dictionaries for future research, which can be shared via email in the top-right corner link. 
 
-Once all of our dictionaries were constructed, we ingested the data and used <ins>[R's tidytext package](https://www.tidytextmining.com/)</ins> to unnest and count all of the terms in our corpus (both in raw counts and as proportions). The code for each hypothesis can be found on <ins>[GitHub](https://github.com/brandonleekramer/diversity/tree/master/src/02_text_trends)</ins>.
+Once all of our dictionaries were constructed, we ingested the data and used <ins>[R's tidytext package](https://www.tidytextmining.com/)</ins> to unnest and count all of the terms in our corpus (both in raw counts and as proportions). The code for each hypothesis can be found on <ins>[GitHub](https://anonymous.4open.science/r/diversity-4EA7/README.md)</ins>.
 
 ### Hypothesis 1
 
@@ -95,9 +94,9 @@ H1: The use of the term “diversity” and related terminology will increase in
 
 For Hypothesis 1, our main goal was to examine the growth of the term diversity and its various metonyms, including cultural, disability, diversity, equity/justice, lifecourse, migration, minority, race/ethnicity, sex/gender, and sexuality. For each category, we manually compiled the terms based on our scholarly expertise in these fields and the likelihood of those terms being used to represent diversity in biomedicine. In the case of sex/gender and sexualties terms, we referenced the <ins>[Oxford Dictionary of Gender Studies](https://www.oxfordreference.com/view/10.1093/acref/9780191834837.001.0001/acref-9780191834837?btog=chap&hide=true&pageSize=20&skipEditions=true&sort=titlesort&source=%2F10.1093%2Facref%2F9780191834837.001.0001%2Facref-9780191834837)</ins> and, for the disability category, we also used the <ins>[National Center on Disability and Justice's Style Guide](https://ncdj.org/style-guide/)</ins> to inform term inclusion. 
 
-Our original lists were more comprehensive for some categories, but extensive sensitivity analyses of each category revealed that the inclusion of some terms yielded a substantial number of "false positive" results. For example, when we included "blind" in the disability category, but found that the majority of results returned related to "double-blind" studies, which are not indicative of the social diversity we are interested here. False-positive results were largely dealt with my removing terms that were too general to provide meaningful results or by <ins>[reclassifying certain combinations of words during our preprocessing stage to minimize inflated count totals](https://github.com/brandonleekramer/diversity/blob/master/data/dictionaries/diversity_project%20-%20preprocessing.csv)</ins>. This strategy proved effective in generating accurate results, which we validated by manually spot-checking a random sample of abstracts to ensure they are capturing valid mentions of the terms. 
+Our original lists were more comprehensive for some categories, but extensive sensitivity analyses of each category revealed that the inclusion of some terms yielded a substantial number of "false positive" results. For example, when we included "blind" in the disability category, but found that the majority of results returned related to "double-blind" studies, which are not indicative of the social diversity we are interested here. False-positive results were largely dealt with my removing terms that were too general to provide meaningful results or by reclassifying certain combinations of words during our preprocessing stage to minimize inflated count totals. This strategy proved effective in generating accurate results, which we validated by manually spot-checking a random sample of abstracts to ensure they are capturing valid mentions of the terms. 
 
-Perhaps, most importantly, the term "diversity" was a concept that took considerable effort to validate in our work. Diversity is a particularly polysemous term; it is has many meanings depending on the context. In fact, our research suggests that diversity rarely refers to issues of diversity, equity, and inclusion, but instead is much more commonly referring to heterogeneity, divergence, variation, complexity, or variability in biomedical research <ins>[(Word2Vec Results)](https://github.com/brandonleekramer/diversity/blob/master/src/04_word_embeddings/04_eda_word2vec.ipynb)</ins>. Thus, we decided to include two categories: one with all mentions of diversity in addition to including all mentions of "social diversity." The second category includes *only* mentions of diversity that co-occur alongside any of the other terms from the other diversity categories in our first dictionary. To verify that this approach was meaningful and accurate, we took a random sample of 1% of abstracts from both the "all diversity" and "social diversity" categories to manually validate that the terms fell into the appropriate category. Overall, we found that this approach was 90%+ accurate in distinguishing between the two uses.
+Perhaps, most importantly, the term "diversity" was a concept that took considerable effort to validate in our work. Diversity is a particularly polysemous term; it is has many meanings depending on the context. In fact, our research suggests that diversity rarely refers to issues of diversity, equity, and inclusion, but instead is much more commonly referring to heterogeneity, divergence, variation, complexity, or variability in biomedical research (see [Word2Vec Results](https://riseofdiversity.netlify.app/results/hypothesis4/)). Thus, we decided to include two categories: one with all mentions of diversity in addition to including all mentions of "social diversity." The second category includes *only* mentions of diversity that co-occur in the same sentence alongside any of the other terms from the  diversity categories in our first dictionary. To verify that this approach was meaningful and accurate, we took a random sample of 500 of abstracts from both the "all diversity" and "social diversity" categories to manually validate that the terms fell into the appropriate category. Overall, we found that this approach was ~85% accurate in distinguishing between the two uses of diversity. For more on these tests, see the [Hypothesis 1 Appendix](https://riseofdiversity.netlify.app/results/hypothesis1/) page.
 
 For those interested, the terms embedded within each category can be visualized by clicking on the <ins>[collapsibleTree](https://adeelk93.github.io/collapsibleTree/)</ins> charts or by searching the <ins>[interactive tables](https://rstudio.github.io/DT/)</ins> below. 
 
@@ -121,7 +120,9 @@ collapsibleTreeSummary(
 ```
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
-tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis1") 
+tree_data <- read_csv("diversity_project - tree_data.csv") %>% 
+  filter(hypothesis == "hypothesis1") %>% 
+  select(hypothesis, category, term)
 DT::datatable(tree_data, rownames = FALSE)
 ```
 
@@ -150,19 +151,18 @@ collapsibleTreeSummary(
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
-tree_data <- read_csv("diversity_project - tree_data.csv") %>% filter(hypothesis == "hypothesis2") 
+tree_data <- read_csv("diversity_project - tree_data.csv") %>% 
+  filter(hypothesis == "hypothesis2") %>% 
+  select(hypothesis, category, term)
 DT::datatable(tree_data, rownames = FALSE)
 ```
 
+<br>
+<br>
+
 ### Hypothesis 3 
 
-To test Hypothesis 3, we used Python’s `gensim` package to examine how semantically similar the terms related to race, ethnicity, and diversity are in PubMed abstracts and compare how their semantic similarity changes over time using two word embedding models. To do this, we ingested the human-only abstracts from the 250 biomedical journals using all of the 1990-2000 abstracts and a random sample of the 2010-2020 abstracts to ensure both models were trained on datasets of the same size (n = 475,077). Next, we converted the text to lowercase, removed punctuation, numbers, digits, white space and stopwords, and then lemmatized to remove inflectional word endings. We then trained a Word2Vec model for each time period with words mentioned less than 5 times being removed from the model, the skip gram window set at 5, a vector dimensionality of 256, and the iterations set at 5. 
-
-Using the results of each model, we performed three different analyses. First, we extracted the most similar word vectors for the race, ethnicity, and diversity vectors based on their cosine similarity. This score is interpreted much like a regression coefficient in which a value of 1 means that two words have a perfect relationship; 0 means the two words have no relationship; and -1 means they are perfect opposites. Second, we compared the word vectors (i.e., race, racial, ethnic, ethnicity, diverse, and diversity) to one another within the 1990-1995 and 2015-2020 models, and then subsequently subtracted the latter model’s score from the baseline to obtain a change score between the two time points; similarity scores that are negative suggest the vectors are becoming less similar over time while higher scores mean they are becoming more similar over time. Third, we used the t-Distributed Stochastic Neighbor Embedding function from Python’s `scikit-learn` package to decompose the model into 2 dimensions to graph the race, ethnicity, and diversity vectors relative to one another in each model’s vector space. This process allows us to evaluate the vectors relative to one another in a 2-dimensional scatterplot. Lastly, we then developed a procedure to compare the cosine similarity of terms from our “diversity dictionary” between the 1990-1995 and 2015-2020 models, which were then plotted as heat maps using Python’s `matplotlib` and `seaborn` packages.
-
-### Hypothesis 4 
-
-In Hypothesis 4, we expanded the scope of our research project by examining the rise of population terms used in biomedical research. In their inductive analysis of population terms used in *Nature Genetics*, Panofsky and Bliss (<ins>[2017](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=eF0JAnU0cn0AAAAA:w30aMLvvQ6dhsF1lr4Z9gU2zEVQx3ViBYSQnAjA_yYMGGSL03coBF8-fuhxvWhp3GIWSdSUQFqrR)</ins>) offer us a number of important insights about how to approach the task of collecting a census on these terms. First, these scholars note that researchers use population terms in ambiguous ways - using their polyvocality to enact population differences in genetic research. These scholars also note that continental, national, and directional terms are used increasingly more than racial and ethnic terms. Still, we are interested in getting an accurate count of each category and in order to do this we need a dictionary of terms to search on for each category. Although we did spend time searching for a comprehensive dictionary to serve our purposes, we were unable to find such a data source, especially of subnational, caste, and/or ethnic terms. 
+In Hypothesis 3, we expanded the scope of our research project by examining the rise of population terms used in biomedical research. In their inductive analysis of population terms used in *Nature Genetics*, Panofsky and Bliss (<ins>[2017](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=eF0JAnU0cn0AAAAA:w30aMLvvQ6dhsF1lr4Z9gU2zEVQx3ViBYSQnAjA_yYMGGSL03coBF8-fuhxvWhp3GIWSdSUQFqrR)</ins>) offer us a number of important insights about how to approach the task of collecting a census on these terms. First, these scholars note that researchers use population terms in ambiguous ways - using their polyvocality to enact population differences in genetic research. These scholars also note that continental, national, and directional terms are used increasingly more than racial and ethnic terms. Still, we are interested in getting an accurate count of each category and in order to do this we need a dictionary of terms to search on for each category. Although we did spend time searching for a comprehensive dictionary to serve our purposes, we were unable to find such a data source, especially of subnational, caste, and/or ethnic terms. 
 
 We ultimately decided to engage in an abductive data collection approach using <ins>[Wikipedia](https://www.wikipedia.org/)</ins> as our primary source. Although the use of Wikipedia is not without its criticisms 
 <ins>[(Black 2008;](https://www.emerald.com/insight/content/doi/10.1108/14684520810865994/full/html?casa_token=u1beY859p2wAAAAA:P36z4aoC-iRw-T6odh_xtUObCsNXjYmWU35SwDNAA783rUtKJgrgJ6H8irMh-VQBW0-iXamyutUIxYyluSKVSDdcCeXqH1qgYyI6RfWdXp_83pwVmsL9)</ins> <ins>[Collier and Bear 2012;](https://dl.acm.org/doi/pdf/10.1145/2145204.2145265?casa_token=SxOYBgDnrFgAAAAA:HYu4VgoXGxCjk2A3GJPU-YE3wRbRhI2bFzWdNm4ue7hTHcZu1vv_wdyorr5cAxOeO1dLT-eU9t7gVQ)</ins> <ins>[Kostakis 2010)](https://journals.uic.edu/ojs/index.php/fm/article/download/2613/2479)</ins>, the site is also among the top-15 websites used on the web <ins>[(Alexa 2020)](https://www.alexa.com/topsites)</ins>, is subject to continuous peer review and editing, and is an active historical document that is crowdsourced by millions of online users <ins>[(Wikipedia 2020)](https://www.wikipedia.org/)</ins>. Thus, while the site is certainly subject to malicious and/or unqualified editing, it is also likely to be more comprehensive than any one single national governing apparatus that is subject to scrutiny by other political actors. As a reminder, our purpose in constructing a dictionary is not to create a hierarchical classification system or to aggregate (mis-)information about populations nor to classify them into strata. We largely circumvent such activities, noting how these terms have been used throughout the long history of scientific racism and other violent racialized activities. Instead, our goal is to aggregate a dictionary of the terms that scientists could use to enact population differences and create a census of how often these terms are used over time. 
@@ -196,7 +196,7 @@ Moreover, we drilled down to collect additional terms from the pages of smaller 
 * South America: Peoples of <ins>[Argentina](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Argentina)</ins>, <ins>[Bolivia](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Bolivia)</ins>, <ins>[Brazil](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Brazil)</ins>, <ins>[Chile](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Chile)</ins>, <ins>[Colombia](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Colombia)</ins>, <ins>[Ecuador](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Ecuador)</ins>, <ins>[French Guiana](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Guyana)</ins>, <ins>[Guyana](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Guyana)</ins>, <ins>[Paraguay](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Paraguay)</ins>, <ins>[Peru](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Peru)</ins>, <ins>[Suriname](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Suriname)</ins>, <ins>[Uruguay](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Uruguay)</ins>, <ins>[Venezuela](https://en.wikipedia.org/wiki/Indigenous_peoples_in_Venezuela)</ins>
 * Oceania: <ins>[Australia](https://en.wikipedia.org/wiki/Aboriginal_Australians)</ins>, <ins>[Austronesia](https://en.wikipedia.org/wiki/Austronesian_peoples)</ins>, <ins>[Micronesia](https://en.wikipedia.org/wiki/Micronesia#Demographics)</ins>, <ins>[Melanesia](https://en.wikipedia.org/wiki/List_of_indigenous_peoples#Oceania)</ins>, and <ins>[Polynesia](https://en.wikipedia.org/wiki/Polynesians)</ins>
 
-The point of this exercise was not to classify populations into any hierarchical category. In fact, we explicitly chose to create the umbrella term "subnational" to circumvent further contributing to the violent history of hierarchical classification into races, classes, or castes. Instead, this process was meant to compile the largest, most inclusive list of population terms we could logically manage - knowing that this list will likely never be exhaustive because the enactment of population differences depends on ambiguity, polyvocality, and dynamism. In total, our list includes more than 4,500 terms. In addition to visualizing these terms in the collapsibleTrees below, you can also search through the interactive table.
+The point of this exercise was not to classify populations into any hierarchical category. In fact, we explicitly chose to create the umbrella term "subnational" to circumvent further contributing to the violent history of hierarchical classification into races, classes, or castes. Instead, this process was meant to compile the largest, most inclusive list of population terms we could logically manage - knowing that this list will likely never be exhaustive because the enactment of population differences depends on ambiguity, polyvocality, and dynamism. In total, our list includes more than 6,600 terms. In addition to visualizing these terms in the collapsibleTrees below, you can also search through the interactive table.
 
 ```{r , echo=FALSE, warning=FALSE, fig.height=7}
 subnational <- h3_dictionary %>% 
@@ -215,15 +215,36 @@ collapsibleTreeSummary(subnational,
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
 all_pop_terms_table <- read_csv("diversity_project - h3_dictionary.csv")
-all_pop_terms_table <- all_pop_terms_table %>% select(-regional, -source, -str_type, -date_added, -subclass)
+all_pop_terms_table <- all_pop_terms_table %>% 
+  select(-regional, -source, -str_type, -date_added, -subclass, -mean_embeddings)
 all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
 DT::datatable(all_pop_terms_table, rownames = FALSE)
 ```
 
 <br>
+<br>
 
-For our main findings, please check out our <ins>[Results](/results/)</ins> page and for methodological questions, please feel free to contact us at <ins>[email](brandonleekramer@gmail.com)</ins>. 
+### Hypothesis 4 
 
+To test Hypothesis 4, we used Python’s `gensim` package to examine how semantically similar the terms related to race, ethnicity, and diversity are in PubMed abstracts and compare how their semantic similarity changes over time using two word embedding models. To do this, we ingested the human-only abstracts from the 250 biomedical journals using all of the 1990-2000 abstracts and a random sample of the 2010-2020 abstracts to ensure both models were trained on datasets of the same size (n = 475,077). Next, we converted the text to lowercase, removed punctuation, numbers, digits, white space and stopwords, and then lemmatized to remove inflectional word endings. We then trained a Word2Vec model for each time period with words mentioned less than 5 times being removed from the model, the skip gram window set at 5, a vector dimensionality of 256, and the iterations set at 5. 
+
+Using the results of each model, we performed three different analyses. First, we extracted the most similar word vectors for the race, ethnicity, and diversity vectors based on their cosine similarity. This score is interpreted much like a regression coefficient in which a value of 1 means that two words have a perfect relationship; 0 means the two words have no relationship; and -1 means they are perfect opposites. Second, we compared the word vectors (i.e., race, racial, ethnic, ethnicity, diverse, and diversity) to one another within the 1990-1995 and 2015-2020 models, and then subsequently subtracted the latter model’s score from the baseline to obtain a change score between the two time points; similarity scores that are negative suggest the vectors are becoming less similar over time while higher scores mean they are becoming more similar over time. Third, we used the t-Distributed Stochastic Neighbor Embedding function from Python’s `scikit-learn` package to decompose the model into 2 dimensions to graph the race, ethnicity, and diversity vectors relative to one another in each model’s vector space. This process allows us to evaluate the vectors relative to one another in a 2-dimensional scatterplot. Lastly, we then developed a procedure to compare the cosine similarity of terms from our “diversity dictionary” between the 1990-1995 and 2015-2020 models, which were then plotted as heat maps using Python’s `matplotlib` and `seaborn` packages.
+
+<br>
+
+For our main findings, please check out our <ins>[Results](/results/)</ins> page and for methodological questions, please feel free to contact us at the email in the top right corner of this page. 
+
+### Appendix 
+
+One of our main goals was to improve the accuracy of our results and one of the ways that we did this was to exclude studies that were conducted on animals. Below is the list of animal terms we used to exclude studies. While still not comprehensive, the list does include 1,124 terms that we eventually plan to formalize into a function for other computational social science researchers.
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/dictionaries")
+ommitted_terms <- read_csv("diversity_project - humanizeR.csv")
+ommitted_terms <- ommitted_terms %>% select(terms, category)
+ommitted_terms[is.na(ommitted_terms)] <- ""
+DT::datatable(ommitted_terms, rownames = FALSE)
+```
 
 
 

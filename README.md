@@ -3,11 +3,11 @@
 
 As of: 05-17-2021
 
-This repository provides the source code for the Brandon Kramer and Catherine Lee's "The Rise of Diversity and Population Terminology in Biomedical Research." After uploading the PubMed/MEDLINE database with `PubMedPortable` in `Python`, we used `R`'s `tidytext` package to examine trends in the use of diversity in more than 2.5 million scientific abstracts from 1990-2020. Overall, our analyses demonstrate that various types of "diversity" and other population terminiology, including race and ethnicity, are rising over time. While we provide some prelimiary results and a full appendix on our [project website](https://growthofdiversity.netlify.app/), the source code, database, and outputs are detailed below. This project is still in progress, but is updated often. 
+This repository provides the source code for the Brandon Kramer and Catherine Lee's "The Rise of Diversity and Population Terminology in Biomedical Research." After uploading the PubMed/MEDLINE database with `PubMedPortable` in `Python`, we used `R`'s `tidytext` package to examine trends in the use of diversity in more than 2.5 million scientific abstracts from 1990-2020. Overall, our analyses demonstrate that various types of "diversity" and other population terminiology, including race and ethnicity, are rising over time. While we provide some prelimiary results and a full appendix on our [project website](https://riseofdiversity.netlify.app/), the source code, database, and outputs are detailed below. This project is still in progress, but is updated often. 
 
 #### Code structure 
 
-    ├── content
+    ├── content (website)
         ├── overview.Rmd
         ├── methods.Rmd
         ├── analyses
@@ -16,16 +16,16 @@ This repository provides the source code for the Brandon Kramer and Catherine Le
             ├── hypothesis3.Rmd
     ├── data
         ├── dictionaries
-            ├── preprocessing.csv
-            ├── in_exclusions.csv
+            ├── preprocessing
+                ├── compoundR.csv
+                ├── polysemeR.csv
+                ├── humanizeR.csv
             ├── h1_dictionary.csv
             ├── h2_dictionary.csv
             ├── h3_dictionary.csv
             ├── tree_data.csv
-            ├── country_recoding.R
-            ├── omb_terms.R
-            ├── subject_categories.csv
         ├── journal_rankings
+        ├── regression_analyses
         ├── sensitivity_checks
         ├── text_results 
             ├── h1_results

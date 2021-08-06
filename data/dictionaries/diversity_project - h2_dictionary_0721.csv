@@ -1,0 +1,15 @@
+asian,black,ethnicity,hispanic_latinx,native_american,pacific_islander,race,white,negations
+asian,black,ethnic,hispanic,alaskan,hawaiian,race,caucasian,nonasian
+asians,blacks,ethnicity,hispanics,alaskans,hawaiians,races,caucasians,nonasians
+asianamerican,negro,ethnically,hispanicamerican,alaskanative,nativehawaiian,racial,white,nonblack
+asianamericans,negroes,,hispanicamericans,alaskanatives,nativehawaiians,racially,whites,nonblacks
+,africanamerican,,latino,americanindian,pacificislander,racism,caucasianamerican,nonracial
+,africanamericans,,latina,americanindians,pacificislanders,racisms,caucasianamericans,nonracially
+,nonhispanicblack,,latinas,nativeamerican,,racist,whiteamerican,nonethnic
+,nonhispanicblacks,,latinos,nativeamericans,,racists,whiteamericans,nonethnically
+,,,latinx,,,,nonhispanicwhite,nonwhite
+,,,latinxs,,,,nonhispanicwhites,nonwhites
+,,,,,,,,noncaucasian
+,,,,,,,,noncaucasians
+,,,,,,,,nonhispanic
+,,,,,,,,nonhispanics

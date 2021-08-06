@@ -23,6 +23,7 @@ library("RPostgreSQL")
 library("data.table")
 library("maditr")
 library("purrr")
+source("~/git/diversity/scripts/diversitizeR_0721.R")
 
 ######################################################################################################## testing h3 
 
@@ -71,8 +72,8 @@ str_c("Finished data pull at: ", Sys.time())
 
 # lets pull in the dictionaries 
 setwd("~/git/diversity/data/dictionaries/")
-divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
-h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv") 
+divictionary <- read_csv("diversity_project - h1_dictionary_0721.csv") 
+h3_dictionary <- read_csv("diversity_project - h3_dictionary_0721.csv") 
 
 # pulling in concatenated population terms from our dataset 
 continental_terms <- h3_dictionary %>% filter(category == "continental")
@@ -95,32 +96,19 @@ omb_uscensus <- paste(c("\\b(?i)(zxz", omb_uscensus$term, "zxz)\\b"), collapse =
 
 ################################################################################################# preprocessing
 
-str_c("Starting to preprocess at: ", Sys.time())
+str_c("Started humanizeR & compoundR at: ", Sys.time())
 
-# pulls in the preprocessing dictionary 
-preprocessing_terms <- read_csv("diversity_project - preprocessing.csv") %>%
-  select(original_string, new_string) %>% tibble::deframe()
-
-# convert text to lowercase 
-pubmed_data <- pubmed_data %>% mutate(abstract = tolower(abstract))
-
-# replaces all the hyphenated and compound words 
-# helps to reduce false positives (e.g. double_blind)
-pubmed_data$abstract <- pubmed_data$abstract %>% 
-  str_replace_all(preprocessing_terms)
-
-# animal exclusion + human inclusion clauses
-in_exclusions <- read_csv("diversity_project - in_exclusions.csv")
-human_inclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(in_exclusions$humans), "zqx)\\b"), collapse = "|")
-animal_exclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(in_exclusions$animals), "zqx)\\b"), collapse = "|")
-
-# remove abstracts with animals to reduce false positive animal studies 
 pubmed_data <- pubmed_data %>% 
-  dt_mutate(human_study = ifelse(test = str_detect(string = abstract, 
-            pattern = human_inclusion_clause), yes = 1, no = 0)) %>% 
-  dt_mutate(animal_study = ifelse(test = str_detect(string = abstract, 
-            pattern = animal_exclusion_clause), yes = 1, no = 0)) %>% 
-  filter(human_study == 1 | animal_study == 0)
+  mutate(abstract_raw = abstract, 
+         abstract = tolower(abstract)) %>% 
+  humanizeR_0721(fk_pmid, abstract) %>% 
+  # exclusion criteria predicated on: 
+  # any human words being included OR 
+  # no human or no nonhuman words 
+  filter(human > 0 | nonhuman == 0) %>% 
+  compoundR_0721(abstract)
+
+str_c("Finished humanizeR & compoundR at: ", Sys.time())
 
 # total articles each year 
 # banking this df now to optimize our memory for later 
@@ -376,8 +364,6 @@ str_c("Finished all processes for all years at: ", Sys.time())
 ####################################################################################### aggregate all years 
 
 setwd("~/git/diversity/data/text_results/h3_results/")
-
-#chk <- read_rds("h3_all_prcs.rds")
 
 # percentages for all sets 
 h3_all_counts <- list.files(pattern="h3_counts_*") %>% 

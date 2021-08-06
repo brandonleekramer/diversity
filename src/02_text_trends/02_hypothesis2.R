@@ -1,4 +1,6 @@
 
+# warning: do not run this script in full until h1 has been completed 
+# requires aggregated totals from social diversity analyses in h1 file 
 
 ##################################################################################################### load packages 
 
@@ -15,7 +17,8 @@ library("RPostgreSQL")
 library("data.table")
 library("maditr")
 library("purrr")
-library("tm")
+source("~/git/diversity/scripts/diversitizeR_0721.R")
+#library("tm")
 
 ##################################################################################################### setting function 
 
@@ -48,11 +51,11 @@ test_h2 <- function(analysis_timeframe){
   str_c("Finished data pull at: ", Sys.time())
   
   # lets pull in the dictionaries 
-  source("~/git/diversity/data/dictionaries/diversity_project - omb_terms.R")
+  #source("~/git/diversity/data/dictionaries/diversity_project - omb_terms.R")
   setwd("~/git/diversity/data/dictionaries/")
-  h1_dictionary <- read_csv("diversity_project - h1_dictionary.csv")
-  h2_dictionary <- read_csv("diversity_project - h2_dictionary.csv")
-  h3_dictionary <- read_csv("diversity_project - h3_dictionary.csv")
+  h1_dictionary <- read_csv("diversity_project - h1_dictionary_0721.csv")
+  h2_dictionary <- read_csv("diversity_project - h2_dictionary_0721.csv")
+  h3_dictionary <- read_csv("diversity_project - h3_dictionary_0721.csv")
   omb_black <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$black), "z3x)\\b"), collapse = "|")
   omb_native_american <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$native_american), "z3x)\\b"), collapse = "|")
   omb_pacific_islander <- paste(c("\\b(?i)(z3x",na.omit(h2_dictionary$pacific_islander), "z3x)\\b"), collapse = "|")
@@ -67,41 +70,19 @@ test_h2 <- function(analysis_timeframe){
                            na.omit(h2_dictionary$hispanic_latinx), na.omit(h2_dictionary$white), 
                            na.omit(h2_dictionary$race), na.omit(h2_dictionary$ethnicity))
   
-  # total articles each year 
-  # banking this df now to optimize our memory for later 
-  #total_pubs <- pubmed_data %>% 
-  #  distinct(fk_pmid, year, abstract) %>% 
-  #  group_by(year) %>% 
-  #  count(year) %>% 
-  #  ungroup() %>% 
-  #  rename(total = n)
+  str_c("Started humanizeR & compoundR at: ", Sys.time())
   
-  str_c("Started bigrams at: ", Sys.time())
-  
-  # pulls in the preprocessing dictionary 
-  preprocessing_terms <- read_csv("diversity_project - preprocessing.csv") %>%
-    select(original_string, new_string) %>% tibble::deframe()
-  
-  # convert text to lowercase 
-  pubmed_data <- pubmed_data %>% mutate(abstract = tolower(abstract))
-  
-  # replaces all the hyphenated and compound words 
-  # helps to reduce false positives (e.g. double_blind)
-  pubmed_data$abstract <- pubmed_data$abstract %>% 
-    str_replace_all(preprocessing_terms)
-  
-  # animal exclusion + human inclusion clauses
-  in_exclusions <- read_csv("diversity_project - in_exclusions.csv")
-  human_inclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(in_exclusions$humans), "zqx)\\b"), collapse = "|")
-  animal_exclusion_clause <- paste(c("\\b(?i)(zqx", na.omit(in_exclusions$animals), "zqx)\\b"), collapse = "|")
-  
-  # remove abstracts with animals to reduce false positive animal studies 
   pubmed_data <- pubmed_data %>% 
-    dt_mutate(human_study = ifelse(test = str_detect(string = abstract, 
-              pattern = human_inclusion_clause), yes = 1, no = 0)) %>% 
-    dt_mutate(animal_study = ifelse(test = str_detect(string = abstract, 
-              pattern = animal_exclusion_clause), yes = 1, no = 0)) %>% 
-    filter(human_study == 1 | animal_study == 0)
+    mutate(abstract_raw = abstract, 
+           abstract = tolower(abstract)) %>% 
+    humanizeR_0721(fk_pmid, abstract) %>% 
+    # exclusion criteria predicated on: 
+    # any human words being included OR 
+    # no human or no nonhuman words 
+    filter(human > 0 | nonhuman == 0) %>% 
+    compoundR_0721(abstract)
+  
+  str_c("Finished humanizeR & compoundR at: ", Sys.time())
   
   # total articles each year 
   # banking this df now to optimize our memory for later 

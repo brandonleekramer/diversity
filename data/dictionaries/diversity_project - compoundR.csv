@@ -1,4 +1,6 @@
 hyp_test,category,original_string,new_string,notes,date_added
+h1,ancestry,life experience,lifeexperience,increases accuracy,07_2021
+h1,ancestry,life experience,lifeexperiences,increases accuracy,07_2021
 h1,cultural,aspirate cultures,aspirate_cultures,lowers false positive rate,02_2021
 h1,cultural,bacteria culture,bacteria_culture,lowers false positive rate,02_2021
 h1,cultural,bacteria cultures,bacteria_cultures,lowers false positive rate,02_2021
@@ -356,6 +358,8 @@ h1,social_class,well-to-do,welltodo,,02_2021
 h1,social_class,white-collar,whitecollar,,02_2021
 h1,social_class,working class,workingclass,,02_2021
 h1,social_class,working-class,workingclass,,02_2021
+h1,population,socio-demographic,sociodemographic,,06_2021
+h1,population,socio-demographics,sociodemographics,,06_2021
 h2,omb_census,african american,africanamerican,,02_2021
 h2,omb_census,african americans,africanamericans,,02_2021
 h2,omb_census,african-american,africanamerican,,02_2021

@@ -7,7 +7,7 @@ weight: 1
 
 ```{css, echo=FALSE}
 /* this chunk of code centers all of the headings */
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5 {
   text-align: center;
 }
 ```
@@ -24,6 +24,14 @@ divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - 
 h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
 general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
 subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+
+# something happened with socioeconomic in the original run 
+#h1_all_set_counts_trends <- subset_counts %>% 
+#  filter(term == "socioeconomic") %>% 
+#  group_by(term, year) %>% 
+#  summarize(count = sum(count)) %>% 
+#  bind_rows(h1_all_set_counts_trends) %>% 
+#  arrange(-count)
 #h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
 #general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
 #subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
@@ -37,17 +45,17 @@ Over the past several years, social scientists have noted that the discourse of 
 </center>
 <br>
 
-To test Hypothesis 1, we opted to use a supervised text mining approach that depends on the use of a nested dictionary. This basically means that we constructed several dictionaries of terms that can be classified into 11 different categories of diversity: cultural, disability, diversity, equity/justice, lifecourse, migration, minority, race/ethnicity, sex/gender, and sexuality. Within each of these categories, there are 4-104 different terms that are of interest to us. For a full list of terms in each category, you can search the Supplementary Tables below or see a hierarchical visualization of the dictionaries on <ins>[Methods](/methods/)</ins> page.
+To test Hypothesis 1, we opted to use a supervised text mining approach that depends on the use of a nested dictionary. This basically means that we constructed several dictionaries of terms that can be classified into 11 different categories of diversity: ancestry, cultural, disability, diversity, equity/justice, lifecourse, migration, minority, race/ethnicity, sex/gender, and sexuality. Within each of these categories, there are 6-104 different terms that are of interest to us. For a full list of terms in each category, you can search the Supplementary Tables below or see a hierarchical visualization of the dictionaries on <ins>[Methods](/methods/)</ins> page.
 
 Once these dictionaries were aggregated, we developed a strategy that (1) counted how often each of the terms within each category were mentioned in biomedical abstracts each year and (2) then calculated what percentage of the overall abstracts that the terms arose within to control for the overall rise in publications over time (see <ins>[Supplementary Analyses](/supplementary/)</ins>). Below, we provide a simple description of the variations in term usage while our manuscript provides a more detailed analysis of the implications for our broader arguments. 
 
-Importantly, as we document in our <ins>[methodology](/methods/)</ins>, measuring "diversity" is somewhat complicated by the fact that it is a polysemous concept - meaning that diversity itself has multiple, diverse meanings (<ins>[Abascal et al. 2021](https://advances.sciencemag.org/content/7/11/eabf2507)</ins>; <ins>[Mayorga-Gallo 2019](https://journals.sagepub.com/doi/abs/10.1177/0002764219842619?casa_token=HHfLLMyoQ7cAAAAA:nRfaKooM-oe1hF_iWjFVktrASiPtzCsmbl-Si-17kEA9Famn7rquX__wM4JxVZXLK1y_QV6WOs_QZQ)</ins>). Specifially, in biomedical research, diversity more commonly means heterogeneity than referring to a form of social representation or relating to a matter of addressing equity, inclusion, or justice. Thus, in the figure below, you will see two diversity lines: "diversity (all)" refers to all means of terms in the diversity category while "diversity (social)" refers to all mentions of diversity that co-occur with any of the other terms in the other 11 diversity categories mentioned above. For example, if diversity is mentioned alongside race or gender, diversity will be classified as a form of "social diversity." In this case, the term will be counted in both lines displayed in the graph. If diversity is not mentioned alongside any of the other diversity terms in our dictionaries, it will only be included in the "diversity (all)" line. 
+Importantly, as we document in our <ins>[methodology](/methods/)</ins>, measuring "diversity" is somewhat complicated by the fact that it is a polysemous concept - meaning that diversity itself has multiple meanings. Specifially, in biomedical research, diversity more commonly means heterogeneity than referring to a form of social representation or relating to a matter of addressing equity, inclusion, or justice. Thus, in the figure below, you will see two diversity trends. First, "diversity (all)" refers to all means of terms in the diversity category. On the other hand, the "diversity (social)" category was classified using a custom algorithm that we developed to identify mentions of diversity in the context of social justice and inequity issues. Though we detail the development and technicalities of this algorithm in our Appendix below, "diversity (social)" basically refers to all mentions of diversity that (1) co-occur in the same sentence as terms from any of the other 11 H1 categories, (2) co-occur along frequent group labels (e.g. group, cohort, participant, etc.), and (3) do not co-occur alongside more general forms of heterogeneity related to the concept of diversity For example, if diversity is mentioned alongside race or gender, diversity will be classified as a form of "social diversity." In this case, the term will be counted in both lines displayed in the graph. If diversity is not mentioned alongside any of the other diversity terms in our dictionaries, it will only be included in the "diversity (all)" line. 
 
 ```{r figure 1a, fig.height=6.5, fig.align="center", echo=FALSE}
 `%notin%` <- Negate(`%in%`)
 
 figure_1A <-  h1_all_set_counts_trends %>% 
-  filter(term %notin% c("total", "ancestry", "population", "genetic")) %>%
+  filter(term %notin% c("total", "population", "genetic")) %>%
   rename(n = count) %>% 
   ggplot() + 
   geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
@@ -61,20 +69,21 @@ figure_1A <-  h1_all_set_counts_trends %>%
         #legend.position = "bottom",
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("cultural", "disability", "diversity (all)","diversity (social)", "equity", "lifecourse",
-                              "migration", "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
-                               # l.green  # mustard  # purple  # d.green  # orange
-                              "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")) + 
-                              # l. blue   # red     # pinkish  # dark blue = 005BB7
-                              #000000, black | #d23ccc, pink | #1b7524, dark green 
-  #scale_y_log10() +
+  scale_color_manual(labels=c("ancestry", "cultural", "disability", 
+                              "diversity (all)","diversity (social)", "equity", 
+                              "lifecourse", "migration", "minority",
+                              "race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396","#B7D100",  "#61B329",    
+                              "#1b7524", "#C0C0C0", "#9a009a",  
+                              "#CC0000", "#005BB7", "#000000",   
+                              "#3B9AB2", "#E86F00", "#b19cd9", "#f2be00")) +
+  scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020)); ggplotly() %>% 
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
 ```
 
-Figure 1A shows the growth in the raw word frequencies of diversity-related terms from 1990-2020. The most obvious trends are the dramatic upward trends in the lifecourse and sex/gender categories - increasing by 6-to-7-fold respectively. The terms are frequently mentioned refer to the age and sex of populations being tested in clinical trials. Next, we see the "diversity (all)" category in yellow, which grew over 18-fold. Surprisingly, this growth is smaller than the 23-fold rise in the use of "diversity (social)" over the same period - a trend that provides robust support of our first hypothesis. We also observe notable growth a fairly marked increased in socio-economic and race/ethnicity terms, which jump about 25- and 11-fold respectively. The cultural, minority, and sexuality all increase over time, but this is a bit more subdued given that they never surpass more than 5,000 mentions in a given year. 
+Figure 1A shows the growth in the raw word frequencies of diversity-related terms from 1990-2020. The most obvious trends are the dramatic upward trends in the lifecourse and sex/gender categories - increasing by 6-to-7-fold each. The terms are frequently mentioned refer to the age and sex of populations being tested in clinical trials. Next, we see the socioeconomic category in yellow, which grew over 21-fold, and the "diversity (all)" category in hunter green, which grew about 16-fold. Surprisingly, this growth is smaller than the 66% increase in the use of "diversity (social)" over the same period - a trend that provides robust support of our first hypothesis. We also observed some growth in race/ethnicity, cultural, and equity/justice categories, which jump 14-fold, 30-fold, and 44-fold respectively. The ancestry, minority, and sexuality categories all increase over time, but this is a bit more subdued given that they all eventually started to taper off by the end of the period.
 
 ```{r figure 1b, fig.height=6.5, fig.align="center", echo=FALSE}
 # graphing terms over time 
@@ -82,6 +91,7 @@ ggplotly(
 figure_1B <- general_pop_terms %>% 
   select(-starts_with("cnt_")) %>% 
   ggplot() + 
+  geom_line(aes(y = prc_ancestry, x = year, colour = "ancestry"), size = 1, stat="identity") +
   geom_line(aes(y = prc_class, x = year, colour = "socioeconomic"), size = 1, stat="identity") +
   geom_line(aes(y = prc_cultural, x = year, colour = "cultural"), size = 1, stat="identity") +
   geom_line(aes(y = prc_diversity, x = year, colour = "diversity (all)"), size = 1, stat="identity", linetype = "solid") +
@@ -100,28 +110,108 @@ figure_1B <- general_pop_terms %>%
   theme(axis.title.x = element_blank(), 
         #legend.position = "none",
         plot.title = element_text(size=12, hjust = 0.5)) +
-  scale_color_manual(labels=c("cultural", "disability", "diversity (all)","diversity (social)", "equity", "lifecourse",
-                              "migration", "minority","race/ethnicity","sex/gender", "sexuality","socioeconomic"),
-                     values=c("#ff8396",  "#1b7524",    "#f2be00",        "#9a009a",            "#005BB7",  "#CC0000", 
-                               # l.green  # mustard  # purple  # d.green  # orange
-                              "#C0C0C0", "#000000",   "#3B9AB2",    "#E86F00",  "#B7D100", "#61B329")) +
+  scale_color_manual(labels=c("ancestry", "cultural", "disability", 
+                              "diversity (all)","diversity (social)", "equity", 
+                              "lifecourse", "migration", "minority",
+                              "race/ethnicity","sex/gender", "sexuality","socioeconomic"),
+                     values=c("#ff8396","#B7D100",  "#61B329",    
+                              "#1b7524", "#C0C0C0", "#9a009a",  
+                              "#CC0000", "#005BB7", "#000000",   
+                              "#3B9AB2", "#E86F00", "#b19cd9", "#f2be00")) +
   scale_y_log10() +
   scale_x_continuous(limits = c(1990, 2020),
                      breaks = c(1990, 1995, 2000, 2005, 2010, 2015, 2020))) %>% 
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
 ```
 
-To normalize for the growth of overall publications, we look at change in the proportion of available abstracts. Figure 1B shows that the rise in lifecourse and sex/gender terms are still quite robust, increasing by about 10% and 5% over the time span of our analysis. The other growth trends are obviously much more muted. Diversity (all) increased by about 4% while diversity (social) is still mentioned in less than 1% of all abstracts by 2020. While this percent change of this category is more marked than the race/ethnicity category, the terms in the latter category are still referenced more often overall. Of the remaining categories, the socioeconomic category is the only other that has seen noticeable change. That said, it is still somewhat surprising to see a "fundamental" cause of health disparities mentioned so rarely in our sample of biomedical abstracts (<ins>[Link and Phelan 1995](https://www.jstor.org/stable/2626958?casa_token=fU0DluGoHicAAAAA:yXM1fgJY3nU02FJjfIt89gR0TCin2coKGHw4OT81ABzqRgl2FEqT1UEkgO-yD6_vq5KIEYTaIhpT7ZrEgbzUght0AgmNpkYiwF1NmODYTl_whLyzk65N)</ins>; <ins>[Phelan et al. 2010](https://journals.sagepub.com/doi/abs/10.1177/0022146510383498)</ins>).
+To normalize for the growth of overall publications, we look at change in the proportion of available abstracts. Figure 1B shows that the rise in lifecourse and sex/gender terms are still quite robust, increasing by about 7% and 3% over the time span of our analysis. The other growth trends are obviously much more subtle. Diversity (all) increased by about 2.4% while diversity (social) is still mentioned in less than 1% of all abstracts by 2020. While this percent change of this category is more marked than the race/ethnicity category, the terms in the latter category are still referenced more often overall. Of the remaining categories, the socioeconomic category is the only other that has seen noticeable change (up around 3%). That said, it is still somewhat surprising to see a "fundamental" cause of health disparities mentioned so rarely in our sample of biomedical abstracts (<ins>[Link and Phelan 1995](https://www.jstor.org/stable/2626958?casa_token=fU0DluGoHicAAAAA:yXM1fgJY3nU02FJjfIt89gR0TCin2coKGHw4OT81ABzqRgl2FEqT1UEkgO-yD6_vq5KIEYTaIhpT7ZrEgbzUght0AgmNpkYiwF1NmODYTl_whLyzk65N)</ins>; <ins>[Phelan et al. 2010](https://journals.sagepub.com/doi/abs/10.1177/0022146510383498)</ins>).
 
 <br>
 
 #### Main Takeaways 
 
-Overall, we see robust support for Hypothesis 1 - that "diversity" is on the rise in biomedical research. Lifecourse and sex/gender terms have shown the most marked increases over time - mentioned in roughly 23% and 15% of all abstracts respectively. While race/ethnicity has risen slightly since 1990, these terms have mostly stagnated since the year 2005. Since then, the use of diversity in its "social" sense has nearly doubled, but is still only used in ~1% of all abstracts. These analyses also show the importance of accurately measuring diversity in context. Hopefully, the dictionaries and software tools developed in this project will help other researchers examine diversity in other contexts as well.
+Overall, we see robust support for Hypothesis 1 - that "diversity" is on the rise in biomedical research. Lifecourse and sex/gender terms have shown the most marked increases over time - mentioned in roughly 27% and 18.5% of all abstracts respectively. While race/ethnicity has risen slightly since 1990, these terms have mostly stagnated since the year 2005. Since then, the use of diversity in its "social" sense has risen almost 70-fold, but is still only used in ~1% of all abstracts. These analyses also show the importance of accurately measuring diversity in context. Hopefully, the dictionaries and software tools developed in this project will help other researchers examine diversity in other contexts as well.
 
 <br>
 
-#### Appendix 
+#### <ins>Appendix</ins>
+
+<br>
+
+```{r, echo=FALSE, warnings=FALSE, messages=FALSE,include=FALSE}
+library("tidyverse")
+setwd("~/git/diversity/data/sensitivity_checks/")
+final_stats_output <- read_csv("socdiv_version_comps_073021.csv")
+```
+
+```{r, fig.height=5, fig.align="center", echo=FALSE, warnings=FALSE, messages=FALSE}
+final_stats_output %>% 
+  mutate(version = str_replace(version, "baseline", "Baseline"),
+         version = str_replace(version, "version", "Version"),
+         category = str_replace(category, "f1_score", "F1 Score"),
+         category = str_replace(category, "accuracy", "Accuracy"),
+         category = str_replace(category, "recall", "Recall"),
+         category = str_replace(category, "precision", "Precision")
+         ) %>% 
+  ggplot(aes(x=version, y=measure, group=category)) +
+  geom_line(aes(linetype=category))+
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Supplementary Figure H1. Comparison of Social Diversity Classification Algorithms",
+       linetype = "Measurements") + 
+  theme(legend.position="bottom",
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        plot.title = element_text(size = 12, hjust = 0.5))
+```
+
+To measure “social diversity” in biomedical abstracts, we developed a series of algorithms to detect the mentions of diversity that reference human forms of diversity rather than general heterogeneity or biodiversity. Our initial specification of this algorithm (the Baseline model) counted any mention of the term diversity that was used in the same **abstract** as any of the other terms in the other 11 categories. After running these tests, we hand-coded an initial set of 500 abstracts that mention “any diversity” and 500 that mentioned “social diversity” more specifically. This baseline version garnered a very low F1 score - mainly because the precision was only around 46%, meaning that we have an extremely high false-positive rate. To address this limitation, we developed eight different comparison algorithms, making small tweaks in each step, and then having two research assistants hand-code 500 abstracts from each of the “all diversity” and “social diversity” samples. Overall, our inter-rater reliability was ~91% between the two coders with any discrepancies being resolved by a third coder (the second co-author). 
+
+<br>
+
+```{r, warning=FALSE, message=FALSE, echo = FALSE}
+setwd("~/git/diversity/data/final_data/")
+supp_data <- read_csv("diversity_project - supp_table_3.csv") 
+DT::datatable(supp_data, 
+          caption = 'Supplementary Table H3: Different Parameters Tested in Social Diversity Classifiers', 
+          rownames = FALSE)
+```
+
+<br>
+
+The first step we took was to improve our nonhuman exclusion clause. In the Baseline run, we had a fairly small list of 237 nonhuman terms and only removed abstracts if they mentioned animals and did not mention humans. To improve this, we increased the nonhuman list to 1,117 terms. Obviously, this step provides the largest improvement in our testing series (see Baseline to Version 1).Second, we reduced false positives by eradicating common forms of polysemy related to bioecological, cellular, and methodological diversity as well as general forms of heterogeneity. These patterns were extracted using `R`’s `tidytext` package to extract n-grams of “diverse [terms],” “diversity of [terms],” and “[terms] diversity.” Alone, this function makes only a marginal difference, but with the animal exclusion clause do see notable improvements (see Baseline to Version 2). 
+
+<br>
+
+Next, we tried implementing an even more stringent nonhuman exclusion clauses. Rather than removing all abstracts that mention nonhumans and did not mention humans, we kept only abstracts that mention humans and removed all that mention animals in Version 3 while adding the polysemy adjustment function in Version 4. Following a similar logic, we also removed any abstract than mentioned nonhuman terms in Version 5 with a polysemy adjustment in Version 6. Much to our surprise, these versions diminished predictive capacity slightly, but opted to keep this version in our final algorithm to minimize the potential of having false positives in animal studies. 
+
+<br>
+
+##### Final Confusion Matrix Comparing All Diversity vs. Social Diversity Categories (n=1000)
+
+<center>
+
+|     | Predicted: YES        | Predicted: NO       | 
+| :------------: | :------------: | :------------: | 
+| <b>Actual: YES</b>   | True Positives = 386        | False Negatives = 24       | 
+| <b>Actual: NO</b>   | False Positives = 114         | True Negatives = 476       | 
+
+##### Final Performance Metrics for Social Diversity Classifier
+
+| Measure | Outcome |  
+| :--------: | :--------: |  
+| Precision | 77.2% |
+| Recall    | 94.1% |
+| Accuracy  | 86.2% |
+| F1 Score  | 84.8% |
+
+</center>
+
+<br>
+
+At this point, our testing suggested that we needed to make a more radical change, as we were still a bit below the 80% F1 score we had set out to exceed. We decided to “count” only mentions of diversity that co-occur alongside the terms in the other categories in the same **sentence**. We recognized that we needed to add another category that accounts for discussions of “diverse groups” that included terms like groups, cohorts, humans, residents, etc. (i.e. Polysemy Adjustment Version 2). Initially, we included “population(s)” and “subpopulation(s)” into this category, leading to an enormous false positive rate that dropped our accuracy and precision scores back down to near baseline (Version 7). After removing these two “(sub)population(s)” terms from the 12th category, our scores normalized in Version 8 while adding a newer version of the Polysemy Adjustment increased this score even more in Version 9. In the final step, we returned to our most successful version of the Animal Exclusion Clause and ended with an F1 score nearing 85%. Table 2 presents the confusion matrix for this final classifier, showing that our model does tend to inflate false positive cases of social diversity. We advise readers to keep this in mind when interpreting the results of Hypotheses 1-3.
+
+##### Hypothesis 1 Dictionary 
 
 Here is a list of the terms in each category analyzed above. You can scroll through each category or use the search tool to see if a term of interest was used in the analyses.
 
@@ -129,21 +219,12 @@ Here is a list of the terms in each category analyzed above. You can scroll thro
 setwd("~/git/diversity/data/dictionaries")
 tree_data <- read_csv("diversity_project - tree_data.csv") %>% 
   filter(hypothesis == "hypothesis1") %>% select(-viz_embeddings, -mean_embeddings)
-DT::datatable(tree_data, rownames = FALSE)
+DT::datatable(tree_data, 
+          caption = 'Supplementary Table H1A: Terms Used in the Hypothesis 1 Dictionary', 
+          rownames = FALSE)
 ```
 
-```{r, warning = FALSE, message = FALSE, echo = FALSE}
-#setwd("~/git/diversity/data/dictionaries")
-#divictionary <- read_csv("diversity_project - h1_dictionary.csv") 
-#first_table <- divictionary %>% select(cultural, diversity, equity, minority, race_ethnicity)
-#first_table[is.na(first_table)] <- ""
-#datatable(first_table, caption = 'Supplementary Table 1A: Dictionary Categories for Hypothesis 1 Testing', rownames = FALSE)
-```
-```{r, echo = FALSE}
-#second_table <- divictionary %>% select(disability, lifecourse, migration, sex_gender, sexuality)
-#second_table[is.na(second_table)] <- ""
-#datatable(second_table, rownames = FALSE)
-```
+##### Top Terms Resulting from H1 Anaylses
 
 ```{r biomedical_wordfreqs, echo = FALSE}
 subset_counts_table <- subset_counts %>% 
@@ -152,21 +233,18 @@ subset_counts_table <- subset_counts %>%
   rename(`term set` = term, `words in term set` = word, `count for all years` = count) %>% 
   select(`term set`, `words in term set`, year, `count for all years`)
 datatable(subset_counts_table, 
-          caption = 'Supplementary Table 1B: Frequency of Words Used in Each Term Set (1990-2020)', 
+          caption = 'Supplementary Table H1B: Frequency of Words Used in Each Term Set (1990-2020)', 
           rownames = FALSE)
 ```
 
 <br>
 
-#### References 
 
-Abascal, M., Wu, J., & Baldassarri, D. (2021). People use both heterogeneity and minority representation to evaluate diversity. *Scientific Advances*, 7(11), eabf2507. 
+#### References 
 
 Berrey, E. (2015). *The Enigma of Diversity.* University of Chicago Press: Chicago, IL.
 
 Link, B. G., & Phelan, J. (1995). Social conditions as fundamental causes of disease. *Journal of Health and Social Behavior*, 80-94.
-
-Mayorga-Gallo, S. (2019). The white-centering logic of diversity ideology. *American Behavioral Scientist*, 63(13), 1789-1809.
 
 Phelan, J. C., Link, B. G., & Tehranifar, P. (2010). Social conditions as fundamental causes of health inequalities: theory, evidence, and policy implications. *Journal of Health and Social Behavior*, 51(1), S28-S40.
 
