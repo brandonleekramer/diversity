@@ -27,16 +27,16 @@ rm(list = ls())
 
 for (pkg in c("tidyverse", "tidytext", "DT", "grid", "gridExtra", "extrafont", "data.table", "plotly")) {library(pkg, character.only = TRUE)}
 
-h3_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_counts.rds")
-all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_prcs.rds")
-#h3_counts <- read_rds("~/git/diversity/data/final_data/h3_all_counts.rds")
-#all_pop_prc_counts <- read_rds("~/git/diversity/data/final_data/h3_all_prcs.rds")
-subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+#h3_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_counts.rds")
+#all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_prcs.rds")
+h3_counts <- read_rds("~/git/diversity/data/final_data/h3_all_counts.rds")
+all_pop_prc_counts <- read_rds("~/git/diversity/data/final_data/h3_all_prcs.rds")
+subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
 social_diversity <- subset_counts %>% 
   filter(term == "diversity (social)") %>% 
   group_by(term, year) %>% 
   summarize(n = sum(count)) 
-social_diversity_prc <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds") %>% 
+social_diversity_prc <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds") %>% 
   mutate(term = "diversity (social)") %>% 
   rename(n = cnt_soc_diversity, percentage = prc_soc_diversity) %>% 
   select(term, year, n, total, percentage)
@@ -48,7 +48,7 @@ figure_3A <- h3_counts %>%
   summarise(n = sum(n)) %>% 
   bind_rows(social_diversity) %>% 
   ggplot() + 
-  geom_line(aes(y = n, x = year, colour = term), size = 1.2, stat="identity") + 
+  geom_line(aes(y = n, x = year, colour = term), size = 1, stat="identity") + 
   theme_minimal() +
   labs(title = "     Figure 3A. Total Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
@@ -81,7 +81,7 @@ figure_2B <- all_pop_prc_counts %>%
   filter(term != "ancestry") %>%
   bind_rows(social_diversity_prc) %>% 
   ggplot() + 
-  geom_line(aes(y = percentage, x = year, colour = term), size = 1.2, stat="identity") +
+  geom_line(aes(y = percentage, x = year, colour = term), size = 1, stat="identity") +
   labs(title = "    Figure 3B. Proportional Growth of Population Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
@@ -110,14 +110,14 @@ figure_2B <- all_pop_prc_counts %>%
 
 Looking at these trends as proportions, Figure 3B again demonstrates that the overall growth of all population terms (12.4% in 1990 to 26.0% in 2020) is mostly the result of growth in national and continental terms, which increase from 5.5% to 19.0% and from 1.8% to 5.7% respectively. Most of the subcontinental, subnational, directional, racial/ethnic, and OMB/US Census categories have exhibited more subtle increases over time. These results suggest that the use of population terms is increasing over time, and that this mostly due to national and continental terms. This is consistent with the Panofsky and Bliss <ins>[(2017)](https://journals.sagepub.com/doi/abs/10.1177/0003122416685812?casa_token=ONTaswwjG9kAAAAA:zyJZCoDHuqmsuTVVUncKX8WqRWSDrhU_adG-ZzBawFV_mwVI6JgXNoLfdo0EAfNMuDmePVo8DteOJg)</ins> who, in a much smaller sample of publications from *Nature Genetics*, also find that national and continental terms are becoming the vernacular of choice among leading biomedical scholars when conducting population difference testing.
 
-### Appendix 
+#### <ins>Appendix</ins>
 
 Here is a list of the 6,600+ distinct terms that were collapsed into the "all population terms" category in these analyses. You can use the search box to find a specific term you are interested in. Please note that this dictionary is still in progress and the sub/categories are both fluid and imperfect. 
 
 ```{r, warning=FALSE, message=FALSE, echo = FALSE}
 setwd("~/git/diversity/data/dictionaries")
 all_pop_terms_table <- read_csv("diversity_project - h3_dictionary.csv")
-all_pop_terms_table <- all_pop_terms_table %>% select(-source, -date_added, -subclass, -regional, -str_type)
+all_pop_terms_table <- all_pop_terms_table %>% select(-source, -date_added, -subclass, -regional, -str_type, -mean_embeddings)
 all_pop_terms_table[is.na(all_pop_terms_table)] <- ""
 DT::datatable(all_pop_terms_table)
 ```

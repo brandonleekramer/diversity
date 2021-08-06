@@ -22,27 +22,35 @@ After discovering that diversity and its many analougues are rising, but race/et
 </center>
 <br>
 
-To do this, we used Word2Vec - a popular word embedding algorithm that quantifies semantic similarities by creating distributional properties of words based on how often they arise in shared contexts of a text corpus (Mikolev et al. 2013). In such a model, all words are represented as numeric vectors within a n-dimensional embedding space. Essentially, each word has a set of numeric coordinates that allow us to compare all words in this embedding space to one another; words that are closer in the vector space are assumed to have more similar meanings. For more on the specifics of the model, see our paper's methods section.
+To examine semantic similarity, we used `word2vec` - a popular word embedding algorithm that quantifies semantic similarities by creating distributional properties of words based on how often they arise in shared contexts of a text corpus (Mikolev et al. 2013). In such a model, all words are represented as numeric vectors within a n-dimensional embedding space. Essentially, each word has a set of numeric coordinates that allow us to compare all words in this embedding space to one another; words that are closer in the vector space are assumed to have more similar meanings. For more on the specifics of the model, see our <ins>[Methods](/methods/)</ins> section.
 
 <center> 
 
 ![](/results/hypothesis4_files/w2v_race_diversity.png)
 
-Supplementary Figures 2A and 2B visualize the top-10 terms in the race, racial, ethnic, ethnicity, diverse and diversity word vectors for the 1990-2000 and 2010-2020 Word2Vec models. To visualize these vectors, we used the t-Distributed Stochastic Neighbor Embedding function from Python’s scikit-learn package (Pedregosa et al. 2011), which is an algorithm used to decompose the model into 2 dimensions for plotting. This process allows us to evaluate the vectors relative to one another in a 2-dimensional scatterplot. Above, we find that diversity moves further away from the racial and ethnic vectors over time.
+</center>
 
-Supplementary Figure 3A: Visual Comparison of Top-10 Terms in <br>
-Race, Ethnicity and Diversity Vectors from 1990-2000 Word2Vec Model
+This chart shows... 
+
+<center>
+
+**Supplementary Figure 4A: Visual Comparison of Top-10 Terms in <br>
+Race, Ethnicity and Diversity Vectors from 1990-2000 Word2Vec Model**
 
 ![](/results/hypothesis4_files/w2v_tsne_19902000.png)
 
-Supplementary Figure 3B: Visual Comparison of Top-10 Terms in <br>
-Race, Ethnicity and Diversity Vectors from 2010-2020 Word2Vec Model
+**Supplementary Figure 4B: Visual Comparison of Top-10 Terms in <br>
+Race, Ethnicity and Diversity Vectors from 2010-2020 Word2Vec Model**
 
 ![](/results/hypothesis4_files/w2v_tsne_20102020.png)
 
 </center>
 
+Supplementary Figures 4A and 4B visualize the top-10 terms in the race, racial, ethnic, ethnicity, diverse and diversity word vectors for the 1990-2000 and 2010-2020 Word2Vec models. To visualize these vectors, we used the t-Distributed Stochastic Neighbor Embedding function from `Python`’s `scikit-learn` package (Pedregosa et al. 2011), which is an algorithm used to decompose the model into 2 dimensions for plotting. This process allows us to evaluate the vectors relative to one another in a 2-dimensional scatterplot. Above, we find that diversity moves further away from the racial and ethnic vectors over time.
+
 Discussion 
+
+
 
 
 

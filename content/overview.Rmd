@@ -1,5 +1,8 @@
 ---
-output: html_document
+title: "Diversity"
+output: 
+  html_document: 
+    self_contained: no
 ---
 
 ```{css, echo=FALSE}
@@ -11,7 +14,7 @@ h1, h2, h3, h4 {
 
 <center>
 
-![](/./description_files/network-labels-new.png)
+![](/./overview_files/network-labels-new.png)
 
 </center>
 

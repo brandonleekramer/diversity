@@ -16,7 +16,7 @@
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/results/hypothesis1/</guid>
-      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  Over the past several years, social scientists have noted that the discourse of &amp;quot;diversity&amp;quot; is expanding in use across various organizations (Berrey 2015; Ray 2019). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research.</description>
+      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4, h5 { text-align: center; }  Over the past several years, social scientists have noted that the discourse of “diversity” is expanding in use across various organizations (Berrey 2015; Ray 2019). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research.</description>
     </item>
     
     <item>
@@ -36,7 +36,7 @@ To test this assertion, we compiled a dictionary used to catch to the main OMB/U
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/results/hypothesis3/</guid>
-      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  After discovering that diversity and its many analougues are rising, but race/ethnicity are stagnating or declining, we began to wonder whether there was a way to test whether diversity was replacing race/ethnicity in biomedical abstracts. Drawing on Berrey&#39;s (2015) argument that diversity acts as a mechanism to whitewash attempts to materially address racial inequality in other contexts, we thought there was a possibility that something similar is happening in biomedicine.</description>
+      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  While our first set of analyses established that “diversity” is increasing in the biomedical literature, we also wanted to account for how terminology related to population testing has changed over time. For example, Panofsky and Bliss (2017) have found that racial and ethnic terms (including those within the US Census and OMB Directive 15 labeling schema) have been replaced by more general geographic terms such continental, national, and directional terminology.</description>
     </item>
     
     <item>
@@ -45,7 +45,7 @@ To test this assertion, we compiled a dictionary used to catch to the main OMB/U
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/results/hypothesis4/</guid>
-      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  While our first set of analyses established that &amp;quot;diversity&amp;quot; is increasing in the biomedical literature, we also wanted to account for how terminology related to population testing has changed over time. For example, Panofsky and Bliss (2017) have found that racial and ethnic terms (including those within the US Census and OMB Directive 15 labeling schema) have been replaced by more general biogeographic terms such continental, national, and directional terminology.</description>
+      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  After discovering that diversity and its many analougues are rising, but race/ethnicity are stagnating or declining, we began to wonder whether there was a way to test whether diversity was replacing race/ethnicity in biomedical abstracts. Drawing on Berrey’s (2015) argument that diversity acts as a mechanism to whitewash attempts to materially address racial inequality in other contexts, we thought there was a possibility that something similar is happening in biomedicine.</description>
     </item>
     
     <item>
@@ -54,16 +54,16 @@ To test this assertion, we compiled a dictionary used to catch to the main OMB/U
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/methods/</guid>
-      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  The Rise of Diversity and Population  Terminology in Biomedical Research Brandon Kramer &amp;amp; Catherine Lee This website was designed to serve as supplement to a paper in progress on the rise of diversity in biomedical research. While the motivation and methods are outlined below, our findings can be found by clicking the Results tab above.</description>
+      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }  The Rise of Diversity and Population  Terminology in Biomedical Research This website was designed to serve as supplement to a paper in progress on the rise of diversity in biomedical research. While the motivation and methods are outlined below, our findings can be found by clicking the Results tab above.</description>
     </item>
     
     <item>
-      <title></title>
+      <title>Diversity</title>
       <link>/overview/</link>
       <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
       
       <guid>/overview/</guid>
-      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }     The Rise of Diversity and Population  Terminology in Biomedical Research Brandon Kramer &amp;amp; Catherine Lee While existing research on race and affirmative action have detailed the growth of diversity projects in education and employment that obfuscate the language of race and racism, the field of science &amp;amp; technology studies have documented scientists persistent attempts to molecularize race in biomedical research.</description>
+      <description>/* this chunk of code centers all of the headings */ h1, h2, h3, h4 { text-align: center; }    The Rise of Diversity and Population  Terminology in Biomedical Research Recent scholarship has highlighted the rise of “diversity projects” across various educational and business contexts, but few studies have detailed what the discourse of diversity does within biomedical research. In this paper, we employ computational text analysis to examine quantitative trends in the use of various forms of diversity and population terminology in a sample of ~2.</description>
     </item>
     
   </channel>

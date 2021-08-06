@@ -21,9 +21,9 @@ library("plotly")
 library("DT")
 
 divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
-h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
-general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
-subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+#general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
+#subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
 
 # something happened with socioeconomic in the original run 
 #h1_all_set_counts_trends <- subset_counts %>% 
@@ -32,9 +32,9 @@ subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_s
 #  summarize(count = sum(count)) %>% 
 #  bind_rows(h1_all_set_counts_trends) %>% 
 #  arrange(-count)
-#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
-#general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
-#subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
+h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
+subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
 ```
 
 Over the past several years, social scientists have noted that the discourse of "diversity" is expanding in use across various organizations (<ins>[Berrey 2015](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins>; <ins>[Ray 2019](https://journals.sagepub.com/doi/abs/10.1177/0003122418822335)</ins>). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research. Specifically, we are interested in eventually understand how diversity may or may not be replacing the discourse of race and ethinicity. First, we need to establish how often diversity is used within biomedical research. On this page, we are interested in measuring how often diversity and its various metonyms (i.e. related phrases) are used in biomedical research over the past three decades (1990-2020). Before getting started, we posed a working hypothesis to guide our work: 
@@ -140,7 +140,7 @@ Overall, we see robust support for Hypothesis 1 - that "diversity" is on the ris
 
 ```{r, echo=FALSE, warnings=FALSE, messages=FALSE,include=FALSE}
 library("tidyverse")
-setwd("~/git/diversity/data/sensitivity_checks/")
+setwd("~/git/diversity/data/final_data/")
 final_stats_output <- read_csv("socdiv_version_comps_073021.csv")
 ```
 
@@ -187,7 +187,7 @@ Next, we tried implementing an even more stringent nonhuman exclusion clauses. R
 
 <br>
 
-##### Final Confusion Matrix Comparing All Diversity vs. Social Diversity Categories (n=1000)
+##### **Final Confusion Matrix Comparing <br> All Diversity vs. Social Diversity Categories (n=1000)**
 
 <center>
 
@@ -196,7 +196,13 @@ Next, we tried implementing an even more stringent nonhuman exclusion clauses. R
 | <b>Actual: YES</b>   | True Positives = 386        | False Negatives = 24       | 
 | <b>Actual: NO</b>   | False Positives = 114         | True Negatives = 476       | 
 
-##### Final Performance Metrics for Social Diversity Classifier
+</center>
+
+<br>
+
+##### **Final Performance Metrics for Social Diversity Classifier**
+
+<center>
 
 | Measure | Outcome |  
 | :--------: | :--------: |  
@@ -211,7 +217,9 @@ Next, we tried implementing an even more stringent nonhuman exclusion clauses. R
 
 At this point, our testing suggested that we needed to make a more radical change, as we were still a bit below the 80% F1 score we had set out to exceed. We decided to “count” only mentions of diversity that co-occur alongside the terms in the other categories in the same **sentence**. We recognized that we needed to add another category that accounts for discussions of “diverse groups” that included terms like groups, cohorts, humans, residents, etc. (i.e. Polysemy Adjustment Version 2). Initially, we included “population(s)” and “subpopulation(s)” into this category, leading to an enormous false positive rate that dropped our accuracy and precision scores back down to near baseline (Version 7). After removing these two “(sub)population(s)” terms from the 12th category, our scores normalized in Version 8 while adding a newer version of the Polysemy Adjustment increased this score even more in Version 9. In the final step, we returned to our most successful version of the Animal Exclusion Clause and ended with an F1 score nearing 85%. Table 2 presents the confusion matrix for this final classifier, showing that our model does tend to inflate false positive cases of social diversity. We advise readers to keep this in mind when interpreting the results of Hypotheses 1-3.
 
-##### Hypothesis 1 Dictionary 
+<br>
+
+##### **Hypothesis 1 Dictionary** 
 
 Here is a list of the terms in each category analyzed above. You can scroll through each category or use the search tool to see if a term of interest was used in the analyses.
 
@@ -224,7 +232,9 @@ DT::datatable(tree_data,
           rownames = FALSE)
 ```
 
-##### Top Terms Resulting from H1 Anaylses
+<br>
+
+##### **Top Terms Resulting from H1 Anaylses**
 
 ```{r biomedical_wordfreqs, echo = FALSE}
 subset_counts_table <- subset_counts %>% 
@@ -238,7 +248,6 @@ datatable(subset_counts_table,
 ```
 
 <br>
-
 
 #### References 
 
