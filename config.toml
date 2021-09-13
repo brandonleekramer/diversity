@@ -45,17 +45,17 @@ ignoreFiles = ["\\.Rmd$", "\\.Rmarkdown$", "public/"]
 # The "name" field should match the name of the icon to be used
 # The list of available icons can be found at http://fontawesome.io/icons/
 
-#[[menu.icon]]
-#    url = "https://journals.sagepub.com/home/asr"
-#    name = "fas fa-book"
-#    weight = 1
+ [[menu.icon]]
+    url = "https://journals.sagepub.com/home/asr"
+    name = "fas fa-book"
+    weight = 1
 
 [[menu.icon]]
-    url = "https://anonymous.4open.science/status/diversity-4EA7"
+    url = "https://anonymous.4open.science/r/diversity-4EA7/README.md"
     name = "fab fa-github"
     weight = 2
     
-[[menu.icon]]
-    url = "mailto:"
-    name = "far fa-envelope"
-    weight = 3
+#[[menu.icon]]
+#    url = "mailto:"
+#    name = "far fa-envelope"
+#    weight = 3

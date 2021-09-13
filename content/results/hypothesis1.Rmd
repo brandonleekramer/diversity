@@ -21,9 +21,9 @@ library("plotly")
 library("DT")
 
 divictionary <- read_csv("~/git/diversity/data/dictionaries/diversity_project - h1_dictionary.csv")
-h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
-general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
-subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
+#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_counts_trends.rds")
+#general_pop_terms <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_set_prc_trends.rds")
+#subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_subset_counts_trends.rds")
 
 # something happened with socioeconomic in the original run 
 #h1_all_set_counts_trends <- subset_counts %>% 
@@ -32,9 +32,9 @@ subset_counts <- read_rds("~/git/diversity/data/text_results/h1_results/h1_all_s
 #  summarize(count = sum(count)) %>% 
 #  bind_rows(h1_all_set_counts_trends) %>% 
 #  arrange(-count)
-#h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
-#general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
-#subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
+h1_all_set_counts_trends <- read_rds("~/git/diversity/data/final_data/h1_all_set_counts_trends.rds")
+general_pop_terms <- read_rds("~/git/diversity/data/final_data/h1_all_set_prc_trends.rds")
+subset_counts <- read_rds("~/git/diversity/data/final_data/h1_all_subset_counts_trends.rds")
 ```
 
 Over the past several years, social scientists have noted that the discourse of "diversity" is expanding in use across various organizations (<ins>[Berrey 2015](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins>; <ins>[Ray 2019](https://journals.sagepub.com/doi/abs/10.1177/0003122418822335)</ins>). While these authors speak to the discourse of diversity being a mechanism for domininant (white) racial groups in power to pay lip service to racial inequity without addressing these problems through the reallocation of resources, our interest in diversity is to better understand how it is used in biomedical research. Specifically, we are interested in eventually understand how diversity may or may not be replacing the discourse of race and ethnicity. First, we need to establish how often diversity is used within biomedical research. On this page, we are interested in measuring how often diversity and its various metonyms (i.e. related phrases) are used in biomedical research over the past three decades (1990-2020). Before getting started, we posed a working hypothesis to guide our work: 
@@ -83,7 +83,7 @@ figure_1A <-  h1_all_set_counts_trends %>%
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
 ```
 
-Figure 1A shows the growth in the raw word frequencies of diversity-related terms from 1990-2020. The most obvious trends are the dramatic upward trends in the lifecourse and sex/gender categories - increasing by 6-to-7-fold each. The terms are frequently mentioned refer to the age and sex of populations being tested in clinical trials. Next, we see the socioeconomic category in yellow, which grew over 21-fold, and the "diversity (all)" category in hunter green, which grew about 16-fold. Surprisingly, this growth is smaller than the 66% increase in the use of "diversity (social)" over the same period - a trend that provides robust support of our first hypothesis. We also observed some growth in race/ethnicity, cultural, and equity/justice categories, which jump 14-fold, 30-fold, and 44-fold respectively. The ancestry, minority, and sexuality categories all increase over time, but this is a bit more subdued given that they all eventually started to taper off by the end of the period.
+Figure 1A also demonstrates the difference between undifferentiated and social uses of diversity. Somewhat surprisingly, the social uses of diversity only comprise a fraction of all mentions of diversity in any given year - starting at 2% in 1990 and growing to 10% in 2020. While the general form of diversity was ranked fourth behind age, sex/gender, and socio-economic terms in the 2020 rankings (with an 18-fold increase), the social variant ranked lowest, but exhibited the largest overall increase with a 67-fold rise since 1990. We caution readers that this count may be somewhat inflated (see Table 2 in the manuscript). However, there is no reason to suspect that this variation should bias the observed longitudinal trends. We also detected growth in socio-economic and racial/ethnic terms, jumping 16- and 14-fold respectively. Although the ancestry, minority, and sexuality categories all increased over time, this growth was more subdued, tapering off by the end of the period.
 
 ```{r figure 1b, fig.height=6.5, fig.align="center", echo=FALSE}
 # graphing terms over time 
@@ -124,7 +124,7 @@ figure_1B <- general_pop_terms %>%
   layout(legend = list(orientation = "h", x = 0.05, y = -0.1))
 ```
 
-To normalize for the growth of overall publications, we look at change in the proportion of available abstracts. Figure 1B shows that the rise in lifecourse and sex/gender terms are still quite robust, increasing by about 7% and 3% over the time span of our analysis. The other growth trends are obviously much more subtle. Diversity (all) increased by about 2.4% while diversity (social) is still mentioned in less than 1% of all abstracts by 2020. While this percent change of this category is more marked than the race/ethnicity category, the terms in the latter category are still referenced more often overall. Of the remaining categories, the socioeconomic category is the only other that has seen noticeable change (up around 3%). That said, it is still somewhat surprising to see a "fundamental" cause of health disparities mentioned so rarely in our sample of biomedical abstracts (<ins>[Link and Phelan 1995](https://www.jstor.org/stable/2626958?casa_token=fU0DluGoHicAAAAA:yXM1fgJY3nU02FJjfIt89gR0TCin2coKGHw4OT81ABzqRgl2FEqT1UEkgO-yD6_vq5KIEYTaIhpT7ZrEgbzUght0AgmNpkYiwF1NmODYTl_whLyzk65N)</ins>; <ins>[Phelan et al. 2010](https://journals.sagepub.com/doi/abs/10.1177/0022146510383498)</ins>).
+To normalize for the growth of overall publications, we look at change in the proportion of available abstracts. Figure 1B shows that the rise in lifecourse and sex/gender terms are still quite robust. The other growth trends are obviously much more subtle. Diversity (all) increased by about 2.45% while diversity (social) is still mentioned in less than 1% of all abstracts by 2020. While this percent change of this category is more marked than the race/ethnicity category, the terms in the latter category are still referenced more often overall. Of the remaining categories, the socio-economic category is the only other that has seen noticeable change (up around 3.2%). That said, it is still somewhat surprising to see a "fundamental" cause of health disparities mentioned so rarely in our sample of biomedical abstracts (<ins>[Link and Phelan 1995](https://www.jstor.org/stable/2626958?casa_token=fU0DluGoHicAAAAA:yXM1fgJY3nU02FJjfIt89gR0TCin2coKGHw4OT81ABzqRgl2FEqT1UEkgO-yD6_vq5KIEYTaIhpT7ZrEgbzUght0AgmNpkYiwF1NmODYTl_whLyzk65N)</ins>; <ins>[Phelan et al. 2010](https://journals.sagepub.com/doi/abs/10.1177/0022146510383498)</ins>).
 
 <br>
 
@@ -140,7 +140,7 @@ Overall, we see robust support for Hypothesis 1 - that "diversity" is on the ris
 
 ```{r, echo=FALSE, warnings=FALSE, messages=FALSE,include=FALSE}
 library("tidyverse")
-setwd("~/git/diversity/data/sensitivity_checks/")
+setwd("~/git/diversity/data/final_data/")
 final_stats_output <- read_csv("socdiv_version_comps_073021.csv")
 ```
 
@@ -196,7 +196,13 @@ Next, we tried implementing an even more stringent nonhuman exclusion clauses. R
 | <b>Actual: YES</b>   | True Positives = 386        | False Negatives = 24       | 
 | <b>Actual: NO</b>   | False Positives = 114         | True Negatives = 476       | 
 
+</center>
+
+<br>
+
 ##### Final Performance Metrics for Social Diversity Classifier
+
+<center>
 
 | Measure | Outcome |  
 | :--------: | :--------: |  
