@@ -6,6 +6,7 @@
 .rds
 .bin
 .model
+/data/bert_data
 /data/regression_analyses
 /data/sensitivity_checks
 /data/text_results

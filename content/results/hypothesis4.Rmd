@@ -1,20 +1,27 @@
 ---
 title: "Hypothesis 4"
 description: "Comparing semantic similarity of diversity-related terminology"
-output: 
-  html_document: 
-    self_contained: no
+output: html_document
 weight: 4
 ---
 
 ```{css, echo=FALSE}
 /* this chunk of code centers all of the headings */
-h1, h2, h3, h4 {
+h1, h2, h3, h4, h5 {
   text-align: center;
 }
 ```
 
-After discovering that diversity and its many analougues are rising, but race/ethnicity are stagnating or declining, we began to wonder whether there was a way to test whether diversity was replacing race/ethnicity in biomedical abstracts. Drawing on <ins>[Berrey's (2015)](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins> argument that diversity acts as a mechanism to whitewash attempts to materially address racial inequality in other contexts, we thought there was a possibility that something similar is happening in biomedicine. Below, we test whether is race, ethnicity and diversity are becoming more or less semantically similar over time. Moreover, we examine whether these terms are becoming more or less semantically similar to other diversity-related terminology over time as well. Understanding these trends should help us better contextualize how diversity is used and what the political implications of such shifts mean for diversity in biomedical research. 
+```{r, include=FALSE}
+library(tidyverse)
+library(DT)
+library(plotly)
+library(cowplot)
+library(grid)
+library(gridExtra)
+```
+
+After discovering that diversity and its many analogues are rising, but race/ethnicity are stagnating or declining, we began to wonder whether there was a way to test whether diversity was replacing race/ethnicity in biomedical abstracts. Drawing on <ins>[Berrey's (2015)](https://www.youtube.com/watch?time_continue=96&v=AyZJdEfYUjw&feature=emb_logo)</ins> argument that diversity acts as a mechanism to "whitewash" attempts to materially address racial inequality in other contexts, we thought there was a possibility that something similar is happening in biomedicine. Below, we test whether is race, ethnicity and diversity are becoming more or less semantically similar over time. Moreover, we examine whether these terms are becoming more or less semantically similar to other diversity-related terminology over time as well. Understanding these trends should help us better contextualize how diversity is used and what the political implications of such shifts mean for diversity in biomedical research. 
 
 <br>
 <center> 
@@ -22,41 +29,323 @@ After discovering that diversity and its many analougues are rising, but race/et
 </center>
 <br>
 
-To examine semantic similarity, we used `word2vec` - a popular word embedding algorithm that quantifies semantic similarities by creating distributional properties of words based on how often they arise in shared contexts of a text corpus (Mikolev et al. 2013). In such a model, all words are represented as numeric vectors within a n-dimensional embedding space. Essentially, each word has a set of numeric coordinates that allow us to compare all words in this embedding space to one another; words that are closer in the vector space are assumed to have more similar meanings. For more on the specifics of the model, see our <ins>[Methods](/methods/)</ins> section.
+To do this, we used Word2Vec - a popular word embedding algorithm that quantifies semantic similarities by creating distributional properties of words based on how often they arise in shared contexts of a text corpus (Mikolev et al. 2013). In such a model, all words are represented as numeric vectors within a *n*-dimensional embedding space. Essentially, each word has a set of numeric coordinates that allow us to compare all words in this embedding space to one another; words that are closer in the vector space are assumed to have more similar meanings. We initially trained two models that compared words from abstracts in 1990-2000 and 2010-2020 that left the term "diversity" unparsed. However, to learn more about the differing uses of diversity and "social diversity" we trained a second set of "parsed" models to examine this nuance in more detail. For more on the specifics on the details of these models and approach more generally, see our paper's methods section.
+
+#### Subsection 1: Top Word Vectors (Parsed Model)
+
+The first thing we looked at was the top word vectors related to race, ethnicity, and diversity. In the final publication, we only included the top-10 word vectors related to race, ethnicity, diversity, and socialdiversity for the parsed model. Those tables are also shared here with the top-50 most related vectors. The results for the unparsed models are all shared below in the Appendix section.
+
+##### Race 
+
+```{r, include=FALSE}
+setwd("~/git/diversity/data/final_data/")
+race_vectors <- read_csv('race_vectors_socdiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+ethnicity_vectors <- read_csv('ethnicity_vectors_socdiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+diversity_vectors <- read_csv('diversity_vectors_alldiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+socdiv_vectors <- read_csv('diversity_vectors_socdiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+```
+
+```{r, echo=FALSE}
+DT::datatable(race_vectors, rownames = FALSE)
+```
+
+##### Ethnicity 
+
+```{r, echo=FALSE}
+DT::datatable(ethnicity_vectors, rownames = FALSE)
+```
+
+##### Diversity (Heterogeneity)
+
+```{r, echo=FALSE}
+DT::datatable(diversity_vectors, rownames = FALSE)
+```
+
+##### Social Diversity 
+
+```{r, echo=FALSE}
+DT::datatable(socdiv_vectors, rownames = FALSE)
+```
+
+#### Subsection 2: Visual Comparison of Race & Ethnicity Relative to Diversity and Social Diversity 
+
+Next, we compared select vectors related to race and ethnicity to examine how the compared to diversity and social diversity. This comparison is done by using a cosine similarity metric to compare how far the word vectors are away from each other in the vector space. We then subtracted the 2010-2020 difference from the 1990-2000 difference to see whether the vectors become closer or further away over time. 
+
+```{r, include=FALSE}
+setwd("~/git/diversity/data/final_data/")
+orgdiv_top_terms <- read_csv('select_wv_comps_orgdiv_0921.csv') %>% mutate(model = "model_1")
+alldiv_top_terms <- read_csv('select_wv_comps_alldiv_0921.csv') %>% mutate(model = "model_2")
+socdiv_top_terms <- read_csv('select_wv_comps_socdiv_0921.csv') %>% mutate(model = "model_3")
+```
+
+```{r, fig.height=5.5, fig.align="center", echo=FALSE}
+top_terms <- rbind(orgdiv_top_terms, alldiv_top_terms, socdiv_top_terms) %>% 
+  rename(x = `1990-2000`, y = `2010-2020`) %>% select(-`...1`) %>% 
+  mutate(group = tolower(group),
+         group = str_replace(group, "african american", "africanamerican"))
+ord <- c("model_1","model_2","model_3")
+top_terms$model <- factor(top_terms$model,levels=ord)
+ord <- c("white","racial","race","latino","hispanic","ethnicity",
+          "ethnic","caucasian","black","asian","africanamerican")
+top_terms$group <- factor(top_terms$group,levels=ord)
+
+ggplot(top_terms, aes(x = group, y = x, ymin = y, ymax = x, color = model, group = model)) +
+     geom_linerange(position = position_dodge(.9)) +
+  #geom_point(position = position_dodge(.9), color = "black", size = 1.5) +
+  geom_point(aes(y=y), position = position_dodge(.9), color = "black", size = 1.5) +
+     coord_flip() + theme_bw() + xlab("") + ylab("") +
+  labs(title = "Figure 4. Comparison of Racial and Ethnic Vectors Relative to \nDiversity and Social Diversity Vectors for 1990-2000 and 2010-2020 Models", 
+       caption = "Note: The black point on each line designates the word vector coordinates for the 2010-2020 model",
+       color = "Model") +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.title = element_blank(),
+        legend.position=c(0.84, 0.40),) + 
+  scale_colour_manual(labels = c("diversity (unparsed)", 
+                                 "diversity (parsed)", 
+                                 "socialdiversity (parsed)"), 
+                      values = c("#C0C0C0", "#3B9AB2", "#CC0000")) +
+  guides(color = guide_legend(override.aes = list(size = 10 )))
+```
+
+Figure 4 shows the differences between these select vectors and how they have changed over time. The gray lines refer to the difference between the vectors listed on the x-axis and diversity in the unparsed model. The blue and red lines refer to the differences between the vectors on the x-axis compared to diversity and socialdiversity respectively. The coordinates of the latter model are marked by the bolded black points while the earlier model's coordinates are the open-ended line. This figure shows two things. First, most of the vectors are positively related, as evidenced by the fact that they share cosine similarities above 0. Second, nearly all of the vectors become less semantically similar over time, which is conveyed by the open flags on the right side of the plot. For a more detailed description of our interpretation, please see our paper. 
+
+#### Subsection 3: Comparing Individual Vectors By Category 
+
+Figure 5 compares select racial/ethnic, equity/justice, socio-economic and gender/sexuality vectors to socialdiversity within in our parsed model. The visualizations for the unparsed model are shared below in the Appendix.
 
 <center> 
 
-![](/results/hypothesis4_files/w2v_race_diversity.png)
+![](/results/hypothesis4_files/socdiv_heatmap_0921.png)
 
 </center>
 
-This chart shows... 
+The heat maps can be interpreted by knowing that the deeper red means word vectors move further away from each over time and darker blue become more semantically similar over time. Generally, each heat map shows that terms in each category other than the gender/sexuality grouping become more semantically dissimilar. For more details on the meaning of this visualization, please see our paper. 
 
-<center>
+#### Subsection 4: Mean Differences in Vectors By H1 and H3 Categories 
 
-**Supplementary Figure 4A: Visual Comparison of Top-10 Terms in <br>
-Race, Ethnicity and Diversity Vectors from 1990-2000 Word2Vec Model**
+```{r, include=FALSE}
+setwd("~/git/diversity/data/final_data/")
+orgdiv_h1 <- read_csv('orgdiv_mean_h1_comps_0921.csv') %>% 
+  select(group, cos_sim_diffs) %>% rename(category = group, model_1 = cos_sim_diffs)
+alldiv_h1 <- read_csv('alldiv_mean_h1_comps_0921.csv') %>% 
+  select(cos_sim_diffs) %>% rename(model_2 = cos_sim_diffs)
+socdiv_h1 <- read_csv('socdiv_mean_h1_comps_0921.csv') %>% 
+  select(cos_sim_diffs) %>% rename(model_3 = cos_sim_diffs)
+div_h1 <- cbind(orgdiv_h1, alldiv_h1, socdiv_h1)
+div_h1 <- div_h1 %>% mutate(category = str_replace(category, "_", "/"),
+                            category = str_replace(category, "social/class", "social class"))
+setwd("~/git/diversity/data/final_data/")
+orgdiv_h3 <- read_csv('orgdiv_mean_h3_comps_0921.csv') %>% 
+  select(group, cos_sim_diffs) %>% rename(category = group, model_1 = cos_sim_diffs)
+alldiv_h3 <- read_csv('alldiv_mean_h3_comps_0921.csv') %>% 
+  select(cos_sim_diffs) %>% rename(model_2 = cos_sim_diffs)
+socdiv_h3 <- read_csv('socdiv_mean_h3_comps_0921.csv') %>% 
+  select(cos_sim_diffs) %>% rename(model_3 = cos_sim_diffs)
+div_h3 <- cbind(orgdiv_h3, alldiv_h3, socdiv_h3)
+div_h3 <- div_h3 %>% mutate(category = str_replace(category, "_", "/"),
+                            category = str_replace(category, "omb/us census", "us omb"))
+setwd("~/git/diversity/data/final_data/")
+orgdiv_hpop <- read_csv('orgdiv_mean_pop_comps_0921.csv') %>% 
+  select(group, cos_sim_diffs) %>% rename(category = group, model_1 = cos_sim_diffs)
+alldiv_hpop <- read_csv('alldiv_mean_pop_comps_0921.csv') %>% 
+  select(cos_sim_diffs) %>% rename(model_2 = cos_sim_diffs)
+socdiv_hpop <- read_csv('socdiv_mean_pop_comps_0921.csv') %>% 
+  select(cos_sim_diffs) %>% rename(model_3 = cos_sim_diffs)
+div_hpop <- cbind(orgdiv_hpop, alldiv_hpop, socdiv_hpop)
+div_hpop <- div_hpop %>% mutate(category = str_replace(category, "_", "/"))
+```
+
+```{r, fig.width=10, fig.height=5, fig.align="center", echo=FALSE}
+div_h1_longer <- div_h1 %>% 
+  pivot_longer(!category, names_to = "model", values_to = "x")
+ord <- c("social class","sexuality","sex/gender","race/ethnicity", "minority",
+          "migration","lifecourse","equity","disability","cultural")
+div_h1_longer$category <- factor(div_h1_longer$category,levels=ord)
+
+div_h1_plot <- ggplot(div_h1_longer, aes(x = category, y = x, ymin = 0, 
+                                         ymax = x, color = model, group = model)) +
+     geom_linerange(position = position_dodge(.9)) +
+  geom_point(position = position_dodge(.9), color = "black", size = 1.5) +
+     coord_flip() + theme_bw() + xlab("") + ylab("") +
+  labs(title = element_blank(), 
+       color = "Model") +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.title = element_blank(),
+        axis.text.x=element_text(angle=45, hjust = 1),
+        #axis.text.y=element_text(angle=45),
+        legend.position="none") + 
+  scale_colour_manual(labels = c("diversity (combined)", "diversity (parsed)", 
+                                 "socialdiversity (parsed)"), 
+                      values = c("#C0C0C0", "#3B9AB2", "#CC0000")) +
+  guides(color = guide_legend(override.aes = list(size = 10 ))) + 
+    scale_y_continuous(breaks=seq(-0.1, 0.05, 0.02))
+
+div_h3_longer <- div_h3 %>% 
+  pivot_longer(!category, names_to = "model", values_to = "x")
+ord <- c("subnational", "subcontinental","race/ethnicity","us omb","national","directional","continental")
+div_h3_longer$category <- factor(div_h3_longer$category,levels=ord)
+
+div_h3_plot <-ggplot(div_h3_longer, aes(x = category, y = x, ymin = 0, 
+                                        ymax = x, color = model, group = model)) +
+     geom_linerange(position = position_dodge(.9)) +
+  geom_point(position = position_dodge(.9), color = "black", size = 1.5) +
+     coord_flip() + theme_bw() + xlab("") + ylab("") +
+  labs(title = element_blank(), 
+       color = "Model") +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.title = element_blank(),
+        axis.text.x=element_text(angle=45, hjust = 1),
+        #axis.text.y=element_text(angle=45),
+        legend.position="none") + 
+  scale_colour_manual(labels = c("diversity (combined)", "diversity (parsed)", 
+                                 "socialdiversity (parsed)"), 
+                      values = c("#C0C0C0", "#3B9AB2", "#CC0000")) +
+  guides(color = guide_legend(override.aes = list(size = 10 ))) +
+  scale_y_continuous(breaks=seq(-0.1, 0.05, 0.02))
+
+div_hpop_longer <- div_hpop %>% 
+  pivot_longer(!category, names_to = "model", values_to = "x")
+ord <- c("south america","oceania","north america","europe","asia","africa")
+div_hpop_longer$category <- factor(div_hpop_longer$category,levels=ord)
+
+div_pop_plot <- ggplot(div_hpop_longer, aes(x = category, y = x, ymin = 0, 
+                                            ymax = x, color = model, group = model)) +
+     geom_linerange(position = position_dodge(.9)) +
+  geom_point(position = position_dodge(.9), color = "black", size = 1.5) +
+     coord_flip() + theme_bw() + xlab("") + ylab("") +
+  labs(title = element_blank(), 
+       color = "Model") +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.title = element_blank(),
+        axis.text.x=element_text(angle=45, hjust = 1),
+        #axis.text.y=element_text(angle=45),
+        legend.position="none") + 
+  scale_colour_manual(labels = c("diversity (combined)", "diversity (parsed)", 
+                                 "socialdiversity (parsed)"), 
+                      values = c("#C0C0C0", "#3B9AB2", "#CC0000")) +
+  scale_y_continuous(breaks=seq(-0.1, 0.05, 0.02))
+
+legend <- ggplot(div_hpop_longer, aes(x = category, y = x, ymin = 0, 
+                                            ymax = x, color = model, group = model)) +
+     geom_linerange(position = position_dodge(.9)) +
+  geom_point(position = position_dodge(.9), color = "black", size = 1.5) +
+     coord_flip() + theme_bw() + xlab("") + ylab("") +
+  labs(title = element_blank()) +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.title = element_blank(),
+        legend.position="bottom", 
+        legend.spacing.x = unit(0.4, 'cm')) + 
+  scale_colour_manual(labels = c("diversity (combined)", "diversity (parsed)", 
+                                 "socialdiversity (parsed)"), 
+                      values = c("#C0C0C0", "#3B9AB2", "#CC0000")) +
+  guides(color = guide_legend(override.aes = list(size = 10 )))
+
+
+legend <- cowplot::get_legend(legend)
+
+grid.arrange(div_h1_plot,
+             div_h3_plot, 
+             div_pop_plot,
+             legend,
+             nrow = 2, ncol=3,
+             layout_matrix = rbind(c(1,2,3), c(5,5,5)),
+             #widths = c(2.7, 2.7), 
+             heights = c(2.5, 0.4), 
+             top = "Figure 6. Mean Differences of Aggregated Terms By \nCategory Relative to Diversity and Social Diversity Word Vectors")
+```
+
+Write something here (Tables below) 
+
+<br>
+
+#### Main Takeaways 
+
+Write something here
+
+<br>
+
+#### <ins>Appendix</ins>
+
+#### Subsection 1: Top Word Vectors (Unparsed Model)
+
+```{r, include=FALSE}
+setwd("~/git/diversity/data/final_data/")
+race_vectors <- read_csv('race_vectors_orgdiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+ethnicity_vectors <- read_csv('ethnicity_vectors_orgdiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+ethnicity_vectors <- read_csv('diversity_vectors_orgdiv_0921.csv') %>% 
+  select(-`...1`) %>% 
+  mutate(score_x = round(score_x, 3),
+         score_y = round(score_y, 3),
+         rank = rank + 1)
+```
+
+##### Race
+
+```{r, echo=FALSE}
+DT::datatable(race_vectors, rownames = FALSE)
+```
+
+##### Ethnicity 
+
+```{r, echo=FALSE}
+DT::datatable(ethnicity_vectors, rownames = FALSE)
+```
+
+##### Diversity 
+
+```{r, echo=FALSE}
+DT::datatable(diversity_vectors, rownames = FALSE)
+```
+
+#### Subsection 3: Comparing Individual Vectors By Category (Unparsed Model)
+
+![](/results/hypothesis4_files/w2v_race_diversity.png)
 
 ![](/results/hypothesis4_files/w2v_tsne_19902000.png)
 
-**Supplementary Figure 4B: Visual Comparison of Top-10 Terms in <br>
-Race, Ethnicity and Diversity Vectors from 2010-2020 Word2Vec Model**
+#### Subsection 4: Mean Differences in Vectors By H1 and H3 Categories (Tables)
 
-![](/results/hypothesis4_files/w2v_tsne_20102020.png)
+To accompany the visualization above, here are the tables with the raw numbers as well.
 
-</center>
+##### Table for H1 Categories
 
-Supplementary Figures 4A and 4B visualize the top-10 terms in the race, racial, ethnic, ethnicity, diverse and diversity word vectors for the 1990-2000 and 2010-2020 Word2Vec models. To visualize these vectors, we used the t-Distributed Stochastic Neighbor Embedding function from `Python`’s `scikit-learn` package (Pedregosa et al. 2011), which is an algorithm used to decompose the model into 2 dimensions for plotting. This process allows us to evaluate the vectors relative to one another in a 2-dimensional scatterplot. Above, we find that diversity moves further away from the racial and ethnic vectors over time.
+```{r, echo=FALSE}
+DT::datatable(div_h1, rownames = FALSE) 
+```
 
-Discussion 
+##### Table for H3 Categories
 
+```{r, echo=FALSE}
+DT::datatable(div_h3, rownames = FALSE) 
+```
 
+#### Table for National Terms Grouped by Continent
 
-
-
-
-
-
-
-
+```{r, echo=FALSE}
+DT::datatable(div_hpop, rownames = FALSE) 
+```
 

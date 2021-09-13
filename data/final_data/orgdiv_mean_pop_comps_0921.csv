@@ -1,0 +1,7 @@
+group,cos_sim_m1,cos_sim_m2,cos_sim_diffs
+africa,0.102,0.148,0.045
+asia,0.125,0.144,0.019
+europe,0.102,0.088,-0.014
+north america,0.12,0.15,0.03
+oceania,0.095,0.131,0.037
+south america,0.139,0.177,0.037

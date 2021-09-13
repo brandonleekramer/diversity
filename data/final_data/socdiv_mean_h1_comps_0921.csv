@@ -1,0 +1,11 @@
+group,cos_sim_m1,cos_sim_m2,cos_sim_diffs
+cultural,0.221,0.182,-0.039
+disability,0.047,0.017,-0.03
+equity,0.18,0.175,-0.005
+lifecourse,0.062,0.054,-0.008
+migration,0.203,0.15,-0.053
+minority,0.285,0.24,-0.045
+race_ethnicity,0.227,0.149,-0.078
+sex_gender,0.084,0.079,-0.005
+sexuality,0.084,0.099,0.015
+social_class,0.159,0.137,-0.023

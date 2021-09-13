@@ -299,7 +299,7 @@ figure_2A <- h2_omb_counts %>%
   ggplot() + 
   geom_line(aes(y = n, x = year, colour = term), size = 0.8, stat="identity") + 
   theme_minimal() +
-  labs(title = "     Figure 2A. Total Growth of OMB/US Census Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
+  labs(title = "     Figure 2A. Total Growth of US OMB Terms \n in PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   ylab("Term Count") +
   theme(axis.title.x = element_blank(), 
@@ -328,7 +328,7 @@ figure_2B_pre <- h2_omb_prcs %>%
   geom_line(aes(y = prc_ethnic, x = year, colour = "ethnicity"), size = 0.8,stat="identity") +
   geom_line(aes(y = prc_racial, x = year, colour = "race"), size = 0.8, stat="identity") +
   geom_line(aes(y = prc_diversity, x = year, colour = "diversity (social)"), size = 0.8, stat="identity") +
-  labs(title = "    Figure 2B. Proportional Growth of OMB/US Census \n Terms in PubMed/MEDLINE Abstracts (1990-2020)",
+  labs(title = "    Figure 2B. Proportional Growth of US OMB Terms \nin PubMed/MEDLINE Abstracts (1990-2020)",
        color =  "Term") + 
   theme_minimal() +
   ylab("Proportion of Abstracts") +
@@ -385,6 +385,9 @@ h3_soc_div <- h2_omb_prcs %>%
 h3_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_counts.rds")
 all_pop_prc_counts <- read_rds("~/git/diversity/data/text_results/h3_results/h3_all_prcs.rds")
 
+h3_counts <- h3_counts %>% 
+  mutate(term = str_replace(term, "omb/us-census", "us omb"))
+
 figure_3A <- h3_counts %>%   
   bind_rows(h3_soc_div %>% filter(word == "cnt_diversity")) %>% 
   group_by(term, year) %>% 
@@ -402,7 +405,7 @@ figure_3A <- h3_counts %>%
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(labels=c("all population terms", "continental", "directional", 
-                              "diversity (social)", "national", "omb/us-census", 
+                              "diversity (social)", "national", "us omb", 
                               "race/ethnicity", "subcontinental", "subnational"),
                      values=c("#E21F00", "#3B9AB2", "#f2be00", "#000000", "#E86F00",
                               "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
@@ -431,7 +434,7 @@ figure_3B <- all_pop_prc_counts %>%
         legend.title = element_text(size = 10, hjust = 0.5, face="bold"),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(labels=c("all population terms", "continental", "directional", 
-                              "diversity (social)", "national", "omb/us-census", 
+                              "diversity (social)", "national", "us omb", 
                               "race/ethnicity", "subcontinental", "subnational"),
                      values=c("#E21F00", "#3B9AB2", "#f2be00", "#000000", "#E86F00",
                               "#00468b", "#ff8396", "#9a009a", "#1b7524")) +
@@ -454,7 +457,7 @@ legend_3AB <- all_pop_prc_counts %>%
         legend.title = element_text(size = 10, hjust = 0.5),
         plot.title = element_text(size=12, hjust = 0.5)) +
   scale_color_manual(labels=c("all population terms", "continental", "directional", 
-                              "diversity (social)", "national", "omb/us-census", 
+                              "diversity (social)", "national", "us omb", 
                               "race/ethnicity", "subcontinental", "subnational"),
                      values=c("#E21F00", "#3B9AB2", "#f2be00", "#000000", "#E86F00",
                               "#00468b", "#ff8396", "#9a009a", "#1b7524")) +

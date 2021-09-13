@@ -1,0 +1,8 @@
+group,cos_sim_m1,cos_sim_m2,cos_sim_diffs
+continental,0.183,0.172,-0.011
+directional,0.149,0.185,0.036
+national,0.112,0.132,0.02
+omb/us census,0.134,0.125,-0.009
+race/ethnicity,0.181,0.134,-0.047
+subcontinental,0.123,0.138,0.015
+subnational,0.069,0.1,0.031
